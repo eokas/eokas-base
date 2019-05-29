@@ -1,5 +1,6 @@
 # visual studio
 .vs
+.vscode
 *.user
 
 # Prerequisites
