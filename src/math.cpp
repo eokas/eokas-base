@@ -1111,6 +1111,21 @@ Bounds::Bounds(const Bounds& other)
 Bounds::~Bounds()
 {}
 
+f32_t Bounds::width() const
+{
+	return max.x - min.x;
+}
+
+f32_t Bounds::height() const
+{
+	return max.y - min.y;
+}
+
+f32_t Bounds::depth() const
+{
+	return max.z - min.z;
+}
+
 Vector3 Bounds::center() const
 {
 	return (min + max) * 0.5f;
@@ -1236,20 +1251,20 @@ const f32_t Math::pi = 3.141592654f;
 const f32_t Math::rad2deg = 180.0f / Math::pi;
 const f32_t Math::deg2rad = Math::pi / 180.0f;
 
-void Math::prime(f32_t (&target)[2], f32_t x, f32_t y)
+void Math::fill(f32_t (&target)[2], f32_t x, f32_t y)
 {
 	target[0] = x;
 	target[1] = y;
 }
 
-void Math::prime(f32_t (&target)[3], f32_t x, f32_t y, f32_t z)
+void Math::fill(f32_t (&target)[3], f32_t x, f32_t y, f32_t z)
 {
 	target[0] = x;
 	target[1] = y;
 	target[2] = z;
 }
 
-void Math::prime(f32_t (&target)[4], f32_t x, f32_t y, f32_t z, f32_t w)
+void Math::fill(f32_t (&target)[4], f32_t x, f32_t y, f32_t z, f32_t w)
 {
 	target[0] = x;
 	target[1] = y;
@@ -1721,10 +1736,10 @@ Matrix4x4 Math::matrixLookToLH(const Vector3& pos, const Vector3& forward, const
 	f32_t d2 = Math::dot(r2, negpos);
 
 	Matrix4x4 m;
-	Math::prime(m.value[0], r0.x, r0.y, r0.z, d0);
-	Math::prime(m.value[1], r1.x, r1.y, r1.z, d1);
-	Math::prime(m.value[2], r2.x, r2.y, r2.z, d2);
-	Math::prime(m.value[3], 0.0f, 0.0f, 0.0f, 1.0f);
+	Math::fill(m.value[0], r0.x, r0.y, r0.z, d0);
+	Math::fill(m.value[1], r1.x, r1.y, r1.z, d1);
+	Math::fill(m.value[2], r2.x, r2.y, r2.z, d2);
+	Math::fill(m.value[3], 0.0f, 0.0f, 0.0f, 1.0f);
 	m.transpose();	
 	return m;
 }
@@ -1756,10 +1771,10 @@ Matrix4x4 Math::matrixOrthographicLH(f32_t width, f32_t height, f32_t near, f32_
 	f32_t range = 1.0f / (far - near);
 
 	Matrix4x4 m;
-	Math::prime(m.value[0], 2.0f / width, 0.0f, 0.0f, 0.0f);
-	Math::prime(m.value[1], 0.0f, 2.0f / height, 0.0f, 0.0f);
-	Math::prime(m.value[2], 0.0f, 0.0f, range, 0.0f);
-	Math::prime(m.value[3], 0.0f, 0.0f, -range * near, 1.0f);
+	Math::fill(m.value[0], 2.0f / width, 0.0f, 0.0f, 0.0f);
+	Math::fill(m.value[1], 0.0f, 2.0f / height, 0.0f, 0.0f);
+	Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
+	Math::fill(m.value[3], 0.0f, 0.0f, -range * near, 1.0f);
 	return m;
 }
 
@@ -1772,10 +1787,10 @@ Matrix4x4 Math::matrixOrthographicRH(f32_t width, f32_t height, f32_t near, f32_
 	f32_t range = 1.0f / (near - far);
 
 	Matrix4x4 m;
-	Math::prime(m.value[0], 2.0f / width, 0.0f, 0.0f, 0.0f);
-	Math::prime(m.value[1], 0.0f, 2.0f / height, 0.0f, 0.0f);
-	Math::prime(m.value[2], 0.0f, 0.0f, range, 0.0f);
-	Math::prime(m.value[3], 0.0f, 0.0f, range * near, 1.0f);
+	Math::fill(m.value[0], 2.0f / width, 0.0f, 0.0f, 0.0f);
+	Math::fill(m.value[1], 0.0f, 2.0f / height, 0.0f, 0.0f);
+	Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
+	Math::fill(m.value[3], 0.0f, 0.0f, range * near, 1.0f);
 	return m;
 }
 
@@ -1790,10 +1805,10 @@ Matrix4x4 Math::matrixOrthographicOffCenterLH(f32_t left, f32_t right, f32_t top
 	f32_t range = 1.0f / (far - near);
 
 	Matrix4x4 m;
-	Math::prime(m.value[0], reciprocalHeight + reciprocalWidth, 0.0f, 0.0f, 0.0f);
-	Math::prime(m.value[1], 0.0f, reciprocalHeight + reciprocalHeight, 0.0f, 0.0f);
-	Math::prime(m.value[2], 0.0f, 0.0f, range, 0.0f);
-	Math::prime(m.value[3], -(left+right)*reciprocalWidth, -(top+bottom)*reciprocalHeight, -range*near, 1.0f);
+	Math::fill(m.value[0], reciprocalHeight + reciprocalWidth, 0.0f, 0.0f, 0.0f);
+	Math::fill(m.value[1], 0.0f, reciprocalHeight + reciprocalHeight, 0.0f, 0.0f);
+	Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
+	Math::fill(m.value[3], -(left+right)*reciprocalWidth, -(top+bottom)*reciprocalHeight, -range*near, 1.0f);
     return m;
 }
 
@@ -1808,10 +1823,10 @@ Matrix4x4 Math::matrixOrthographicOffCenterRH(f32_t left, f32_t right, f32_t top
 	f32_t range = 1.0f / (near - far);
 
 	Matrix4x4 m;
-	Math::prime(m.value[0], reciprocalHeight + reciprocalWidth, 0.0f, 0.0f, 0.0f);
-	Math::prime(m.value[1], 0.0f, reciprocalHeight + reciprocalHeight, 0.0f, 0.0f);
-	Math::prime(m.value[2], 0.0f, 0.0f, range, 0.0f);
-	Math::prime(m.value[3], -(left+right)*reciprocalWidth, -(top+bottom)*reciprocalHeight, range*near, 1.0f);
+	Math::fill(m.value[0], reciprocalHeight + reciprocalWidth, 0.0f, 0.0f, 0.0f);
+	Math::fill(m.value[1], 0.0f, reciprocalHeight + reciprocalHeight, 0.0f, 0.0f);
+	Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
+	Math::fill(m.value[3], -(left+right)*reciprocalWidth, -(top+bottom)*reciprocalHeight, range*near, 1.0f);
     return m;
 }
 
@@ -1825,10 +1840,10 @@ Matrix4x4 Math::matrixPerspectiveLH(f32_t width, f32_t height, f32_t near, f32_t
 	f32_t range = far / (far - near);
 
 	Matrix4x4 m;
-	Math::prime(m.value[0], twoNear / width, 0.0f, 0.0f, 0.0f);
-	Math::prime(m.value[1], 0.0f, twoNear / height, 0.0f, 0.0f);
-	Math::prime(m.value[2], 0.0f, 0.0f, range, 1.0f);
-	Math::prime(m.value[3], 0.0f, 0.0f, -range * near, 0.0f);
+	Math::fill(m.value[0], twoNear / width, 0.0f, 0.0f, 0.0f);
+	Math::fill(m.value[1], 0.0f, twoNear / height, 0.0f, 0.0f);
+	Math::fill(m.value[2], 0.0f, 0.0f, range, 1.0f);
+	Math::fill(m.value[3], 0.0f, 0.0f, -range * near, 0.0f);
 	return m;
 }
 
@@ -1842,10 +1857,10 @@ Matrix4x4 Math::matrixPerspectiveRH(f32_t width, f32_t height, f32_t near, f32_t
 	f32_t range = far / (near - far);
 
 	Matrix4x4 m;
-	Math::prime(m.value[0], twoNear / width, 0.0f, 0.0f, 0.0f);
-	Math::prime(m.value[1], 0.0f, twoNear / height, 0.0f, 0.0f);
-	Math::prime(m.value[2], 0.0f, 0.0f, range, -1.0f);
-	Math::prime(m.value[3], 0.0f, 0.0f, range * near, 0.0f);
+	Math::fill(m.value[0], twoNear / width, 0.0f, 0.0f, 0.0f);
+	Math::fill(m.value[1], 0.0f, twoNear / height, 0.0f, 0.0f);
+	Math::fill(m.value[2], 0.0f, 0.0f, range, -1.0f);
+	Math::fill(m.value[3], 0.0f, 0.0f, range * near, 0.0f);
 	return m;
 }
 
@@ -1862,10 +1877,10 @@ Matrix4x4 Math::matrixPerspectiveFovLH(f32_t fov, f32_t aspect, f32_t near, f32_
 	f32_t range = far / (far - near);
 
 	Matrix4x4 m;
-	Math::prime(m.value[0], width, 0.0f, 0.0f, 0.0f);
-	Math::prime(m.value[1], 0.0f, height, 0.0f, 0.0f);
-	Math::prime(m.value[2], 0.0f, 0.0f, range, 1.0f);
-	Math::prime(m.value[3], 0.0f, 0.0f, -range*near, 0.0f);
+	Math::fill(m.value[0], width, 0.0f, 0.0f, 0.0f);
+	Math::fill(m.value[1], 0.0f, height, 0.0f, 0.0f);
+	Math::fill(m.value[2], 0.0f, 0.0f, range, 1.0f);
+	Math::fill(m.value[3], 0.0f, 0.0f, -range*near, 0.0f);
 	return m;
 }
 
@@ -1882,10 +1897,10 @@ Matrix4x4 Math::matrixPerspectiveFovRH(f32_t fov, f32_t aspect, f32_t near, f32_
 	f32_t range = far / (near - far);
 
 	Matrix4x4 m;
-	Math::prime(m.value[0], width, 0.0f, 0.0f, 0.0f);
-	Math::prime(m.value[1], 0.0f, height, 0.0f, 0.0f);
-	Math::prime(m.value[2], 0.0f, 0.0f, range, 1.0f);
-	Math::prime(m.value[3], 0.0f, 0.0f, range*near, 0.0f);
+	Math::fill(m.value[0], width, 0.0f, 0.0f, 0.0f);
+	Math::fill(m.value[1], 0.0f, height, 0.0f, 0.0f);
+	Math::fill(m.value[2], 0.0f, 0.0f, range, 1.0f);
+	Math::fill(m.value[3], 0.0f, 0.0f, range*near, 0.0f);
 	return m;
 }
 
@@ -1901,10 +1916,10 @@ Matrix4x4 Math::matrixPerspectiveOffCenterLH(f32_t left, f32_t right, f32_t top,
 	f32_t range = far / (far - near);
 
 	Matrix4x4 m;
-	Math::prime(m.value[0], twoNear * reciprocalWidth, 0.0f, 0.0f, 0.0f);
-	Math::prime(m.value[1], 0.0f, twoNear * reciprocalHeight, 0.0f, 0.0f);
-	Math::prime(m.value[2], -(left+right)*reciprocalWidth, -(top+bottom)*reciprocalHeight, range, 1.0f);
-	Math::prime(m.value[3], 0.0f, 0.0f, -range*near, 0.0f);
+	Math::fill(m.value[0], twoNear * reciprocalWidth, 0.0f, 0.0f, 0.0f);
+	Math::fill(m.value[1], 0.0f, twoNear * reciprocalHeight, 0.0f, 0.0f);
+	Math::fill(m.value[2], -(left+right)*reciprocalWidth, -(top+bottom)*reciprocalHeight, range, 1.0f);
+	Math::fill(m.value[3], 0.0f, 0.0f, -range*near, 0.0f);
 	return m;
 }
 
@@ -1920,10 +1935,10 @@ Matrix4x4 Math::matrixPerspectiveOffCenterRH(f32_t left, f32_t right, f32_t top,
 	f32_t range = far / (near - far);
 
 	Matrix4x4 m;
-	Math::prime(m.value[0], twoNear * reciprocalWidth, 0.0f, 0.0f, 0.0f);
-	Math::prime(m.value[1], 0.0f, twoNear * reciprocalHeight, 0.0f, 0.0f);
-	Math::prime(m.value[2], (left+right)*reciprocalWidth, (top+bottom)*reciprocalHeight, range, -1.0f);
-	Math::prime(m.value[3], 0.0f, 0.0f, range*near, 0.0f);
+	Math::fill(m.value[0], twoNear * reciprocalWidth, 0.0f, 0.0f, 0.0f);
+	Math::fill(m.value[1], 0.0f, twoNear * reciprocalHeight, 0.0f, 0.0f);
+	Math::fill(m.value[2], (left+right)*reciprocalWidth, (top+bottom)*reciprocalHeight, range, -1.0f);
+	Math::fill(m.value[3], 0.0f, 0.0f, range*near, 0.0f);
 	return m;
 }
 

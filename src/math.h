@@ -366,6 +366,9 @@ public:
 	~Bounds();
 
 public:
+	f32_t width() const;
+	f32_t height() const;
+	f32_t depth() const;
 	Vector3 center() const;
 	Vector3 extent() const;	
 	bool contains(const Vector3& p) const;
@@ -427,9 +430,9 @@ public:
 	static const f32_t deg2rad;
 
 public:
-	static void prime(f32_t (&target)[2], f32_t x, f32_t y);
-	static void prime(f32_t (&target)[3], f32_t x, f32_t y, f32_t z);
-	static void prime(f32_t (&target)[4], f32_t x, f32_t y, f32_t z, f32_t w);
+	static void fill(f32_t (&target)[2], f32_t x, f32_t y);
+	static void fill(f32_t (&target)[3], f32_t x, f32_t y, f32_t z);
+	static void fill(f32_t (&target)[4], f32_t x, f32_t y, f32_t z, f32_t w);
 
 	static f32_t radianToAngle(f32_t radian);
 	static f32_t angleToRadian(f32_t degree);
