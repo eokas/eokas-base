@@ -7,7 +7,7 @@
 #if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
 #include <windows.h>
 #else
-#include <sys/man.h>
+#include <sys/mman.h>
 #endif
 
 _BeginNamespace(eokas)
@@ -133,7 +133,7 @@ void MemoryUtility::free_v(void* ptr, size_t size)
 	munmap(ptr, size);
 }
 
-u32_t MemoryUtility::prot_v(void* ptr, size_t size, u32_t proto)
+u32_t MemoryUtility::prot_v(void* ptr, size_t size, u32_t prot)
 {
 	return mprotect(ptr, size, prot);
 }

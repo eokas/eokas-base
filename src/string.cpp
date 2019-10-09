@@ -1,5 +1,5 @@
 
-#include "String.h"
+#include "string.h"
 #include <algorithm>
 
 _BeginNamespace(eokas)

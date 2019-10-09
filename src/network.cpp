@@ -420,13 +420,6 @@ struct Kqueue
 {
 	static Kqueue instance;
 
-	static void thread_func(void* param)
-	{
-		Kqueue* kqueue = (Kqueue*)param;
-		if (kqueue != nullptr)
-			kqueue->exec_operation();
-	}
-
 	int kq;
 	bool runing;
 	std::thread thread;
@@ -437,7 +430,7 @@ struct Kqueue
 	{
 		this->kq = kqueue();
 		this->runing = true;
-		this->thread = std::thread(thread_func, this);
+		this->thread = std::thread(&Kqueue::exec_oper, this);
 		return true;
 	}
 
@@ -448,25 +441,25 @@ struct Kqueue
 		kq = 0;
 	}
 
-	bool post_operation(NetworkSession* session, NetworkOperation* oper)
+	bool post_oper(NetworkSession* session, NetworkOperation* oper)
 	{
 		if (session == nullptr || oper == nullptr)
 			return false;
-		if (oper->operationType < _OP_ACCEPT || oper->operationType > _OP_SEND)
+		if (oper->type < OperationType::Accept || oper->type > OperationType::Send)
 			return false;
 
 		oper->session = session;
 
 		struct kevent changes[1];
-		if (oper->operationType == _OP_ACCEPT)
+		if (oper->type == OperationType::Accept)
 		{
 			EV_SET(&changes[0], session->socket, EVFILT_READ, EV_ADD, 0, 0, oper);
 		}
-		else if (oper->operationType == _OP_RECV)
+		else if (oper->type == OperationType::Recv)
 		{
 			EV_SET(&changes[0], session->socket, EVFILT_READ, EV_ADD, 0, 0, oper);
 		}
-		else if (oper->operationType == _OP_SEND)
+		else if (oper->type == OperationType::Send)
 		{
 			EV_SET(&changes[0], session->socket, EVFILT_WRITE, EV_ADD, 0, 0, oper);
 		}
@@ -482,7 +475,7 @@ struct Kqueue
 		return true;
 	}
 
-	void exec_operation()
+	void exec_oper()
 	{
 		struct kevent events[_EVENT_COUNT];
 		while (this->runing)
@@ -516,15 +509,15 @@ struct Kqueue
 			session->operations.remove(oper);
 			this->mutex.unlock();
 
-			if (oper->operationType == _OP_ACCEPT)
+			if (oper->type == OperationType::Accept)
 			{
 				this->launch_accept(session, oper, data);
 			}
-			else if (oper->operationType == _OP_RECV)
+			else if (oper->type == OperationType::Recv)
 			{
 				this->launch_recv(session, oper, data);
 			}
-			else if (oper->operationType == _OP_SEND)
+			else if (oper->type == OperationType::Send)
 			{
 
 			}
@@ -543,7 +536,7 @@ struct Kqueue
 			}
 
 			oper->acceptedSocket = client;
-			this->invoke_callback(session->onAccept, oper);
+			this->invoke_callback(session, oper);
 		}
 	}
 
@@ -553,24 +546,19 @@ struct Kqueue
 		u32_t len = session->socket.recv(oper->data, oper->size);
 		if (len == 0 || len == -1)
 		{
-			this->invoke_callback(session->onBreak, oper);
+			this->invoke_callback(session, oper, NetworkError::Broken);
 			session->socket.close();
 			return;
 		}
 
-		this->on_recv(oper);
+		this->invoke_callback(session, oper);
 	}
 
-	void on_recv(NetworkOperation* oper)
+	void invoke_callback(NetworkSession* session, NetworkOperation* oper, NetworkError error = NetworkError::None)
 	{
-
-	}
-
-	NetworkSession* invoke_callback(NetworkCallback callback, NetworkOperation* oper)
-	{
-		if (callback == nullptr)
-			return nullptr;
-		return callback(oper);
+		if(session == nullptr || session->callback == nullptr)
+			return;
+		session->callback(session, oper, error);		
 	}
 };
 
@@ -578,67 +566,70 @@ Kqueue Kqueue::instance;
 
 /*
 ============================================================
-==== Network
+==== NetworkSession
 ============================================================
 */
-Network::Network()
+bool NetworkSession::open()
+{
+	return this->open(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+}
+
+bool NetworkSession::open(AddressFamily family, SocketType socktype, ProtocolType protocol)
+{
+	Socket s;
+	s.open(family, socktype, protocol);
+	return this->open(s);
+}
+
+bool NetworkSession::open(const Socket& s)
+{
+	if (!s.isOpen())
+		return false;
+	this->socket = s;
+	return true;
+}
+
+void NetworkSession::close()
+{
+	this->socket.shutdown(Socket::ShutdownMethod::Send);
+	this->socket.close();
+}
+
+bool NetworkSession::listen(const SocketAddress& addr, int maxconn)
+{
+	return this->socket.bind(addr)
+		&& this->socket.listen(maxconn);
+}
+
+bool NetworkSession::connect(const SocketAddress& addr)
+{
+	return this->socket.connect(addr);
+}
+
+bool NetworkSession::post(NetworkOperation* oper)
+{
+	return Kqueue::instance.post_oper(this, oper);
+}
+
+/*
+============================================================
+==== NetworkService
+============================================================
+*/
+NetworkService::NetworkService()
 {}
 
-Network::~Network()
+NetworkService::~NetworkService()
 {}
 
-bool Network::init()
+bool NetworkService::init()
 {
 	return Kqueue::instance.init();
 }
 
-void Network::quit()
+void NetworkService::quit()
 {
 	Kqueue::instance.quit();
-}
-
-NetworkSession* Network::openSession()
-{
-	return this->openSession(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-}
-
-NetworkSession* Network::openSession(AddressFamily family, SocketType socktype, ProtocolType protocol)
-{
-	Socket socket;
-	socket.open();
-	return this->openSession(socket);
-}
-
-NetworkSession* Network::openSession(const Socket& socket)
-{
-	if (!socket.isOpen())
-		return nullptr;
-
-	NetworkSession* session = new NetworkSession();
-	session->socket = socket;
-
-	return session;
-}
-
-void Network::closeSession(NetworkSession* session)
-{
-	_DeletePointer(session);
-}
-
-bool Network::listen(NetworkSession* session, const SocketAddress& addr, int maxconn)
-{
-	return session->socket.bind(addr)
-		&& session->socket.listen(maxconn);
-}
-
-bool Network::connect(NetworkSession* session, const SocketAddress& addr)
-{
-	return session->socket.connect(addr);
-}
-
-bool Network::postOperation(NetworkSession* session, NetworkOperation* oper)
-{
-	return Kqueue::instance.post_operation(session, oper);
 }
 
 _EndNamespace(eokas)

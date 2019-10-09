@@ -37,6 +37,7 @@ struct NetworkOperation
 	OVERLAPPED overlapped;
 	WSABUF wsabuf;
 #endif
+	NetworkSession* session;
 	OperationType type;
 	char data[_BUFFER_SIZE];
 	int size;

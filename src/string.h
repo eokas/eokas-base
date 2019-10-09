@@ -2,15 +2,15 @@
 #ifndef  _EOKAS_ARCHAISM_STRING_H_
 #define  _EOKAS_ARCHAISM_STRING_H_
 
-#include "Header.h"
+#include "header.h"
 #include <sstream>
 #include <cstdarg>
 
 _BeginNamespace(eokas)
 
-using StringList = std::list<String>;
-using StringVector = std::vector<String>;
-using StringMap = std::map<String, String>;
+typedef std::list<String> StringList;
+typedef std::vector<String> StringVector;
+typedef std::map<String, String> StringMap;
 
 #ifndef _STRING_LITTLE_LENGTH
 #define _STRING_LITTLE_LENGTH 16
