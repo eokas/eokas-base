@@ -1,12 +1,15 @@
 cmake_minimum_required(VERSION 3.10)
-
 project(libarchaism)
 
-aux_source_directory(./src, SRC_DIR)
+message(" project source dir: " ${PROJECT_SOURCE_DIR})
+message(" project binary dir: " ${PROJECT_BINARY_DIR})   
 
-# add_subdirectory(.)
+aux_source_directory(./src SRC_DIR)
 
-add_library(libarchaism, ${SRC_DIR})
-# add_executable(libarchaism, ${SRC_DIR})
+set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
-# target_link_libraries(libarchaism libcxx)
+add_library(${PROJECT_NAME} ${SRC_DIR})
+# add_executable(${PROJECT_NAME}, ${SRC_DIR})
+
+# target_link_libraries(${PROJECT_NAME} libcxx)
