@@ -9,7 +9,7 @@ aux_source_directory(./src SRC_DIR)
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
-add_library(${PROJECT_NAME} ${SRC_DIR})
+add_library(${PROJECT_NAME} STATIC ${SRC_DIR})
 # add_executable(${PROJECT_NAME}, ${SRC_DIR})
 
 # target_link_libraries(${PROJECT_NAME} libcxx)
