@@ -1265,6 +1265,56 @@ bool Rect::contains(const Vector2& p) const
 		&& p.y >= this->minY()
 		&& p.y <= this->maxY();
 }
+
+/*
+============================================================
+== Spherical
+============================================================
+*/
+Spherical::Spherical()
+    :radius(0), phi(0), theta(0)
+{ }
+
+Spherical::Spherical(f32_t radius, f32_t phi, f32_t theta)
+    :radius(radius), phi(phi), theta(theta)
+{ }
+
+Spherical::Spherical(const Spherical& other)
+    :radius(other.radius)
+    ,phi(other.phi)
+    ,theta(other.theta)
+{ }
+
+Spherical::Spherical(const Vector3& point)
+{
+    f32_t radius = point.magnitude();
+    this->radius = radius;
+
+    if(radius > 0) {
+        this->theta = std::atan2(point.x, point.z);
+        this->phi = std::acos(Math::clamp(point.y / radius, -1, 1));
+    }
+    else {
+        this->theta = 0;
+        this->phi = 0;
+    }
+}
+
+Spherical::~Spherical()
+{ }
+
+Spherical::operator Vector3() 
+{
+    f32_t radius = this->radius;
+    f32_t phi = this->phi;
+    f32_t theta = this->theta;
+    return Vector3(
+        radius * std::sin(phi) * std::sin(theta),
+        radius * std::cos(phi),
+        radius * std::sin(phi) * std::cos(theta)
+    );
+}
+
 /*
 ============================================================
 == Math
