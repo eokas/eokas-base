@@ -6,6 +6,8 @@
 #include <cassert>
 #include <algorithm>
 
+#include "./random.h"
+
 _BeginNamespace(eokas)
 
 /*
@@ -19,6 +21,16 @@ const Vector2 Vector2::up(0, 1);
 const Vector2 Vector2::down(0, -1);
 const Vector2 Vector2::right(1, 0);
 const Vector2 Vector2::left(-1, 0);
+
+Vector2 Vector2::random(f32_t scale)
+{
+    Random random;
+    f32_t angle = random.next(0.0f, 1.0f) * Math::PI2;
+    Vector2 out;
+    out.x = std::cos(angle) * scale;
+    out.y = std::sin(angle) * scale;
+    return out;
+}
 
 Vector2::Vector2()
 	:x(0), y(0)
@@ -150,6 +162,20 @@ const Vector3 Vector3::right(1, 0, 0);
 const Vector3 Vector3::left(-1, 0, 0);
 const Vector3 Vector3::forward(0, 0, 1);
 const Vector3 Vector3::back(0, 0, -1);
+
+Vector3 Vector3::random(f32_t scale)
+{
+    Random random;
+    f32_t angle = random.next(0.0f, 1.0f) * Math::PI2;
+    f32_t z = random.next(-1.0f, 1.0f);
+    f32_t xyScale = std::sqrt(1 - z * z) * scale;
+
+    Vector3 out;
+    out.x = std::cos(angle) * xyScale;
+    out.y = std::sin(angle) * xyScale;
+    out.z = z * scale;
+    return out;
+}
 
 Vector3::Vector3()
 	:x(0), y(0), z(0)
@@ -1244,12 +1270,13 @@ bool Rect::contains(const Vector2& p) const
 == Math
 ============================================================
 */
-const f32_t Math::epsilon4 = 0.0001f;
-const f32_t Math::epsilon5 = 0.00001f;
-const f32_t Math::epsilon6 = 0.000001f;
-const f32_t Math::pi = 3.141592654f;
-const f32_t Math::rad2deg = 180.0f / Math::pi;
-const f32_t Math::deg2rad = Math::pi / 180.0f;
+const f32_t Math::EPSILON_4 = 0.0001f;
+const f32_t Math::EPSILON_5 = 0.00001f;
+const f32_t Math::EPSILON_6 = 0.000001f;
+const f32_t Math::PI = 3.141592654f;
+const f32_t Math::PI2 = Math::PI * 2;
+const f32_t Math::DEGREES_PER_RADIAN = 180.0f / Math::PI;
+const f32_t Math::RADIANS_PER_DEGREE = Math::PI / 180.0f;
 
 void Math::fill(f32_t (&target)[2], f32_t x, f32_t y)
 {
@@ -1274,12 +1301,12 @@ void Math::fill(f32_t (&target)[4], f32_t x, f32_t y, f32_t z, f32_t w)
 
 f32_t Math::radianToAngle(f32_t radian)
 {
-	return radian * Math::rad2deg;
+	return radian * Math::DEGREES_PER_RADIAN;
 }
 
 f32_t Math::angleToRadian(f32_t degree)
 {
-	return degree * Math::deg2rad;
+	return degree * Math::RADIANS_PER_DEGREE;
 }
 
 bool Math::between(f32_t x, f32_t a, f32_t b)

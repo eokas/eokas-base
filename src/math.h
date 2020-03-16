@@ -21,6 +21,9 @@ public:
 	static const Vector2 left;
 
 public:
+    static Vector2 random(f32_t scale = 1);
+
+public:
 	Vector2();
 	Vector2(f32_t x, f32_t y);
 	Vector2(const f32_t (&v)[2]);
@@ -70,6 +73,9 @@ public:
 	static const Vector3 left;
 	static const Vector3 forward;
 	static const Vector3 back;
+
+public:
+    static Vector3 random(f32_t scale = 1);
 
 public:
 	Vector3();
@@ -422,12 +428,13 @@ public:
 class Math
 {
 public:
-	static const f32_t epsilon4;
-	static const f32_t epsilon5;
-	static const f32_t epsilon6;
-	static const f32_t pi;
-	static const f32_t rad2deg;
-	static const f32_t deg2rad;
+	static const f32_t EPSILON_4;
+	static const f32_t EPSILON_5;
+	static const f32_t EPSILON_6;
+	static const f32_t PI;
+    static const f32_t PI2;
+	static const f32_t DEGREES_PER_RADIAN;
+	static const f32_t RADIANS_PER_DEGREE;
 
 public:
 	static void fill(f32_t (&target)[2], f32_t x, f32_t y);
@@ -436,7 +443,7 @@ public:
 
 	static f32_t radianToAngle(f32_t radian);
 	static f32_t angleToRadian(f32_t degree);
-	
+
 	static bool between(f32_t x, f32_t a, f32_t b);
 	static bool between(const Vector2& x, const Vector2& a, const Vector2& b);
 	static bool between(const Vector3& x, const Vector3& a, const Vector3& b);
