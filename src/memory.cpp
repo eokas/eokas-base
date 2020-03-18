@@ -6,6 +6,8 @@
 
 #if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
 #include <windows.h>
+#elif _EOKAS_PLATFORM == _EOKAS_PLATFORM_MACOS || _EOKAS_PLATFORM == _EOKAS_PLATFORM_IOS
+#include <sys/mman.h>
 #else
 #include <sys/mman.h>
 #endif
