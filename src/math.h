@@ -162,40 +162,40 @@ public:
 /**
  * 3x3 Matrix
 */
-class Matrix3x3
+class Matrix3
 {
 public:
-	static const Matrix3x3 identity;
+	static const Matrix3 identity;
 
 public:
-	Matrix3x3();
-	Matrix3x3(
+	Matrix3();
+	Matrix3(
 		f32_t _00, f32_t _01, f32_t _02,
 		f32_t _10, f32_t _11, f32_t _12,
 		f32_t _20, f32_t _21, f32_t _22);
-	Matrix3x3(const f32_t (&m)[3][3]);
-	Matrix3x3(const Matrix3x3& m);
-	~Matrix3x3();
+	Matrix3(const f32_t (&m)[3][3]);
+	Matrix3(const Matrix3& m);
+	~Matrix3();
 
 public:
-	Matrix3x3& operator=(const Matrix3x3& m);
-	Matrix3x3 operator-() const;
+	Matrix3& operator=(const Matrix3& m);
+	Matrix3 operator-() const;
 
-	Matrix3x3 operator+(const Matrix3x3& m) const;
-	Matrix3x3 operator-(const Matrix3x3& m) const;
-	Matrix3x3 operator*(const Matrix3x3& m) const;
+	Matrix3 operator+(const Matrix3& m) const;
+	Matrix3 operator-(const Matrix3& m) const;
+	Matrix3 operator*(const Matrix3& m) const;
 
-	Matrix3x3& operator+=(const Matrix3x3& m);
-	Matrix3x3& operator-=(const Matrix3x3& m);
-	Matrix3x3& operator*=(const Matrix3x3& m);
+	Matrix3& operator+=(const Matrix3& m);
+	Matrix3& operator-=(const Matrix3& m);
+	Matrix3& operator*=(const Matrix3& m);
 
-	bool operator==(const Matrix3x3& m) const;
-	bool operator!=(const Matrix3x3& m) const;
+	bool operator==(const Matrix3& m) const;
+	bool operator!=(const Matrix3& m) const;
 
 public:
 	f32_t determinant() const;
-	Matrix3x3 transposed() const;
-	Matrix3x3& transpose();
+	Matrix3 transposed() const;
+	Matrix3& transpose();
 
 public:
 	f32_t value[3][3];
@@ -204,42 +204,42 @@ public:
 /**
  * 4x4 Matrix
 */
-class Matrix4x4
+class Matrix4
 {
 public:
-	static const Matrix4x4 identity;
+	static const Matrix4 identity;
 
 public:
-	Matrix4x4();
-	Matrix4x4(
+	Matrix4();
+	Matrix4(
 		f32_t _00, f32_t _01, f32_t _02, f32_t _03,
 		f32_t _10, f32_t _11, f32_t _12, f32_t _13,
 		f32_t _20, f32_t _21, f32_t _22, f32_t _23,
 		f32_t _30, f32_t _31, f32_t _32, f32_t _33);
-	Matrix4x4(const f32_t (&m)[4][4]);
-	Matrix4x4(const Matrix4x4& m);
-	Matrix4x4(const Matrix3x3& m);
-	~Matrix4x4();
+	Matrix4(const f32_t (&m)[4][4]);
+	Matrix4(const Matrix4& m);
+	Matrix4(const Matrix3& m);
+	~Matrix4();
 
 public:
-	Matrix4x4& operator=(const Matrix4x4& m);
-	Matrix4x4 operator-() const;
+	Matrix4& operator=(const Matrix4& m);
+	Matrix4 operator-() const;
 
-	Matrix4x4 operator+(const Matrix4x4& m) const;
-	Matrix4x4 operator-(const Matrix4x4& m) const;
-	Matrix4x4 operator*(const Matrix4x4& m) const;
+	Matrix4 operator+(const Matrix4& m) const;
+	Matrix4 operator-(const Matrix4& m) const;
+	Matrix4 operator*(const Matrix4& m) const;
 
-	Matrix4x4& operator+=(const Matrix4x4& m);
-	Matrix4x4& operator-=(const Matrix4x4& m);
-	Matrix4x4& operator*=(const Matrix4x4& m);
+	Matrix4& operator+=(const Matrix4& m);
+	Matrix4& operator-=(const Matrix4& m);
+	Matrix4& operator*=(const Matrix4& m);
 
-	bool operator==(const Matrix4x4& m) const;
-	bool operator!=(const Matrix4x4& m) const;
+	bool operator==(const Matrix4& m) const;
+	bool operator!=(const Matrix4& m) const;
 
 public:
 	float determinant() const;
-	Matrix4x4 transposed() const;
-	Matrix4x4& transpose();
+	Matrix4 transposed() const;
+	Matrix4& transpose();
 
 public:
 	f32_t value[4][4];
@@ -289,13 +289,34 @@ public:
 };
 
 /**
+ * Spherical coords
+*/
+class Spherical
+{
+public:
+    Spherical();
+    Spherical(f32_t radius, f32_t phi, f32_t theta);
+    Spherical(const Vector3& point);
+    Spherical(const Spherical& other);
+    ~Spherical();
+
+public:
+    operator Vector3();
+
+public:
+    f32_t radius;
+    f32_t phi;
+    f32_t theta;
+};
+
+/**
  * Ray
 */
 class Ray
 {
 public:
 	Ray();
-	Ray(const Vector3& origin, const Vector3& direction);
+	Ray(const Vector3& origin, const Vector3& diBounds2ion);
 	Ray(const Ray& other);
 	~Ray();
 
@@ -304,7 +325,7 @@ public:
 
 public:
 	Vector3 origin;
-	Vector3 direction;
+	Vector3 diBounds2ion;
 };
 
 /**
@@ -341,7 +362,9 @@ public:
 	~Sphere();
 
 public:
-	f32_t side(const Vector3& p);
+	f32_t side(const Vector3& p) const;
+    bool include(const Vector3& p) const;
+    Sphere& expand(const Vector3&);
 
 public:
 	Vector3 origin;
@@ -349,14 +372,38 @@ public:
 };
 
 /**
- * Bounds
+ * Bounds2
 */
-class Bounds
+class Bounds2
 {
 public:
-	Bounds(const Vector3& center, const Vector3& extent);
-	Bounds(const Bounds& other);
-	~Bounds();
+	Bounds2(const Vector2& center, const Vector2& extent);
+	Bounds2(const Bounds2& other);
+	~Bounds2();
+
+public:
+	f32_t width() const;
+	f32_t height() const;
+	Vector2 center() const;
+	Vector2 extent() const;	
+	bool contains(const Vector2& p) const;
+	Bounds2& expand(const Vector2& p);
+	Bounds2& expand(const Bounds2& b);
+
+public:
+	Vector2 min;
+	Vector2 max;
+};
+
+/**
+ * Bounds3
+*/
+class Bounds3
+{
+public:
+	Bounds3(const Vector3& center, const Vector3& extent);
+	Bounds3(const Bounds3& other);
+	~Bounds3();
 
 public:
 	f32_t width() const;
@@ -365,68 +412,13 @@ public:
 	Vector3 center() const;
 	Vector3 extent() const;	
 	bool contains(const Vector3& p) const;
-	void expand(const Vector3& p);
-	void expand(const Bounds& b);
+	Bounds3& expand(const Vector3& p);
+	Bounds3& expand(const Bounds3& b);
 
 public:
 	Vector3 min;
 	Vector3 max;
 };
-
-/**
- * Rect
-*/
-class Rect
-{
-public:
-	Rect();
-	Rect(f32_t x, f32_t y, f32_t w, f32_t h);
-	Rect(const Vector2& pos, const Vector2& size);
-	Rect(const Rect& other);
-	~Rect();
-
-public:
-	bool operator==(const Rect& other);
-	bool operator!=(const Rect& other);
-
-public:
-	f32_t minX() const;
-	f32_t minY() const;
-	f32_t maxX() const;
-	f32_t maxY() const;
-	f32_t area() const;
-	Vector2 center() const;
-	bool contains(f32_t px, f32_t py) const;
-	bool contains(const Vector2& p) const;
-
-public:
-	f32_t x;
-	f32_t y;
-	f32_t w;
-	f32_t h;
-};
-
-/**
- * Spherical coords
-*/
-class Spherical
-{
-public:
-    Spherical();
-    Spherical(f32_t radius, f32_t phi, f32_t theta);
-    Spherical(const Vector3& point);
-    Spherical(const Spherical& other);
-    ~Spherical();
-
-public:
-    operator Vector3();
-
-public:
-    f32_t radius;
-    f32_t phi;
-    f32_t theta;
-};
-
 
 /**
  * Math
@@ -492,44 +484,44 @@ public:
 public:
 	static bool intersects(const Ray& ray, const Plane& plane);
 	static bool intersects(const Ray& ray, const Sphere& sphere);
-	static bool intersects(const Ray& ray, const Bounds& bounds);
+	static bool intersects(const Ray& ray, const Bounds3& bounds);
 	static bool intersects(f32_t& t, const Ray& ray, const Plane& plane);
 	static bool intersects(f32_t& t, const Ray& ray, const Sphere& sphere);
-	static bool intersects(f32_t& t, const Ray& ray, const Bounds& bounds);
+	static bool intersects(f32_t& t, const Ray& ray, const Bounds3& bounds);
 	static bool intersects(f32_t& t, const Ray& ray, const Vector3& v0, const Vector3& v1, const Vector3 v2);
 	
 public:
-	static void transform(Vector3& result, const Vector3& v, const Matrix3x3& m);
-	static void transform(Vector4& result, const Vector4& v, const Matrix4x4& m);
-	static void transform(Matrix3x3& result, const Matrix3x3& m1, const Matrix3x3& m2);
-	static void transform(Matrix4x4& result, const Matrix4x4& m1, const Matrix4x4& m2);
+	static void transform(Vector3& result, const Vector3& v, const Matrix3& m);
+	static void transform(Vector4& result, const Vector4& v, const Matrix4& m);
+	static void transform(Matrix3& result, const Matrix3& m1, const Matrix3& m2);
+	static void transform(Matrix4& result, const Matrix4& m1, const Matrix4& m2);
 
 public:
-	static Matrix3x3 matrixTranslation(const Vector2& dir);
-	static Matrix4x4 matrixTranslation(const Vector3& dir);
+	static Matrix3 matrixTranslation(const Vector2& dir);
+	static Matrix4 matrixTranslation(const Vector3& dir);
 
-	static Matrix3x3 matrixRotation(const Vector2& axis, f32_t angle);
-	static Matrix4x4 matrixRotation(const Vector3& axis, f32_t angle);
+	static Matrix3 matrixRotation(const Vector2& axis, f32_t angle);
+	static Matrix4 matrixRotation(const Vector3& axis, f32_t angle);
 	
-	static Matrix3x3 matrixScaling(const Vector2& scale);
-	static Matrix4x4 matrixScaling(const Vector3& scale);
+	static Matrix3 matrixScaling(const Vector2& scale);
+	static Matrix4 matrixScaling(const Vector3& scale);
 
-	static Matrix4x4 matrixLookToLH(const Vector3& pos, const Vector3& forward, const Vector3& up);
-	static Matrix4x4 matrixLookAtLH(const Vector3& pos, const Vector3& focus, const Vector3& up);
-	static Matrix4x4 matrixLookToRH(const Vector3& pos, const Vector3& forward, const Vector3& up);
-	static Matrix4x4 matrixLookAtRH(const Vector3& pos, const Vector3& focus, const Vector3& up);
+	static Matrix4 matrixLookToLH(const Vector3& pos, const Vector3& forward, const Vector3& up);
+	static Matrix4 matrixLookAtLH(const Vector3& pos, const Vector3& focus, const Vector3& up);
+	static Matrix4 matrixLookToRH(const Vector3& pos, const Vector3& forward, const Vector3& up);
+	static Matrix4 matrixLookAtRH(const Vector3& pos, const Vector3& focus, const Vector3& up);
 
-	static Matrix4x4 matrixOrthographicLH(f32_t width, f32_t height, f32_t near, f32_t far);
-	static Matrix4x4 matrixOrthographicRH(f32_t width, f32_t height, f32_t near, f32_t far);
-	static Matrix4x4 matrixOrthographicOffCenterLH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far);
-	static Matrix4x4 matrixOrthographicOffCenterRH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far);
+	static Matrix4 matrixOrthographicLH(f32_t width, f32_t height, f32_t near, f32_t far);
+	static Matrix4 matrixOrthographicRH(f32_t width, f32_t height, f32_t near, f32_t far);
+	static Matrix4 matrixOrthographicOffCenterLH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far);
+	static Matrix4 matrixOrthographicOffCenterRH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far);
 
-	static Matrix4x4 matrixPerspectiveLH(f32_t width, f32_t height, f32_t near, f32_t far);
-	static Matrix4x4 matrixPerspectiveRH(f32_t width, f32_t height, f32_t near, f32_t far);
-	static Matrix4x4 matrixPerspectiveFovLH(f32_t fov, f32_t aspect, f32_t near, f32_t far);
-	static Matrix4x4 matrixPerspectiveFovRH(f32_t fov, f32_t aspect, f32_t near, f32_t far);
-	static Matrix4x4 matrixPerspectiveOffCenterLH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far);
-	static Matrix4x4 matrixPerspectiveOffCenterRH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far);
+	static Matrix4 matrixPerspectiveLH(f32_t width, f32_t height, f32_t near, f32_t far);
+	static Matrix4 matrixPerspectiveRH(f32_t width, f32_t height, f32_t near, f32_t far);
+	static Matrix4 matrixPerspectiveFovLH(f32_t fov, f32_t aspect, f32_t near, f32_t far);
+	static Matrix4 matrixPerspectiveFovRH(f32_t fov, f32_t aspect, f32_t near, f32_t far);
+	static Matrix4 matrixPerspectiveOffCenterLH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far);
+	static Matrix4 matrixPerspectiveOffCenterRH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far);
 
 	static Quaternion quaternionFromEulerAngles(f32_t x, f32_t y, f32_t z);
 	static Quaternion quaternionFromAxisAngle(const Vector3& axis, f32_t angle);

@@ -453,20 +453,20 @@ Vector4& Vector4::normalize()
 
 /*
 ============================================================
-== Matrix3x3
+== Matrix3
 ============================================================
 */
-const Matrix3x3 Matrix3x3::identity(
+const Matrix3 Matrix3::identity(
 	1, 0, 0,
 	0, 1, 0,
 	0, 0, 1);
 
-Matrix3x3::Matrix3x3()
+Matrix3::Matrix3()
 {
 	memset(value, 0, sizeof(value));
 }
 
-Matrix3x3::Matrix3x3(
+Matrix3::Matrix3(
 	f32_t _00, f32_t _01, f32_t _02, 
 	f32_t _10, f32_t _11, f32_t _12, 
 	f32_t _20, f32_t _21, f32_t _22)
@@ -476,26 +476,26 @@ Matrix3x3::Matrix3x3(
 	value[2][0] = _20; value[2][1] = _21; value[2][2] = _22;
 }
 
-Matrix3x3::Matrix3x3(const f32_t (&m)[3][3])
+Matrix3::Matrix3(const f32_t (&m)[3][3])
 {
 	memcpy(value, m, sizeof(value));
 }
 
-Matrix3x3::Matrix3x3(const Matrix3x3& m)
+Matrix3::Matrix3(const Matrix3& m)
 {
 	memcpy(value, m.value, sizeof(value));
 }
 
-Matrix3x3::~Matrix3x3()
+Matrix3::~Matrix3()
 {}
 
-Matrix3x3& Matrix3x3::operator=(const Matrix3x3& m)
+Matrix3& Matrix3::operator=(const Matrix3& m)
 {
 	memcpy(value, m.value, sizeof(value));
 	return *this;
 }
 
-Matrix3x3 Matrix3x3::operator-() const
+Matrix3 Matrix3::operator-() const
 {
 	f32_t result[3][3];
 	for(i32_t i=0; i<3; i++)
@@ -505,10 +505,10 @@ Matrix3x3 Matrix3x3::operator-() const
 			result[i][j] = -value[i][j];
 		}
 	}
-	return Matrix3x3(result);
+	return Matrix3(result);
 }
 
-Matrix3x3 Matrix3x3::operator+(const Matrix3x3& m) const
+Matrix3 Matrix3::operator+(const Matrix3& m) const
 {
 	f32_t result[3][3];
 	for(i32_t i=0; i<3; i++)
@@ -518,9 +518,9 @@ Matrix3x3 Matrix3x3::operator+(const Matrix3x3& m) const
 			result[i][j] = value[i][j] + m.value[i][j];
 		}
 	}
-	return Matrix3x3(result);;
+	return Matrix3(result);;
 }
-Matrix3x3 Matrix3x3::operator-(const Matrix3x3& m) const
+Matrix3 Matrix3::operator-(const Matrix3& m) const
 {
 	f32_t result[3][3];
 	for(i32_t i=0; i<3; i++)
@@ -530,9 +530,9 @@ Matrix3x3 Matrix3x3::operator-(const Matrix3x3& m) const
 			result[i][j] = value[i][j] - m.value[i][j];
 		}
 	}
-	return Matrix3x3(result);
+	return Matrix3(result);
 }
-Matrix3x3 Matrix3x3::operator*(const Matrix3x3& m) const
+Matrix3 Matrix3::operator*(const Matrix3& m) const
 {
 	f32_t result[3][3];
 	for(i32_t i=0; i<3; i++)
@@ -542,10 +542,10 @@ Matrix3x3 Matrix3x3::operator*(const Matrix3x3& m) const
 			result[i][j] = value[i][j] * m.value[i][j];
 		}
 	}
-	return Matrix3x3(result);
+	return Matrix3(result);
 }
 
-Matrix3x3& Matrix3x3::operator+=(const Matrix3x3& m)
+Matrix3& Matrix3::operator+=(const Matrix3& m)
 {
 	for(i32_t i=0; i<3; i++)
 	{
@@ -556,7 +556,7 @@ Matrix3x3& Matrix3x3::operator+=(const Matrix3x3& m)
 	}
 	return *this;
 }
-Matrix3x3& Matrix3x3::operator-=(const Matrix3x3& m)
+Matrix3& Matrix3::operator-=(const Matrix3& m)
 {
 	for(i32_t i=0; i<3; i++)
 	{
@@ -567,7 +567,7 @@ Matrix3x3& Matrix3x3::operator-=(const Matrix3x3& m)
 	}
 	return *this;
 }
-Matrix3x3& Matrix3x3::operator*=(const Matrix3x3& m)
+Matrix3& Matrix3::operator*=(const Matrix3& m)
 {
 	for(i32_t i=0; i<3; i++)
 	{
@@ -579,7 +579,7 @@ Matrix3x3& Matrix3x3::operator*=(const Matrix3x3& m)
 	return *this;
 }
 
-bool Matrix3x3::operator==(const Matrix3x3& m) const
+bool Matrix3::operator==(const Matrix3& m) const
 {
 	for(i32_t i=0; i<3; i++)
 	{
@@ -594,7 +594,7 @@ bool Matrix3x3::operator==(const Matrix3x3& m) const
 	return true;
 }
 
-bool Matrix3x3::operator!=(const Matrix3x3& m) const
+bool Matrix3::operator!=(const Matrix3& m) const
 {
 	for(i32_t i=0; i<3; i++)
 	{
@@ -618,7 +618,7 @@ bool Matrix3x3::operator!=(const Matrix3x3& m) const
 		a00a11a22 + a01a12a20 + a02a10a21 - 
 		a02a11a20 - a00a12a21 - a01a10a22
 */
-f32_t Matrix3x3::determinant() const
+f32_t Matrix3::determinant() const
 {
 	return
 		value[0][0] * value[1][1] * value[2][2] +
@@ -629,9 +629,9 @@ f32_t Matrix3x3::determinant() const
 		value[0][1] * value[1][0] * value[2][2];		
 }
 
-Matrix3x3 Matrix3x3::transposed() const
+Matrix3 Matrix3::transposed() const
 {
-	Matrix3x3 t(value);
+	Matrix3 t(value);
 	for (i32_t i = 1; i<3; i++)
 	{
 		for (i32_t j = 0; j<i; j++)
@@ -643,9 +643,9 @@ Matrix3x3 Matrix3x3::transposed() const
 	return t;
 }
 
-Matrix3x3& Matrix3x3::transpose()
+Matrix3& Matrix3::transpose()
 {
-	Matrix3x3 t(value);
+	Matrix3 t(value);
 	for (i32_t i = 1; i<3; i++)
 	{
 		for (i32_t j = 0; j<i; j++)
@@ -659,21 +659,21 @@ Matrix3x3& Matrix3x3::transpose()
 
 /*
 ============================================================
-== Matrix4x4
+== Matrix4
 ============================================================
 */
-const Matrix4x4 Matrix4x4::identity(
+const Matrix4 Matrix4::identity(
 	1, 0, 0, 0,
 	0, 1, 0, 0,
 	0, 0, 1, 0,
 	0, 0, 0, 1);
 
-Matrix4x4::Matrix4x4()
+Matrix4::Matrix4()
 {
 	memset(value, 0, sizeof(value));
 }
 
-Matrix4x4::Matrix4x4(
+Matrix4::Matrix4(
 	f32_t _00, f32_t _01, f32_t _02, f32_t _03,
 	f32_t _10, f32_t _11, f32_t _12, f32_t _13,
 	f32_t _20, f32_t _21, f32_t _22, f32_t _23,
@@ -685,12 +685,12 @@ Matrix4x4::Matrix4x4(
 	value[3][0] = _30; value[3][1] = _31; value[3][2] = _32; value[3][3] = _33;
 }
 
-Matrix4x4::Matrix4x4(const f32_t (&m)[4][4])
+Matrix4::Matrix4(const f32_t (&m)[4][4])
 {
 	memcpy(value, m, sizeof(value));
 }
 
-Matrix4x4::Matrix4x4(const Matrix3x3& m)
+Matrix4::Matrix4(const Matrix3& m)
 {
 	memset(value, 0, sizeof(value));
 	for(i32_t i=0; i<3; i++)
@@ -703,21 +703,21 @@ Matrix4x4::Matrix4x4(const Matrix3x3& m)
 	value[3][3] = 1;
 }
 
-Matrix4x4::Matrix4x4(const Matrix4x4& m)
+Matrix4::Matrix4(const Matrix4& m)
 {
 	memcpy(value, m.value, sizeof(value));
 }
 
-Matrix4x4::~Matrix4x4()
+Matrix4::~Matrix4()
 {}
 
-Matrix4x4& Matrix4x4::operator=(const Matrix4x4& m)
+Matrix4& Matrix4::operator=(const Matrix4& m)
 {
 	memcpy(value, m.value, sizeof(value));
 	return *this;
 }
 	
-Matrix4x4 Matrix4x4::operator-() const
+Matrix4 Matrix4::operator-() const
 {
 	f32_t result[4][4];
 	for(i32_t i=0; i<4; i++)
@@ -727,10 +727,10 @@ Matrix4x4 Matrix4x4::operator-() const
 			result[i][j] = -value[i][j];
 		}
 	}
-	return Matrix4x4(result);
+	return Matrix4(result);
 }
 
-Matrix4x4 Matrix4x4::operator+(const Matrix4x4& m) const
+Matrix4 Matrix4::operator+(const Matrix4& m) const
 {
 	f32_t result[4][4];
 	for(i32_t i=0; i<4; i++)
@@ -740,9 +740,9 @@ Matrix4x4 Matrix4x4::operator+(const Matrix4x4& m) const
 			result[i][j] = value[i][j] + m.value[i][j];
 		}
 	}
-	return Matrix4x4(result);;
+	return Matrix4(result);;
 }
-Matrix4x4 Matrix4x4::operator-(const Matrix4x4& m) const
+Matrix4 Matrix4::operator-(const Matrix4& m) const
 {
 	f32_t result[4][4];
 	for(i32_t i=0; i<4; i++)
@@ -752,9 +752,9 @@ Matrix4x4 Matrix4x4::operator-(const Matrix4x4& m) const
 			result[i][j] = value[i][j] - m.value[i][j];
 		}
 	}
-	return Matrix4x4(result);
+	return Matrix4(result);
 }
-Matrix4x4 Matrix4x4::operator*(const Matrix4x4& m) const
+Matrix4 Matrix4::operator*(const Matrix4& m) const
 {
 	f32_t result[4][4];
 	for(i32_t i=0; i<4; i++)
@@ -764,10 +764,10 @@ Matrix4x4 Matrix4x4::operator*(const Matrix4x4& m) const
 			result[i][j] = value[i][j] * m.value[i][j];
 		}
 	}
-	return Matrix4x4(result);
+	return Matrix4(result);
 }
 
-Matrix4x4& Matrix4x4::operator+=(const Matrix4x4& m)
+Matrix4& Matrix4::operator+=(const Matrix4& m)
 {
 	for(i32_t i=0; i<4; i++)
 	{
@@ -778,7 +778,7 @@ Matrix4x4& Matrix4x4::operator+=(const Matrix4x4& m)
 	}
 	return *this;
 }
-Matrix4x4& Matrix4x4::operator-=(const Matrix4x4& m)
+Matrix4& Matrix4::operator-=(const Matrix4& m)
 {
 	for(i32_t i=0; i<4; i++)
 	{
@@ -789,7 +789,7 @@ Matrix4x4& Matrix4x4::operator-=(const Matrix4x4& m)
 	}
 	return *this;
 }
-Matrix4x4& Matrix4x4::operator*=(const Matrix4x4& m)
+Matrix4& Matrix4::operator*=(const Matrix4& m)
 {
 	for(i32_t i=0; i<4; i++)
 	{
@@ -801,7 +801,7 @@ Matrix4x4& Matrix4x4::operator*=(const Matrix4x4& m)
 	return *this;
 }
 
-bool Matrix4x4::operator==(const Matrix4x4& m) const
+bool Matrix4::operator==(const Matrix4& m) const
 {
 	for(i32_t i=0; i<4; i++)
 	{
@@ -816,7 +816,7 @@ bool Matrix4x4::operator==(const Matrix4x4& m) const
 	return true;
 }
 
-bool Matrix4x4::operator!=(const Matrix4x4& m) const
+bool Matrix4::operator!=(const Matrix4& m) const
 {
 	for(i32_t i=0; i<4; i++)
 	{
@@ -841,7 +841,7 @@ bool Matrix4x4::operator!=(const Matrix4x4& m) const
 		a00a11a22a33 + a01a12a23a30 + a02a13a20a31 + a03a10a21a32 -
 		a03a12a21a30 - a00a13a22a31 - a01a10a23a32 - a02a11a20a33
 */
-f32_t Matrix4x4::determinant() const
+f32_t Matrix4::determinant() const
 {
 	return
 		value[0][0] * value[1][1] * value[2][2] * value[3][3] +
@@ -855,9 +855,9 @@ f32_t Matrix4x4::determinant() const
 		value[0][2] * value[1][1] * value[2][0] * value[3][3];
 }
 
-Matrix4x4 Matrix4x4::transposed() const
+Matrix4 Matrix4::transposed() const
 {
-	Matrix4x4 t(value);
+	Matrix4 t(value);
 	for (i32_t i = 1; i < 4; i++)
 	{
 		for (i32_t j = 0; j < i; j++)
@@ -869,9 +869,9 @@ Matrix4x4 Matrix4x4::transposed() const
 	return t;
 }
 
-Matrix4x4& Matrix4x4::transpose()
+Matrix4& Matrix4::transpose()
 {
-	Matrix4x4 t(value);
+	Matrix4 t(value);
 	for (i32_t i = 1; i < 4; i++)
 	{
 		for (i32_t j = 0; j < i; j++)
@@ -922,7 +922,7 @@ Quaternion& Quaternion::operator=(const Quaternion& q)
 
 Quaternion Quaternion::operator-() const
 {
-	return Quaternion();
+	return Quaternion(-x, -y, -z, -w);
 }
 
 Quaternion Quaternion::operator+(const Quaternion& q) const
@@ -1010,22 +1010,72 @@ Quaternion Quaternion::inverse() const
 
 /*
 ============================================================
+== Spherical
+============================================================
+*/
+Spherical::Spherical()
+    :radius(0), phi(0), theta(0)
+{ }
+
+Spherical::Spherical(f32_t radius, f32_t phi, f32_t theta)
+    :radius(radius), phi(phi), theta(theta)
+{ }
+
+Spherical::Spherical(const Spherical& other)
+    :radius(other.radius)
+    ,phi(other.phi)
+    ,theta(other.theta)
+{ }
+
+Spherical::Spherical(const Vector3& point)
+{
+    f32_t radius = point.magnitude();
+    this->radius = radius;
+
+    if(radius > 0) {
+        this->theta = std::atan2(point.x, point.z);
+        this->phi = std::acos(Math::clamp(point.y / radius, -1, 1));
+    }
+    else {
+        this->theta = 0;
+        this->phi = 0;
+    }
+}
+
+Spherical::~Spherical()
+{ }
+
+Spherical::operator Vector3() 
+{
+    f32_t radius = this->radius;
+    f32_t phi = this->phi;
+    f32_t theta = this->theta;
+    return Vector3(
+        radius * std::sin(phi) * std::sin(theta),
+        radius * std::cos(phi),
+        radius * std::sin(phi) * std::cos(theta)
+    );
+}
+
+
+/*
+============================================================
 == Ray
 ============================================================
 */
 Ray::Ray()
 	:origin(0, 0, 0)
-	,direction(0, 1, 0)
+	,diBounds2ion(0, 1, 0)
 {}
 
-Ray::Ray(const Vector3& origin, const Vector3& direction)
+Ray::Ray(const Vector3& origin, const Vector3& diBounds2ion)
 	:origin(origin)
-	,direction(direction)
+	,diBounds2ion(diBounds2ion)
 {}
 
 Ray::Ray(const Ray& other)
 	:origin(other.origin)
-	,direction(other.direction)
+	,diBounds2ion(other.diBounds2ion)
 {}
 
 Ray::~Ray()
@@ -1033,8 +1083,9 @@ Ray::~Ray()
 
 Vector3 Ray::point(f32_t t) const
 {
-	return Vector3(origin + direction.normalized() * t);
+	return Vector3(origin + diBounds2ion.normalized() * t);
 }
+
 /*
 ============================================================
 == Plane
@@ -1085,6 +1136,7 @@ f32_t Plane::side(const Vector3& p) const
 	Vector3 m = p - o;
 	return Math::cosA(n, m);
 }
+
 /*
 ============================================================
 == Sphere
@@ -1113,206 +1165,153 @@ Sphere::Sphere(const Sphere& other)
 Sphere::~Sphere()
 {}
 
-f32_t Sphere::side(const Vector3& p)
+f32_t Sphere::side(const Vector3& p) const
 {
 	Vector3 d = p - this->origin;
 	return d.magnitude() - this->radius;
 }
 
+bool Sphere::include(const Vector3& p) const
+{
+    return this->side(p) <= 0;
+}
+
+Sphere& Sphere::expand(const Vector3& p)
+{
+    Vector3 dir = this->origin - p;
+    f32_t dis = dir.magnitude();
+    if(dis <= this->radius)
+        return *this;
+    
+    f32_t radius = (dis + this->radius) * 0.5;
+    this->origin = p + dir.normalize() * radius;
+    this->radius = radius;
+    return *this;
+}
+
 /*
 ============================================================
-== Bounds
+== Bounds2
 ============================================================
 */
-Bounds::Bounds(const Vector3& center, const Vector3& extent)
+Bounds2::Bounds2(const Vector2& center, const Vector2& extent)
 	:min(center-extent)
 	,max(center+extent)
 {}
 
-Bounds::Bounds(const Bounds& other)
+Bounds2::Bounds2(const Bounds2& other)
 	:min(other.min)
 	,max(other.max)
 {}
 
-Bounds::~Bounds()
+Bounds2::~Bounds2()
 {}
 
-f32_t Bounds::width() const
+f32_t Bounds2::width() const
 {
 	return max.x - min.x;
 }
 
-f32_t Bounds::height() const
+f32_t Bounds2::height() const
 {
 	return max.y - min.y;
 }
 
-f32_t Bounds::depth() const
-{
-	return max.z - min.z;
-}
-
-Vector3 Bounds::center() const
+Vector2 Bounds2::center() const
 {
 	return (min + max) * 0.5f;
 }
 
-Vector3 Bounds::extent() const
+Vector2 Bounds2::extent() const
 {
 	return (max - min) * 0.5f;
 }
 
-bool Bounds::contains(const Vector3& p) const
+bool Bounds2::contains(const Vector2& p) const
 {
 	return Math::between(p, this->min, this->max);
 }
 
-void Bounds::expand(const Vector3& p)
+Bounds2& Bounds2::expand(const Vector2& p)
 {
 	if (this->min.x > p.x) this->min.x = p.x;
 	if (this->min.y > p.y) this->min.y = p.y;
 	if (this->max.x < p.x) this->max.x = p.x;
 	if (this->max.y < p.y) this->max.y = p.y;
+    return *this;
 }
 
-void Bounds::expand(const Bounds& b)
+Bounds2& Bounds2::expand(const Bounds2& b)
 {
 	this->expand(b.min);
 	this->expand(b.max);
-}
-/*
-============================================================
-== Rect
-============================================================
-*/
-Rect::Rect()
-	:x(0), y(0), w(0), h(0)
-{}
-
-Rect::Rect(f32_t x, f32_t y, f32_t w, f32_t h)
-	:x(x), y(y), w(w), h(h)
-{}
-
-Rect::Rect(const Vector2& pos, const Vector2& size)
-	:x(pos.x), y(pos.y), w(size.x), h(size.y)
-{}
-
-Rect::Rect(const Rect& other)
-	:x(other.x), y(other.y), w(other.w), h(other.h)
-{}
-
-Rect::~Rect()
-{}
-
-bool Rect::operator==(const Rect& other)
-{
-	return _FloatEqual(x, other.x)
-		&& _FloatEqual(y, other.y)
-		&& _FloatEqual(w, other.w)
-		&& _FloatEqual(h, other.h);
-}
-
-bool Rect::operator!=(const Rect& other)
-{
-	return !_FloatEqual(x, other.x)
-		|| !_FloatEqual(y, other.y)
-		|| !_FloatEqual(w, other.w)
-		|| !_FloatEqual(h, other.h);
-}
-
-f32_t Rect::minX() const
-{
-	return std::min(x, x + w);
-}
-
-f32_t Rect::minY() const
-{
-	return std::min(y, y + h);
-}
-
-f32_t Rect::maxX() const
-{
-	return std::max(x, x + w);
-}
-
-f32_t Rect::maxY() const
-{
-	return std::max(y, y + h);
-}
-
-f32_t Rect::area() const
-{
-	return w * h;
-}
-
-Vector2 Rect::center() const
-{
-	return Vector2(x + w / 2.0f, y + h / 2.0f);
-}
-
-bool Rect::contains(f32_t px, f32_t py) const
-{
-	return px >= this->minX()
-		&& px <= this->maxX()
-		&& py >= this->minY()
-		&& py <= this->maxY();
-}
-
-bool Rect::contains(const Vector2& p) const
-{
-	return p.x >= this->minX()
-		&& p.x <= this->maxX()
-		&& p.y >= this->minY()
-		&& p.y <= this->maxY();
+    return *this;
 }
 
 /*
 ============================================================
-== Spherical
+== Bounds3
 ============================================================
 */
-Spherical::Spherical()
-    :radius(0), phi(0), theta(0)
-{ }
+Bounds3::Bounds3(const Vector3& center, const Vector3& extent)
+	:min(center-extent)
+	,max(center+extent)
+{}
 
-Spherical::Spherical(f32_t radius, f32_t phi, f32_t theta)
-    :radius(radius), phi(phi), theta(theta)
-{ }
+Bounds3::Bounds3(const Bounds3& other)
+	:min(other.min)
+	,max(other.max)
+{}
 
-Spherical::Spherical(const Spherical& other)
-    :radius(other.radius)
-    ,phi(other.phi)
-    ,theta(other.theta)
-{ }
+Bounds3::~Bounds3()
+{}
 
-Spherical::Spherical(const Vector3& point)
+f32_t Bounds3::width() const
 {
-    f32_t radius = point.magnitude();
-    this->radius = radius;
-
-    if(radius > 0) {
-        this->theta = std::atan2(point.x, point.z);
-        this->phi = std::acos(Math::clamp(point.y / radius, -1, 1));
-    }
-    else {
-        this->theta = 0;
-        this->phi = 0;
-    }
+	return max.x - min.x;
 }
 
-Spherical::~Spherical()
-{ }
-
-Spherical::operator Vector3() 
+f32_t Bounds3::height() const
 {
-    f32_t radius = this->radius;
-    f32_t phi = this->phi;
-    f32_t theta = this->theta;
-    return Vector3(
-        radius * std::sin(phi) * std::sin(theta),
-        radius * std::cos(phi),
-        radius * std::sin(phi) * std::cos(theta)
-    );
+	return max.y - min.y;
+}
+
+f32_t Bounds3::depth() const
+{
+	return max.z - min.z;
+}
+
+Vector3 Bounds3::center() const
+{
+	return (min + max) * 0.5f;
+}
+
+Vector3 Bounds3::extent() const
+{
+	return (max - min) * 0.5f;
+}
+
+bool Bounds3::contains(const Vector3& p) const
+{
+	return Math::between(p, this->min, this->max);
+}
+
+Bounds3& Bounds3::expand(const Vector3& p)
+{
+	if (this->min.x > p.x) this->min.x = p.x;
+	if (this->min.y > p.y) this->min.y = p.y;
+    if (this->min.z > p.z) this->min.z = p.z;
+	if (this->max.x < p.x) this->max.x = p.x;
+	if (this->max.y < p.y) this->max.y = p.y;
+    if (this->max.z < p.z) this->max.z = p.z;
+    return *this;
+}
+
+Bounds3& Bounds3::expand(const Bounds3& b)
+{
+	this->expand(b.min);
+	this->expand(b.max);
+    return *this;
 }
 
 /*
@@ -1541,7 +1540,7 @@ bool Math::intersects(const Ray& ray, const Sphere& sphere)
 	return Math::intersects(t, ray, sphere);
 }
 
-bool Math::intersects(const Ray& ray, const Bounds& bounds)
+bool Math::intersects(const Ray& ray, const Bounds3& bounds)
 {
 	f32_t t = FLT_MAX;
 	return Math::intersects(t, ray, bounds);
@@ -1554,7 +1553,7 @@ bool Math::intersects(const Ray& ray, const Bounds& bounds)
 */
 bool Math::intersects(f32_t& t, const Ray& ray, const Plane& plane)
 {
-	f32_t a = Math::dot(plane.normal, ray.direction);
+	f32_t a = Math::dot(plane.normal, ray.diBounds2ion);
 	if(_FloatEqual(a, 0))
 		return false;
 	f32_t b = Math::dot(plane.normal, plane.normal * plane.distance);
@@ -1569,8 +1568,8 @@ bool Math::intersects(f32_t& t, const Ray& ray, const Sphere& sphere)
 	if(d.sqrmagnitude() < sphere.radius * sphere.radius)
 		return false;
 	Vector3 ao = sphere.origin - ray.origin;
-	f32_t hv = Math::dot(ao, ray.direction);
-	Vector3 ap = ray.direction * hv;
+	f32_t hv = Math::dot(ao, ray.diBounds2ion);
+	Vector3 ap = ray.diBounds2ion * hv;
 	f32_t el = (sphere.radius * sphere.radius) - (ao - ap).sqrmagnitude();
 	if(el < 0)
 		return false;
@@ -1578,7 +1577,7 @@ bool Math::intersects(f32_t& t, const Ray& ray, const Sphere& sphere)
 	return t >= 0;
 }
 
-bool Math::intersects(f32_t& t, const Ray& ray, const Bounds& bounds)
+bool Math::intersects(f32_t& t, const Ray& ray, const Bounds3& bounds)
 {
 	Vector3 min = bounds.min;
 	Vector3 max = bounds.max;
@@ -1586,19 +1585,19 @@ bool Math::intersects(f32_t& t, const Ray& ray, const Bounds& bounds)
 		(ray.origin.x < max.x || ray.origin.y < max.y || ray.origin.z < max.z))
 		return false;
 
-	if(ray.origin.x <= min.x && ray.direction.x <= 0)
+	if(ray.origin.x <= min.x && ray.diBounds2ion.x <= 0)
 		return false;
-	if(ray.origin.x >= max.x && ray.direction.x >= 0)
-		return false;
-
-	if(ray.origin.y <= min.y && ray.direction.y <= 0)
-		return false;
-	if(ray.origin.y >= max.y && ray.direction.y >= 0)
+	if(ray.origin.x >= max.x && ray.diBounds2ion.x >= 0)
 		return false;
 
-	if(ray.origin.z <= min.z && ray.direction.z <= 0)
+	if(ray.origin.y <= min.y && ray.diBounds2ion.y <= 0)
 		return false;
-	if(ray.origin.z >= max.z && ray.direction.z >= 0)
+	if(ray.origin.y >= max.y && ray.diBounds2ion.y >= 0)
+		return false;
+
+	if(ray.origin.z <= min.z && ray.diBounds2ion.z <= 0)
+		return false;
+	if(ray.origin.z >= max.z && ray.diBounds2ion.z >= 0)
 		return false;
 
 	Plane planes[] = 
@@ -1632,7 +1631,7 @@ bool Math::intersects(f32_t& t, const Ray& ray, const Vector3& v0, const Vector3
 
     Vector3 e1 = v1 - v0;
     Vector3 e2 = v2 - v0;
-    Vector3 p = Math::cross(ray.direction, e2);
+    Vector3 p = Math::cross(ray.diBounds2ion, e2);
  
     // determinant
     float det = Math::dot(e1, p);
@@ -1662,7 +1661,7 @@ bool Math::intersects(f32_t& t, const Ray& ray, const Vector3& v0, const Vector3
         return false;
 
     // Calculate v and make sure u + v <= 1
-    v = Math::dot(ray.direction, Q);
+    v = Math::dot(ray.diBounds2ion, Q);
     if(v < 0.0f || u + v > det)
         return false;
 
@@ -1677,14 +1676,14 @@ bool Math::intersects(f32_t& t, const Ray& ray, const Vector3& v0, const Vector3
     return true;
 }
 
-void Math::transform(Vector3& result, const Vector3& v, const Matrix3x3& m)
+void Math::transform(Vector3& result, const Vector3& v, const Matrix3& m)
 {
 	result.x = v.x*m.value[0][0] + v.y*m.value[1][0] + v.z*m.value[2][0];
 	result.y = v.x*m.value[0][1] + v.y*m.value[1][1] + v.z*m.value[2][1];
 	result.z = v.x*m.value[0][2] + v.y*m.value[1][2] + v.z*m.value[2][2];
 }
 
-void Math::transform(Vector4& result, const Vector4& v, const Matrix4x4& m)
+void Math::transform(Vector4& result, const Vector4& v, const Matrix4& m)
 {
 	result.x = v.x*m.value[0][0] + v.y*m.value[1][0] + v.z*m.value[2][0] + v.w*m.value[3][0];
 	result.y = v.x*m.value[0][1] + v.y*m.value[1][1] + v.z*m.value[2][1] + v.w*m.value[3][1];
@@ -1692,7 +1691,7 @@ void Math::transform(Vector4& result, const Vector4& v, const Matrix4x4& m)
 	result.w = v.x*m.value[0][3] + v.y*m.value[1][3] + v.z*m.value[2][3] + v.w*m.value[3][3];
 }
 
-void Math::transform(Matrix3x3& result, const Matrix3x3& m1, const Matrix3x3& m2)
+void Math::transform(Matrix3& result, const Matrix3& m1, const Matrix3& m2)
 {
 	for(i32_t i=0; i<3; i++)
 	{
@@ -1706,7 +1705,7 @@ void Math::transform(Matrix3x3& result, const Matrix3x3& m1, const Matrix3x3& m2
 	}
 }
 
-void Math::transform(Matrix4x4& result, const Matrix4x4& m1, const Matrix4x4& m2)
+void Math::transform(Matrix4& result, const Matrix4& m1, const Matrix4& m2)
 {
 	for(i32_t i=0; i<4; i++)
 	{
@@ -1720,17 +1719,17 @@ void Math::transform(Matrix4x4& result, const Matrix4x4& m1, const Matrix4x4& m2
 	}
 }
 
-Matrix3x3 Math::matrixTranslation(const Vector2& dir)
+Matrix3 Math::matrixTranslation(const Vector2& dir)
 {
-	Matrix3x3 m = Matrix3x3::identity;
+	Matrix3 m = Matrix3::identity;
 	m.value[2][0] = dir.x;
 	m.value[2][1] = dir.y;
 	return m;
 }
 
-Matrix4x4 Math::matrixTranslation(const Vector3& dir)
+Matrix4 Math::matrixTranslation(const Vector3& dir)
 {
-	Matrix4x4 m = Matrix4x4::identity;
+	Matrix4 m = Matrix4::identity;
 	m.value[3][0] = dir.x;
 	m.value[3][1] = dir.y;
 	m.value[3][2] = dir.z;
@@ -1741,9 +1740,9 @@ Matrix4x4 Math::matrixTranslation(const Vector3& dir)
 | 0,  1,  0|  X  |-sinA,  cosA,  0|  X  | 0,  1,  0|
 |-x, -y,  1|     |    0,     0,  1|     | x,  y,  1|
 */
-Matrix3x3 Math::matrixRotation(const Vector2& axis, f32_t angle)
+Matrix3 Math::matrixRotation(const Vector2& axis, f32_t angle)
 {
-	Matrix3x3 m = Matrix3x3::identity;
+	Matrix3 m = Matrix3::identity;
 	f32_t x = axis.x;
 	f32_t y = axis.y;
 	f32_t sinAngle = sin(angle);
@@ -1760,9 +1759,9 @@ Matrix3x3 Math::matrixRotation(const Vector2& axis, f32_t angle)
 	return m;
 }
 
-Matrix4x4 Math::matrixRotation(const Vector3& axis, f32_t angle)
+Matrix4 Math::matrixRotation(const Vector3& axis, f32_t angle)
 {
-	Matrix4x4 m = Matrix4x4::identity;
+	Matrix4 m = Matrix4::identity;
 	f32_t x = axis.x;
 	f32_t y = axis.y;
 	f32_t z = axis.z;
@@ -1780,24 +1779,24 @@ Matrix4x4 Math::matrixRotation(const Vector3& axis, f32_t angle)
 	return m;
 }
 
-Matrix3x3 Math::matrixScaling(const Vector2& scale)
+Matrix3 Math::matrixScaling(const Vector2& scale)
 {
-	Matrix3x3 m = Matrix3x3::identity;
+	Matrix3 m = Matrix3::identity;
 	m.value[0][0] = scale.x;
 	m.value[1][1] = scale.y;
 	return m;
 }
 
-Matrix4x4 Math::matrixScaling(const Vector3& scale)
+Matrix4 Math::matrixScaling(const Vector3& scale)
 {
-	Matrix4x4 m = Matrix4x4::identity;
+	Matrix4 m = Matrix4::identity;
 	m.value[0][0] = scale.x;
 	m.value[1][1] = scale.y;
 	m.value[2][2] = scale.z;
 	return m;
 }
 
-Matrix4x4 Math::matrixLookToLH(const Vector3& pos, const Vector3& forward, const Vector3& up)
+Matrix4 Math::matrixLookToLH(const Vector3& pos, const Vector3& forward, const Vector3& up)
 {
 	assert(forward != Vector3(0, 0, 0));
 	assert(up != Vector3(0, 0, 0));
@@ -1812,7 +1811,7 @@ Matrix4x4 Math::matrixLookToLH(const Vector3& pos, const Vector3& forward, const
 	f32_t d1 = Math::dot(r1, negpos);
 	f32_t d2 = Math::dot(r2, negpos);
 
-	Matrix4x4 m;
+	Matrix4 m;
 	Math::fill(m.value[0], r0.x, r0.y, r0.z, d0);
 	Math::fill(m.value[1], r1.x, r1.y, r1.z, d1);
 	Math::fill(m.value[2], r2.x, r2.y, r2.z, d2);
@@ -1821,25 +1820,25 @@ Matrix4x4 Math::matrixLookToLH(const Vector3& pos, const Vector3& forward, const
 	return m;
 }
 
-Matrix4x4 Math::matrixLookAtLH(const Vector3& pos, const Vector3& focus, const Vector3& up)
+Matrix4 Math::matrixLookAtLH(const Vector3& pos, const Vector3& focus, const Vector3& up)
 {
 	Vector3 forward = focus - pos;
 	return Math::matrixLookToLH(pos, forward, up);
 }
 
-Matrix4x4 Math::matrixLookToRH(const Vector3& pos, const Vector3& forward, const Vector3& up)
+Matrix4 Math::matrixLookToRH(const Vector3& pos, const Vector3& forward, const Vector3& up)
 {
 	Vector3 back = -forward;
 	return Math::matrixLookToLH(pos, back, up);
 }
 
-Matrix4x4 Math::matrixLookAtRH(const Vector3& pos, const Vector3& focus, const Vector3& up)
+Matrix4 Math::matrixLookAtRH(const Vector3& pos, const Vector3& focus, const Vector3& up)
 {
 	Vector3 back = pos - focus;
 	return Math::matrixLookToLH(pos, back, up);
 }
 
-Matrix4x4 Math::matrixOrthographicLH(f32_t width, f32_t height, f32_t near, f32_t far)
+Matrix4 Math::matrixOrthographicLH(f32_t width, f32_t height, f32_t near, f32_t far)
 {
 	assert(_FloatNotEqual(width, 0));
 	assert(_FloatNotEqual(height, 0));
@@ -1847,7 +1846,7 @@ Matrix4x4 Math::matrixOrthographicLH(f32_t width, f32_t height, f32_t near, f32_
 
 	f32_t range = 1.0f / (far - near);
 
-	Matrix4x4 m;
+	Matrix4 m;
 	Math::fill(m.value[0], 2.0f / width, 0.0f, 0.0f, 0.0f);
 	Math::fill(m.value[1], 0.0f, 2.0f / height, 0.0f, 0.0f);
 	Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
@@ -1855,7 +1854,7 @@ Matrix4x4 Math::matrixOrthographicLH(f32_t width, f32_t height, f32_t near, f32_
 	return m;
 }
 
-Matrix4x4 Math::matrixOrthographicRH(f32_t width, f32_t height, f32_t near, f32_t far)
+Matrix4 Math::matrixOrthographicRH(f32_t width, f32_t height, f32_t near, f32_t far)
 {
 	assert(_FloatNotEqual(width, 0));
 	assert(_FloatNotEqual(height, 0));
@@ -1863,7 +1862,7 @@ Matrix4x4 Math::matrixOrthographicRH(f32_t width, f32_t height, f32_t near, f32_
 
 	f32_t range = 1.0f / (near - far);
 
-	Matrix4x4 m;
+	Matrix4 m;
 	Math::fill(m.value[0], 2.0f / width, 0.0f, 0.0f, 0.0f);
 	Math::fill(m.value[1], 0.0f, 2.0f / height, 0.0f, 0.0f);
 	Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
@@ -1871,7 +1870,7 @@ Matrix4x4 Math::matrixOrthographicRH(f32_t width, f32_t height, f32_t near, f32_
 	return m;
 }
 
-Matrix4x4 Math::matrixOrthographicOffCenterLH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far)
+Matrix4 Math::matrixOrthographicOffCenterLH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far)
 {
 	assert(_FloatNotEqual(left, right));
 	assert(_FloatNotEqual(top, bottom));
@@ -1881,7 +1880,7 @@ Matrix4x4 Math::matrixOrthographicOffCenterLH(f32_t left, f32_t right, f32_t top
 	f32_t reciprocalHeight = 1.0f / (top - bottom);
 	f32_t range = 1.0f / (far - near);
 
-	Matrix4x4 m;
+	Matrix4 m;
 	Math::fill(m.value[0], reciprocalHeight + reciprocalWidth, 0.0f, 0.0f, 0.0f);
 	Math::fill(m.value[1], 0.0f, reciprocalHeight + reciprocalHeight, 0.0f, 0.0f);
 	Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
@@ -1889,7 +1888,7 @@ Matrix4x4 Math::matrixOrthographicOffCenterLH(f32_t left, f32_t right, f32_t top
     return m;
 }
 
-Matrix4x4 Math::matrixOrthographicOffCenterRH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far)
+Matrix4 Math::matrixOrthographicOffCenterRH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far)
 {
 	assert(_FloatNotEqual(left, right));
 	assert(_FloatNotEqual(top, bottom));
@@ -1899,7 +1898,7 @@ Matrix4x4 Math::matrixOrthographicOffCenterRH(f32_t left, f32_t right, f32_t top
 	f32_t reciprocalHeight = 1.0f / (top - bottom);
 	f32_t range = 1.0f / (near - far);
 
-	Matrix4x4 m;
+	Matrix4 m;
 	Math::fill(m.value[0], reciprocalHeight + reciprocalWidth, 0.0f, 0.0f, 0.0f);
 	Math::fill(m.value[1], 0.0f, reciprocalHeight + reciprocalHeight, 0.0f, 0.0f);
 	Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
@@ -1907,7 +1906,7 @@ Matrix4x4 Math::matrixOrthographicOffCenterRH(f32_t left, f32_t right, f32_t top
     return m;
 }
 
-Matrix4x4 Math::matrixPerspectiveLH(f32_t width, f32_t height, f32_t near, f32_t far)
+Matrix4 Math::matrixPerspectiveLH(f32_t width, f32_t height, f32_t near, f32_t far)
 {
 	assert(_FloatNotEqual(width, 0.0f));
 	assert(_FloatNotEqual(height, 0.0f));
@@ -1916,7 +1915,7 @@ Matrix4x4 Math::matrixPerspectiveLH(f32_t width, f32_t height, f32_t near, f32_t
 	f32_t twoNear = near + near;
 	f32_t range = far / (far - near);
 
-	Matrix4x4 m;
+	Matrix4 m;
 	Math::fill(m.value[0], twoNear / width, 0.0f, 0.0f, 0.0f);
 	Math::fill(m.value[1], 0.0f, twoNear / height, 0.0f, 0.0f);
 	Math::fill(m.value[2], 0.0f, 0.0f, range, 1.0f);
@@ -1924,7 +1923,7 @@ Matrix4x4 Math::matrixPerspectiveLH(f32_t width, f32_t height, f32_t near, f32_t
 	return m;
 }
 
-Matrix4x4 Math::matrixPerspectiveRH(f32_t width, f32_t height, f32_t near, f32_t far)
+Matrix4 Math::matrixPerspectiveRH(f32_t width, f32_t height, f32_t near, f32_t far)
 {
 	assert(_FloatNotEqual(width, 0.0f));
 	assert(_FloatNotEqual(height, 0.0f));
@@ -1933,7 +1932,7 @@ Matrix4x4 Math::matrixPerspectiveRH(f32_t width, f32_t height, f32_t near, f32_t
 	f32_t twoNear = near + near;
 	f32_t range = far / (near - far);
 
-	Matrix4x4 m;
+	Matrix4 m;
 	Math::fill(m.value[0], twoNear / width, 0.0f, 0.0f, 0.0f);
 	Math::fill(m.value[1], 0.0f, twoNear / height, 0.0f, 0.0f);
 	Math::fill(m.value[2], 0.0f, 0.0f, range, -1.0f);
@@ -1941,7 +1940,7 @@ Matrix4x4 Math::matrixPerspectiveRH(f32_t width, f32_t height, f32_t near, f32_t
 	return m;
 }
 
-Matrix4x4 Math::matrixPerspectiveFovLH(f32_t fov, f32_t aspect, f32_t near, f32_t far)
+Matrix4 Math::matrixPerspectiveFovLH(f32_t fov, f32_t aspect, f32_t near, f32_t far)
 {
 	assert(_FloatNotEqual(fov, 0.0f));
 	assert(_FloatNotEqual(aspect, 0.0f));
@@ -1953,7 +1952,7 @@ Matrix4x4 Math::matrixPerspectiveFovLH(f32_t fov, f32_t aspect, f32_t near, f32_
 	f32_t width = height / aspect;
 	f32_t range = far / (far - near);
 
-	Matrix4x4 m;
+	Matrix4 m;
 	Math::fill(m.value[0], width, 0.0f, 0.0f, 0.0f);
 	Math::fill(m.value[1], 0.0f, height, 0.0f, 0.0f);
 	Math::fill(m.value[2], 0.0f, 0.0f, range, 1.0f);
@@ -1961,7 +1960,7 @@ Matrix4x4 Math::matrixPerspectiveFovLH(f32_t fov, f32_t aspect, f32_t near, f32_
 	return m;
 }
 
-Matrix4x4 Math::matrixPerspectiveFovRH(f32_t fov, f32_t aspect, f32_t near, f32_t far)
+Matrix4 Math::matrixPerspectiveFovRH(f32_t fov, f32_t aspect, f32_t near, f32_t far)
 {
 	assert(_FloatNotEqual(fov, 0.0f));
 	assert(_FloatNotEqual(aspect, 0.0f));
@@ -1973,7 +1972,7 @@ Matrix4x4 Math::matrixPerspectiveFovRH(f32_t fov, f32_t aspect, f32_t near, f32_
 	f32_t width = height / aspect;
 	f32_t range = far / (near - far);
 
-	Matrix4x4 m;
+	Matrix4 m;
 	Math::fill(m.value[0], width, 0.0f, 0.0f, 0.0f);
 	Math::fill(m.value[1], 0.0f, height, 0.0f, 0.0f);
 	Math::fill(m.value[2], 0.0f, 0.0f, range, 1.0f);
@@ -1981,7 +1980,7 @@ Matrix4x4 Math::matrixPerspectiveFovRH(f32_t fov, f32_t aspect, f32_t near, f32_
 	return m;
 }
 
-Matrix4x4 Math::matrixPerspectiveOffCenterLH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far)
+Matrix4 Math::matrixPerspectiveOffCenterLH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far)
 {
 	assert(_FloatNotEqual(left, right));
 	assert(_FloatNotEqual(top, bottom));
@@ -1992,7 +1991,7 @@ Matrix4x4 Math::matrixPerspectiveOffCenterLH(f32_t left, f32_t right, f32_t top,
 	f32_t reciprocalHeight = 1.0f / (top - bottom);
 	f32_t range = far / (far - near);
 
-	Matrix4x4 m;
+	Matrix4 m;
 	Math::fill(m.value[0], twoNear * reciprocalWidth, 0.0f, 0.0f, 0.0f);
 	Math::fill(m.value[1], 0.0f, twoNear * reciprocalHeight, 0.0f, 0.0f);
 	Math::fill(m.value[2], -(left+right)*reciprocalWidth, -(top+bottom)*reciprocalHeight, range, 1.0f);
@@ -2000,7 +1999,7 @@ Matrix4x4 Math::matrixPerspectiveOffCenterLH(f32_t left, f32_t right, f32_t top,
 	return m;
 }
 
-Matrix4x4 Math::matrixPerspectiveOffCenterRH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far)
+Matrix4 Math::matrixPerspectiveOffCenterRH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far)
 {
 	assert(_FloatNotEqual(left, right));
 	assert(_FloatNotEqual(top, bottom));
@@ -2011,7 +2010,7 @@ Matrix4x4 Math::matrixPerspectiveOffCenterRH(f32_t left, f32_t right, f32_t top,
 	f32_t reciprocalHeight = 1.0f / (top - bottom);
 	f32_t range = far / (near - far);
 
-	Matrix4x4 m;
+	Matrix4 m;
 	Math::fill(m.value[0], twoNear * reciprocalWidth, 0.0f, 0.0f, 0.0f);
 	Math::fill(m.value[1], 0.0f, twoNear * reciprocalHeight, 0.0f, 0.0f);
 	Math::fill(m.value[2], (left+right)*reciprocalWidth, (top+bottom)*reciprocalHeight, range, -1.0f);
