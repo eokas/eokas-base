@@ -354,17 +354,6 @@ String String::decodeURL(const String& str)
 	return stream.str();
 }
 
-void String::format(String& result, const char* fmt, va_list ap)
-{
-	i32_t size = vsnprintf(nullptr, 0, fmt, ap);
-	char* buff = new char[size + 1];
-	vsnprintf(buff, size + 1, fmt, ap);
-	buff[size] = '\0';
-
-	result = String(buff);
-	delete []buff;
-}
-
 String String::format(const char* fmt, ...)
 {
 	String result;

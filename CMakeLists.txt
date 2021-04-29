@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # set the project name and version
-project(libarchaism VERSION 1.0)
+project(archaism VERSION 1.0)
 
 # specify the C++ standard and options
 set(CMAKE_CXX_STANDARD 17)
