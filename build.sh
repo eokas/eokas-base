@@ -6,4 +6,4 @@ cd _build
 cmake ..
 
 cmake --build .
-cmake --install . --prefix ../_out
+cmake --install . --prefix ../_install
