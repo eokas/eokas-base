@@ -1,0 +1,28 @@
+{
+    "project": "libarchaism",
+    "version": "1.0.0",
+    
+    "targets": [{
+        "name": "libarchaism",
+        "type": "static",
+
+        "cflags": [
+            "-std=c++17"
+        ],
+
+        "lflags": [],
+
+        "includes": [
+            "./src"
+        ],
+
+        "libraries": [
+        ],
+
+        "sources": [
+            "./src/**.cpp"
+        ],
+
+        "copies": []
+    }]
+}
