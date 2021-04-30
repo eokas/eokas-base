@@ -413,6 +413,7 @@ String::String(char chr, size_t len)
 	,mMetric(0)
 {
 	mValue[0] = '\0';
+    len = chr != '\0' ? len : 0;
 	if(len > 0)
 	{
 		mMetric = String::measure(len);
