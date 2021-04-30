@@ -44,6 +44,9 @@ public:
     virtual bool seek(int offset, int origin) override; // 0:beg, 1:cur, 2:end
     virtual void flush() override;
 
+public:
+    void bind(Stream& target);
+
 private:
     Stream& target;
 };

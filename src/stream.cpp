@@ -57,4 +57,9 @@ void DataStream::flush()
     return target.flush();
 }
 
+void DataStream::bind(Stream& stream)
+{
+    this->target = stream;
+}
+
 _EndNamespace(eokas)
