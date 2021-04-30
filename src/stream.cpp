@@ -4,62 +4,99 @@
 
 _BeginNamespace(eokas)
 
+void Stream::read(Stream& stream)
+{
+    Stream& self = *this;
+    size_t bsize = 1024;
+    u8_t bdata[1024];
+    while (!self.eos())
+    {
+        size_t isize = self.read(bdata, bsize);
+        size_t osize = stream.write(bdata, isize);
+        if (isize < bsize || osize < isize) {
+            break;
+        }
+    }
+}
+
+void Stream::write(Stream& stream)
+{
+    Stream& self = *this;
+    size_t bsize = 1024;
+    u8_t bdata[1024];
+    while (!stream.eos())
+    {
+        size_t isize = stream.read(bdata, bsize);
+        size_t osize = self.write(bdata, isize);
+        if (isize < bsize || osize < isize) {
+            break;
+        }
+    }
+}
+/*
+============================================================
+*/
 DataStream::DataStream(Stream& target)
-    :target(target)
+    :mTarget(&target)
 {}
 
 bool DataStream::open()
 {
-    return target.open();
+    return mTarget->open();
 }
 void DataStream::close()
 {
-    return target.close();
+    return mTarget->close();
 }
 bool DataStream::isOpen() const
 {
-    return target.isOpen();
+    return mTarget->isOpen();
 }
 bool DataStream::readable() const
 {
-    return target.readable();
+    return mTarget->readable();
 }
 bool DataStream::writable() const
 {
-    return target.writable();
+    return mTarget->writable();
 }
 bool DataStream::eos() const
 {
-    return target.eos();
+    return mTarget->eos();
 }
 size_t DataStream::pos() const
 {
-    return target.pos();
+    return mTarget->pos();
 }
 size_t DataStream::size() const
 {
-    return target.size();
+    return mTarget->size();
 }
 size_t DataStream::read(void* data, size_t size)
 {
-    return target.read(data, size);
+    return mTarget->read(data, size);
 }
 size_t DataStream::write(void* data, size_t size)
 {
-    return target.write(data, size);
+    return mTarget->write(data, size);
 }
 bool DataStream::seek(int offset, int origin) // 0:beg, 1:cur, 2:end
 {
-    return target.seek(offset, origin);
+    return mTarget->seek(offset, origin);
 }
 void DataStream::flush()
 {
-    return target.flush();
+    return mTarget->flush();
+}
+
+Stream& DataStream::target() const
+{
+    return *mTarget;
 }
 
 void DataStream::bind(Stream& stream)
 {
-    this->target = stream;
+    this->mTarget = &stream;
 }
 
 _EndNamespace(eokas)
