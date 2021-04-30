@@ -23,6 +23,8 @@
             "./src/**.cpp"
         ],
 
-        "copies": []
+        "copies": [
+            "./src/**.h"
+        ]
     }]
 }
