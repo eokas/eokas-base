@@ -1,7 +1,7 @@
 
 #include "timer.h"
 
-#if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN32
 
 #include <windows.h>
 
@@ -51,7 +51,7 @@ i64_t Timer::elapse(bool isReset)
 
 _EndNamespace(eokas)
 
-#elif _EOKAS_PLATFORM == _EOKAS_PLATFORM_MACOS || _EOKAS_PLATFORM == _EOKAS_PLATFORM_IOS
+#elif _EOKAS_OS == _EOKAS_OS_MACOS || _EOKAS_OS == _EOKAS_OS_IOS
 
 #include <mach/mach_time.h>
 

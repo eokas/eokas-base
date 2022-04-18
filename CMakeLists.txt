@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # set the project name and version
-project(archaism VERSION 1.0)
+project(eokas-base VERSION 1.0)
 
 # specify the C++ standard and options
 set(CMAKE_CXX_STANDARD 17)
@@ -18,5 +18,5 @@ message("headers " ${HEADER_FILES})
 
 add_library(${PROJECT_NAME} STATIC ${SRC_DIR})
 
-install(TARGETS ${PROJECT_NAME} DESTINATION lib)
-install(FILES ${HEADER_FILES} DESTINATION include)
+install(TARGETS ${PROJECT_NAME} DESTINATION lib/${CMAKE_BUILD_TYPE})
+install(FILES ${HEADER_FILES} DESTINATION include/${PROJECT_NAME})

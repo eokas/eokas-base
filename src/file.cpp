@@ -2,7 +2,7 @@
 #include "file.h"
 #include "string.h"
 
-#if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN32
 #include <Windows.h>
 #include <io.h>
 #else
@@ -13,7 +13,7 @@
 
 _BeginNamespace(eokas)
 
-#if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN32
 
 static void FileTimeToTimeT(FILETIME* ft, time_t* tt)
 {
@@ -127,7 +127,7 @@ FILE* FileStream::handle() const
 */
 bool File::exists(const String& path)
 {
-#if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN32
 	return _access(path.cstr(), 0) == 0;
 #else
 	return access(path.cstr(), F_OK) == 0;
@@ -136,7 +136,7 @@ bool File::exists(const String& path)
 
 bool File::isFile(const String& path)
 {
-#if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN32
 	DWORD attr = GetFileAttributesA(path.cstr());
 	if (attr == INVALID_FILE_ATTRIBUTES)
 		return false;
@@ -154,7 +154,7 @@ bool File::isFile(const String& path)
 
 bool File::isFolder(const String& path)
 {
-#if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN32
 	DWORD attr = GetFileAttributesA(path.cstr());
 	if (attr == INVALID_FILE_ATTRIBUTES)
 		return false;
@@ -173,7 +173,7 @@ bool File::isFolder(const String& path)
 FileList File::fileInfoList(const String& path)
 {
 	FileList list;
-#if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN32
     String search = File::combinePath(path, "*");
 	WIN32_FIND_DATAA f;
 	HANDLE h = FindFirstFileA(search.cstr(), &f);
@@ -225,7 +225,7 @@ FileList File::fileInfoList(const String& path)
 StringList File::fileNameList(const String& path)
 {
 	StringList list;
-#if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN32
 	String search = File::combinePath(path, "*");
 	WIN32_FIND_DATAA f;
 	HANDLE h = FindFirstFileA(search.cstr(), &f);
@@ -257,7 +257,7 @@ StringList File::fileNameList(const String& path)
 StringList File::folderNameList(const String& path)
 {
 	StringList list;
-#if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN32
     String search = File::combinePath(path, "*");
 	WIN32_FIND_DATAA f;
 	HANDLE h = FindFirstFileA(search.cstr(), &f);
@@ -292,7 +292,7 @@ StringList File::folderNameList(const String& path)
 
 String File::executingPath()
 {
-#if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN32
 	char buf[MAX_PATH];
 	DWORD ret = GetModuleFileNameA(NULL, buf, MAX_PATH);
 	if (ret == 0)
@@ -310,7 +310,7 @@ String File::executingPath()
 
 String File::absolutePath(const String& path)
 {
-#if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN32
 	char resolved_path[MAX_PATH] = { 0 };
 	_fullpath(resolved_path, path.cstr(), MAX_PATH);
 	return resolved_path;

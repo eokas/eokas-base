@@ -1,6 +1,6 @@
 
-#ifndef  _EOKAS_ARCHAISM_MAIN_H_
-#define  _EOKAS_ARCHAISM_MAIN_H_
+#ifndef  _EOKAS_BASE_MAIN_H_
+#define  _EOKAS_BASE_MAIN_H_
 
 // Header
 #include "header.h"
@@ -32,4 +32,4 @@
 #include "timer.h"
 #include "network.h"
 
-#endif//_EOKAS_ARCHAISM_MAIN_H_
+#endif//_EOKAS_BASE_MAIN_H_

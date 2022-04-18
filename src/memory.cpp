@@ -4,9 +4,9 @@
 #include <exception>
 #include <algorithm>
 
-#if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN32
 #include <windows.h>
-#elif _EOKAS_PLATFORM == _EOKAS_PLATFORM_MACOS || _EOKAS_PLATFORM == _EOKAS_PLATFORM_IOS
+#elif _EOKAS_OS == _EOKAS_OS_MACOS || _EOKAS_OS == _EOKAS_OS_IOS
 #include <sys/mman.h>
 #else
 #include <sys/mman.h>
@@ -81,7 +81,7 @@ int MemoryUtility::compare(void* ptr1, void* ptr2, size_t size)
 	return std::memcmp(ptr1, ptr2, size);
 }
 
-#if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN32
 
 static u32_t encode_prot(DWORD prot)
 {

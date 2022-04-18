@@ -1,9 +1,9 @@
 {
-    "project": "libarchaism",
+    "project": "eokas-base",
     "version": "1.0.0",
     
     "targets": [{
-        "name": "libarchaism",
+        "name": "libeokas-base",
         "type": "static",
 
         "cflags": [

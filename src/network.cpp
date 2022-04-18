@@ -1,7 +1,7 @@
 			  
 #include "network.h"
 
-#if _EOKAS_PLATFORM == _EOKAS_PLATFORM_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN32
 
 #include <mutex>
 #include <WinSock2.h>
@@ -404,7 +404,7 @@ void NetworkService::quit()
 
 _EndNamespace(eokas)
 
-#elif _EOKAS_PLATFORM == _EOKAS_PLATFORM_MACOS
+#elif _EOKAS_OS == _EOKAS_OS_MACOS
 
 #include <sys/types.h>
 #include <sys/event.h>

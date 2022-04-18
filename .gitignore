@@ -3,6 +3,14 @@
 .vscode
 *.user
 
+# idea
+.idea
+
+#cmake
+cmake-build-debug
+cmake-build-release
+cmake-install
+
 # Prerequisites
 *.d
 
