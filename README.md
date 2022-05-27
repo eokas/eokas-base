@@ -1,6 +1,6 @@
-# libarchaism
+# eokas-base
 
-A C++ basic library.
+eokas base library.
 
 ## Features
 
