@@ -25,7 +25,7 @@
 #include "pixels.h"
 #include "socket.h"
 #include "file.h"
-#include "args.h"
+#include "cli.h"
 
 // Platform
 #include "dll.h"
