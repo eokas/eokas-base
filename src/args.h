@@ -1,27 +1,38 @@
 
-#ifndef  _EOKAS_BASE_ARGS_H_
-#define  _EOKAS_BASE_ARGS_H_
+#ifndef  _EOKAS_BASE_CLI_H_
+#define  _EOKAS_BASE_CLI_H_
 
 #include "header.h"
 #include "string.h"
 
-_BeginNamespace(eokas)
+_BeginNamespace(eokas::cli)
 
-class Args
+struct Option
 {
-public:
-	Args(int argc, char** argv);
+	String name = "";
+	String info = "";
+	StringValue value = StringValue::empty;
 
-public:
-	size_t count() const;
-	bool has(const String& arg) const;
-	const StringValue& get(size_t pos, const StringValue& def = StringValue::empty) const;
-	const StringValue& get(const String& arg, const StringValue& def = StringValue::empty) const;
-
-private:
-	std::vector<StringValue> mArgs;
+	String toString() const;
 };
 
-_EndNamespace(eokas)
+struct Command
+{
+	using Func = std::function<void(const Command& cmd)>;
 
-#endif//_EOKAS_BASE_ARGS_H_
+	String name = "";
+	String info = "";
+	Func func = nullptr;
+	std::map <String, Option> options = {};
+	std::map <String, Command> subCommands = {};
+
+	Option option(const String& name, const String& info, const StringValue& defaultValue);
+	Command command(cons String& name, const String& info, const Func& func);
+	String toString() const;
+	void exec(int argc, char** argv);
+	void exec(const std::vector<StringValue>& args);
+};
+
+_EndNamespace(eokas::cli)
+
+#endif//_EOKAS_BASE_CLI_H_

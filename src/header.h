@@ -123,8 +123,8 @@
 == StringType and Unicode
 =================================================================
 */
-#define _EOKAS_STRINGTYPE_MBS 'mbs'
-#define _EOKAS_STRINGTYPE_WCS 'wcs'
+#define _EOKAS_STRINGTYPE_MBS 1
+#define _EOKAS_STRINGTYPE_WCS 2
 
 #if (_EOKAS_COMPILER_FAMILY == _EOKAS_COMPILER_FAMILY_MSVC)
     #if defined(_UNICODE)
@@ -136,8 +136,8 @@
     #define _EOKAS_STRINGTYPE _EOKAS_STRINGTYPE_MBS
 #endif
 
-#define _EOKAS_UCS_2 'ucs2'
-#define _EOKAS_UCS_4 'ucs4'
+#define _EOKAS_UCS_2 2
+#define _EOKAS_UCS_4 4
 
 #if(_EOKAS_OS == _EOKAS_OS_WIN32)
     #define _EOKAS_UCS _EOKAS_UCS_2
