@@ -1322,8 +1322,12 @@ Bounds3& Bounds3::expand(const Bounds3& b)
 const f32_t Math::EPSILON_4 = 0.0001f;
 const f32_t Math::EPSILON_5 = 0.00001f;
 const f32_t Math::EPSILON_6 = 0.000001f;
-const f32_t Math::PI = 3.141592654f;
-const f32_t Math::PI2 = Math::PI * 2;
+const f32_t Math::PI = 3.1415926535897932f;
+const f32_t Math::PI_MUL_2 = Math::PI * 2;
+const f32_t Math::PI_DIV_2 = Math::PI * 0.5f;
+const f32_t Math::INV_PI = 1.0f / Math::PI;
+const f32_t Math::SQRT_2 = 1.4142135623730950488016887242097f;
+const f32_t Math::SQRT_3 = 1.7320508075688772935274463415059f;
 const f32_t Math::DEGREES_PER_RADIAN = 180.0f / Math::PI;
 const f32_t Math::RADIANS_PER_DEGREE = Math::PI / 180.0f;
 
