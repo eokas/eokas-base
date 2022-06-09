@@ -41,8 +41,10 @@
     #define _EOKAS_COMPILER_VERSION _MSC_VER
 #elif defined(__GNUC__)
     #define _EOKAS_COMPILER_FAMILY _EOKAS_COMPILER_GNUC
-    #define _EOKAS_COMPILER_VERSION  \
-            (((__GNUC__)*100) + ((__GNUC_MINOR__)*10) + (__GNUC_PATCHLEVEL__))
+    #define _EOKAS_COMPILER_VERSION  (((__GNUC__)*100) + ((__GNUC_MINOR__)*10) + (__GNUC_PATCHLEVEL__))
+#elif defined(__clang__)
+    #define _EOKAS_COMPILER_FAMILY _EOKAS_COMPILER_CLANG
+    #define _EOKAS_COMPILER_VERSION __clang_version__
 #endif
 
 /*
@@ -54,17 +56,7 @@
 #define _EOKAS_ARCH_X86 0x00863200
 #define _EOKAS_ARCH_X64 0x00866400
 
-#define _EOKAS_ARCH_ARM2    0x000A0200
-#define _EOKAS_ARCH_ARM3    0x000A0300
-#define _EOKAS_ARCH_ARM4T   0x000A0400
-#define _EOKAS_ARCH_ARM5    0x000A0500
-#define _EOKAS_ARCH_ARM6    0x000A0600
-#define _EOKAS_ARCH_ARM6T2  0x000A0602
-#define _EOKAS_ARCH_ARM7    0x000A0700
-#define _EOKAS_ARCH_ARM7A   0x000A0701
-#define _EOKAS_ARCH_ARM7R   0x000A0702
-#define _EOKAS_ARCH_ARM7M   0x000A0703
-#define _EOKAS_ARCH_ARM7S   0x000A0704
+#define _EOKAS_ARCH_ARM32   0x000A3200
 #define _EOKAS_ARCH_ARM64   0x000A6400
 
 #define _EOKAS_ARCH_MIPS        0x00010000
@@ -74,48 +66,28 @@
 #define _EOKAS_ARCH_SPARC       0x00040000
 #define _EOKAS_ARCH_M68K        0x00050000
 
-#if defined(__x86_64__) || defined(_M_X64)
-#define _EOKAS_ARCH _EOKAS_ARCH_X64
+#if defined(_M_X64) || defined(__amd64__) || defined(__x86_64__)
+    #define _EOKAS_ARCH _EOKAS_ARCH_X64
 #elif defined(i386) || defined(__i386__) || defined(__i386) || defined(_M_IX86)
-#define _EOKAS_ARCH _EOKAS_ARCH_X86
-#elif defined(__ARM_ARCH_2__)
-#define _EOKAS_ARCH _EOKAS_ARCH_ARM2
-#elif defined(__ARM_ARCH_3__) || defined(__ARM_ARCH_3M__)
-#define _EOKAS_ARCH _EOKAS_ARCH_ARM3
-#elif defined(__ARM_ARCH_4T__) || defined(__TARGET_ARM_4T)
-#define _EOKAS_ARCH _EOKAS_ARCH_ARM4T
-#elif defined(__ARM_ARCH_5_) || defined(__ARM_ARCH_5E_)
-#define _EOKAS_ARCH _EOKAS_ARCH_ARM5
-#elif defined(__ARM_ARCH_6T2_) || defined(__ARM_ARCH_6T2_)
-#define _EOKAS_ARCH _EOKAS_ARCH_ARM6T2
-#elif defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_6J__) || defined(__ARM_ARCH_6K__) || defined(__ARM_ARCH_6Z__) || defined(__ARM_ARCH_6ZK__)
-#define _EOKAS_ARCH _EOKAS_ARCH_ARM6
-#elif defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7S__)
-#define _EOKAS_ARCH _EOKAS_ARCH_ARM7
-#elif defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7S__)
-#define _EOKAS_ARCH _EOKAS_ARCH_ARM7A
-#elif defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7S__)
-#define _EOKAS_ARCH _EOKAS_ARCH_ARM7R
-#elif defined(__ARM_ARCH_7M__)
-#define _EOKAS_ARCH _EOKAS_ARCH_ARM7M
-#elif defined(__ARM_ARCH_7S__)
-#define _EOKAS_ARCH _EOKAS_ARCH_ARM7S
+    #define _EOKAS_ARCH _EOKAS_ARCH_X86
+#elif defined(__arm__) || defined(_M_ARM)
+    #define _EOKAS_ARCH _EOKAS_ARCH_ARM32
 #elif defined(__aarch64__) || defined(_M_ARM64)
-#define _EOKAS_ARCH _EOKAS_ARCH_ARM64
+    #define _EOKAS_ARCH _EOKAS_ARCH_ARM64
 #elif defined(mips) || defined(__mips__) || defined(__mips)
-#define _EOKAS_ARCH _EOKAS_ARCH_MIPS
+    #define _EOKAS_ARCH _EOKAS_ARCH_MIPS
 #elif defined(__sh__)
-#define _EOKAS_ARCH _EOKAS_ARCH_SUPERH
+    #define _EOKAS_ARCH _EOKAS_ARCH_SUPERH
 #elif defined(__powerpc) || defined(__powerpc__) || defined(__powerpc64__) || defined(__POWERPC__) || defined(__ppc__) || defined(__PPC__) || defined(_ARCH_PPC)
-#define _EOKAS_ARCH _EOKAS_ARCH_POWERPC
+    #define _EOKAS_ARCH _EOKAS_ARCH_POWERPC
 #elif defined(__PPC64__) || defined(__ppc64__) || defined(_ARCH_PPC64)
-#define _EOKAS_ARCH _EOKAS_ARCH_POWERPC64
+    #define _EOKAS_ARCH _EOKAS_ARCH_POWERPC64
 #elif defined(__sparc__) || defined(__sparc)
-#define _EOKAS_ARCH _EOKAS_ARCH_SPARC
+    #define _EOKAS_ARCH _EOKAS_ARCH_SPARC
 #elif defined(__m68k__)
-#define _EOKAS_ARCH _EOKAS_ARCH_M68K
+    #define _EOKAS_ARCH _EOKAS_ARCH_M68K
 #else
-#define _EOKAS_ARCH _EOKAS_ARCH_UNKNOWN
+    #define _EOKAS_ARCH _EOKAS_ARCH_UNKNOWN
 #endif
 
 /*
@@ -254,6 +226,7 @@
 #include <string>
 #include <typeinfo>
 #include <memory>
+#include <functional>
 
 namespace eokas
 {
