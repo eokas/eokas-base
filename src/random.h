@@ -6,21 +6,24 @@
 
 _BeginNamespace(eokas)
 
-class Random
+struct Random_Fake
 {
-public:
-	Random();
-	~Random();
+    f32_t seed;
 
-public:
-	i32_t next();
-	i32_t next(i32_t minValue, i32_t maxValue);
-	f32_t next(f32_t minValue, f32_t maxValue);
-	f64_t next(f64_t minValue, f64_t maxValue);
+    Random_Fake();
+    Random_Fake(u32_t seed);
 
-private:
-	unsigned int mSeed;
+    f32_t make() const;
+
+    static Random_Fake globalRandom;
+
+    static f32_t value();
+    static i32_t range(i32_t min, i32_t max);
+    static f32_t range(f32_t min, f32_t max);
+    static f64_t range(f64_t min, f64_t max);
 };
+
+using Random = Random_Fake;
 
 _EndNamespace(eokas)
 

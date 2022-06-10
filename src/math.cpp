@@ -24,8 +24,7 @@ const Vector2 Vector2::left(-1, 0);
 
 Vector2 Vector2::random(f32_t scale)
 {
-    Random random;
-    f32_t angle = random.next(0.0f, 1.0f) * Math::PI2;
+    f32_t angle = Random::value() * Math::PI_MUL_2;
     Vector2 out;
     out.x = std::cos(angle) * scale;
     out.y = std::sin(angle) * scale;
@@ -165,9 +164,8 @@ const Vector3 Vector3::back(0, 0, -1);
 
 Vector3 Vector3::random(f32_t scale)
 {
-    Random random;
-    f32_t angle = random.next(0.0f, 1.0f) * Math::PI2;
-    f32_t z = random.next(-1.0f, 1.0f);
+    f32_t angle = Random::value() * Math::PI_MUL_2;
+    f32_t z = Random::range(-1.0f, 1.0f);
     f32_t xyScale = std::sqrt(1 - z * z) * scale;
 
     Vector3 out;

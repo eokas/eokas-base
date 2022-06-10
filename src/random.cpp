@@ -5,34 +5,42 @@
 
 _BeginNamespace(eokas)
 
-Random::Random()
-	:mSeed(0)
+Random_Fake::Random_Fake()
+	:seed(0)
 {
-	mSeed = static_cast<unsigned int>(std::time(nullptr)%1024);
-	std::srand(mSeed);
+	seed = static_cast<unsigned int>(std::time(nullptr)%1024);
+	std::srand(seed);
 }
 
-Random::~Random()
-{}
-
-i32_t Random::next()
+Random_Fake::Random_Fake(u32_t seed)
+    :seed(seed)
 {
-	return std::rand();
+    std::srand(seed);
 }
 
-i32_t Random::next(i32_t minValue, i32_t maxValue)
+f32_t Random_Fake::make() const
 {
-	return minValue + (static_cast<i32_t>((maxValue-minValue)*(std::rand()*1.0f/RAND_MAX)));
+    return (std::rand() + 0.0f) / (RAND_MAX);
 }
 
-f32_t Random::next(f32_t minValue, f32_t maxValue)
+f32_t Random_Fake::value()
 {
-	return minValue+((maxValue-minValue)*(std::rand()*1.0f/RAND_MAX));
+    return globalRandom.make();
 }
 
-f64_t Random::next(f64_t minValue, f64_t maxValue)
+i32_t Random_Fake::range(i32_t min, i32_t max)
 {
-	return minValue+((maxValue-minValue)*(std::rand()*1.0/RAND_MAX));
+    return min + std::floor(globalRandom.make() * (max - min));
+}
+
+f32_t Random_Fake::range(f32_t min, f32_t max)
+{
+    return min + globalRandom.make() * (max - min);
+}
+
+f64_t Random_Fake::range(f64_t min, f64_t max)
+{
+    return min + globalRandom.make() * (max - min);
 }
 
 _EndNamespace(eokas)
