@@ -8,7 +8,7 @@ _BeginNamespace(eokas)
 
 struct Random_Fake
 {
-    f32_t seed;
+    u32_t seed;
 
     Random_Fake();
     Random_Fake(u32_t seed);

@@ -12,7 +12,7 @@ void Option::set(const String& name, const String& info, const StringValue& valu
 
 String Option::toString() const
 {
-	return String::format("\t%s\t\t\t\t%s (default:%s)\n", name.cstr(), info.cstr(), (const char*)value);
+	return String::format("\t%s\t\t\t\t%s (default:%s)\n", name.cstr(), info.cstr(), value.string().cstr());
 }
 
 void Command::set(const String& name, const String& info, const Func& func)

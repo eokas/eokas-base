@@ -1181,7 +1181,7 @@ Sphere& Sphere::expand(const Vector3& p)
     if(dis <= this->radius)
         return *this;
     
-    f32_t radius = (dis + this->radius) * 0.5;
+    f32_t radius = (dis + this->radius) * 0.5f;
     this->origin = p + dir.normalize() * radius;
     this->radius = radius;
     return *this;

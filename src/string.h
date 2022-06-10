@@ -141,7 +141,7 @@ private:
   char* mData;
   size_t mSize;
   size_t mCapacity;
-  char mMetric;
+  i32_t mMetric;
   char mValue[_STRING_LITTLE_LENGTH];
 };
 /*
