@@ -173,8 +173,7 @@ inline T String::stringToValue(const String& str)
 template<>
 inline bool String::stringToValue<bool>(const String& str)
 {
-  return (str == "true" || str == "TRUE" || str == "True" || str == "1") ?
-    true : false;
+  return (str == "true" || str == "TRUE" || str == "True" || str == "1");
 }
 
 template<typename T>
@@ -278,7 +277,6 @@ public:
   StringValue& operator=(bool value);
 
   operator const String& () const;
-  operator const char* () const;
   operator i8_t() const;
   operator u8_t() const;
   operator i16_t() const;

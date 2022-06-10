@@ -54,7 +54,7 @@ String Command::toString() const
 
 int Command::exec(int argc, char** argv)
 {
-	if(argc <= 0 || this->name != StringValue(argv[0]))
+	if(argc <= 0 || this->name != String(argv[0]))
 		return -1;
 	
 	std::vector<StringValue> args;

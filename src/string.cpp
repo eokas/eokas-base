@@ -1269,11 +1269,6 @@ StringValue::operator const String&() const
 	return mValue;
 }
 
-StringValue::operator const char*() const
-{
-	return mValue.cstr();
-}
-
 StringValue::operator i8_t() const
 {
 	return String::stringToValue<i8_t>(mValue);
