@@ -25,13 +25,13 @@ struct JsonLexer
             case '\'':
             case '"': {
                 auto str = this->nextString(c);
-                return static_cast<JsonValue_String*>(str.get())->value;
+                return JsonValue_String::pick(str);
             }
             default:
                 if(_ascil_is_alpha_(c))
                 {
                     auto id = this->nextIdentifier(c);
-                    return static_cast<JsonValue_Identifier*>(id.get())->value;
+                    return JsonValue_Identifier::pick(id);
                 }
         }
 
@@ -57,9 +57,18 @@ struct JsonLexer
                 }
                 else if(_ascil_is_alpha_(c))
                 {
-                    return this->nextIdentifier(c);
+                    size_t start = mPosition;
+                    auto id = this->nextIdentifier(c);
+                    auto value = JsonValue_Identifier::pick(id);
+                    if(value == "true")
+                        return JsonValue_Boolean::make(true);
+                    else if(value == "false")
+                        return JsonValue_Boolean::make(false);
+                    else if(value == "null")
+                        return JsonValue_Null::make();
+                    mPosition = start;
                 }
-                return JsonValue();
+                return nullptr;
         }
     }
 
@@ -72,7 +81,7 @@ struct JsonLexer
         char first = this->nextCleanChar();
         if(first == ']')
         {
-            return JsonValue::Ref(new JsonValue_Array(list));
+            return JsonValue_Array::make(list);
         }
         else if(first == '\0')
         {
@@ -88,7 +97,7 @@ struct JsonLexer
             switch(c)
             {
                 case ']':
-                    return JsonValue::Ref(new JsonValue_Array(list));
+                    return JsonValue_Array::make(list);
                 case ',':
                     continue;
                 default:
@@ -105,7 +114,7 @@ struct JsonLexer
         char first = this->nextCleanChar();
         if (first == '}')
         {
-            return JsonValue::Ref(new JsonValue_Object(object));
+            return JsonValue_Object::make(object);
         }
         else if (first != '\0')
         {
@@ -136,7 +145,7 @@ struct JsonLexer
             switch (this->nextCleanChar())
             {
                 case '}':
-                    return object;
+                    return JsonValue_Object::make(object);
                 case ';':
                 case ',':
                     continue;
@@ -205,7 +214,7 @@ struct JsonLexer
         mPosition -= 1;
 
         auto value = String::stringToValue<f64_t>(str);
-        return JsonValue::Ref(new JsonValue_Number(value));
+        return JsonValue_Number::make(value);
     }
 
     JsonValue::Ref nextString(char quote)
@@ -218,7 +227,7 @@ struct JsonLexer
             if(c == quote)
             {
                 str += mSource.substr(start, mPosition - start - 1);
-                return JsonValue::Ref(new JsonValue_String(str));
+                return JsonValue_String::make(str);
             }
 
             if(c == '\\')
@@ -230,7 +239,7 @@ struct JsonLexer
         }
 
         // error : Unterminated string
-        return JsonValue::Ref(new JsonValue_String(""));
+        return JsonValue_String::make("");
     }
 
     JsonValue::Ref nextIdentifier(char first)
@@ -245,7 +254,7 @@ struct JsonLexer
 
         mPosition -= 1;
 
-        return JsonValue::Ref(new JsonValue_Identifier(str));
+        return JsonValue_Identifier::make(str);
     }
 
     char escapeChar()
@@ -323,7 +332,7 @@ struct JsonLexer
 
     void skipComment()
     {
-        char current = mSource[mPosition];
+        char current = mSource.at(mPosition);
         if(current == '/')
         {
 
@@ -360,21 +369,21 @@ String Json::stringify(const JsonValue::Ref& json)
     switch(json->type)
     {
         case JsonValue::Type::Number: {
-            auto value = static_cast<JsonValue_Number *>(json.get())->value;
+            auto value = JsonValue_Number::pick(json);
             return String::valueToString(value);
         }
         case JsonValue::Type::Boolean: {
-            auto value = static_cast<JsonValue_Boolean *>(json.get())->value;
+            auto value = JsonValue_Boolean::pick(json);
             return String::valueToString(value);
         }
         case JsonValue::Type::String: {
-            auto value = static_cast<JsonValue_String *>(json.get())->value;
+            auto value = JsonValue_String::pick(json);
             return String::format("\"%s\"", value.cstr());
         }
         case JsonValue::Type::Array: {
             String str = "[";
             bool first = true;
-            auto value = static_cast<JsonValue_Array*>(json.get())->value;
+            auto value = JsonValue_Array::pick(json);
             for(const auto& i : value)
             {
                 if(first)
@@ -391,7 +400,7 @@ String Json::stringify(const JsonValue::Ref& json)
         {
             String str = "{";
             bool first = true;
-            auto value = static_cast<JsonValue_Object*>(json.get())->value;
+            auto value = JsonValue_Object::pick(json);
             for(const auto& i : value)
             {
                 if(first)
