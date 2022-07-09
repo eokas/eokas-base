@@ -25,20 +25,20 @@ struct JsonLexer
             case '\'':
             case '"': {
                 auto str = this->nextString(c);
-                return JsonValue_String::pick(str);
+                return HomString::pick(str);
             }
             default:
                 if(_ascil_is_alpha_(c))
                 {
                     auto id = this->nextIdentifier(c);
-                    return JsonValue_Identifier::pick(id);
+                    return HomIdentifier::pick(id);
                 }
         }
 
         return "";
     }
 
-    JsonValue::Ref nextValue()
+    HomValue::Ref nextValue()
     {
         char c = this->nextChar();
         switch(c)
@@ -59,29 +59,29 @@ struct JsonLexer
                 {
                     size_t start = mPosition;
                     auto id = this->nextIdentifier(c);
-                    auto value = JsonValue_Identifier::pick(id);
+                    auto value = HomIdentifier::pick(id);
                     if(value == "true")
-                        return JsonValue_Boolean::make(true);
+                        return HomBoolean::make(true);
                     else if(value == "false")
-                        return JsonValue_Boolean::make(false);
+                        return HomBoolean::make(false);
                     else if(value == "null")
-                        return JsonValue_Null::make();
+                        return HomNull::make();
                     mPosition = start;
                 }
                 return nullptr;
         }
     }
 
-    JsonValue::Ref nextArray()
+    HomValue::Ref nextArray()
     {
-        std::vector<JsonValue::Ref> list;
+        std::vector<HomValue::Ref> list;
 
         int count = 0;
 
         char first = this->nextCleanChar();
         if(first == ']')
         {
-            return JsonValue_Array::make(list);
+            return HomArray::make(list);
         }
         else if(first == '\0')
         {
@@ -90,14 +90,14 @@ struct JsonLexer
 
         while(true)
         {
-            JsonValue::Ref value = this->nextValue();
+            HomValue::Ref value = this->nextValue();
             list.push_back(value);
 
             char c = this->nextCleanChar();
             switch(c)
             {
                 case ']':
-                    return JsonValue_Array::make(list);
+                    return HomArray::make(list);
                 case ',':
                     continue;
                 default:
@@ -106,15 +106,15 @@ struct JsonLexer
         }
     }
 
-    JsonValue::Ref nextObject()
+    HomValue::Ref nextObject()
     {
-        std::map<String, JsonValue::Ref> object;
+        std::map<String, HomValue::Ref> object;
 
         /* Peek to see if this is the empty object. */
         char first = this->nextCleanChar();
         if (first == '}')
         {
-            return JsonValue_Object::make(object);
+            return HomObject::make(object);
         }
         else if (first != '\0')
         {
@@ -145,7 +145,7 @@ struct JsonLexer
             switch (this->nextCleanChar())
             {
                 case '}':
-                    return JsonValue_Object::make(object);
+                    return HomObject::make(object);
                 case ';':
                 case ',':
                     continue;
@@ -155,7 +155,7 @@ struct JsonLexer
         }
     }
 
-    JsonValue::Ref nextNumber(char first)
+    HomValue::Ref nextNumber(char first)
     {
         String str(first);
         if(first != '+' && first != '-')
@@ -214,10 +214,10 @@ struct JsonLexer
         mPosition -= 1;
 
         auto value = String::stringToValue<f64_t>(str);
-        return JsonValue_Number::make(value);
+        return HomNumber::make(value);
     }
 
-    JsonValue::Ref nextString(char quote)
+    HomValue::Ref nextString(char quote)
     {
         String str = "";
 
@@ -227,7 +227,7 @@ struct JsonLexer
             if(c == quote)
             {
                 str += mSource.substr(start, mPosition - start - 1);
-                return JsonValue_String::make(str);
+                return HomString::make(str);
             }
 
             if(c == '\\')
@@ -239,10 +239,10 @@ struct JsonLexer
         }
 
         // error : Unterminated string
-        return JsonValue_String::make("");
+        return HomString::make("");
     }
 
-    JsonValue::Ref nextIdentifier(char first)
+    HomValue::Ref nextIdentifier(char first)
     {
         String str(first);
         char c = this->nextChar();
@@ -254,7 +254,7 @@ struct JsonLexer
 
         mPosition -= 1;
 
-        return JsonValue_Identifier::make(str);
+        return HomIdentifier::make(str);
     }
 
     char escapeChar()
@@ -364,26 +364,26 @@ struct JsonLexer
     }
 };
 
-String Json::stringify(const JsonValue::Ref& json)
+String Json::stringify(const HomValue::Ref& json)
 {
     switch(json->type)
     {
-        case JsonValue::Type::Number: {
-            auto value = JsonValue_Number::pick(json);
+        case HomValue::Type::Number: {
+            auto value = HomNumber::pick(json);
             return String::valueToString(value);
         }
-        case JsonValue::Type::Boolean: {
-            auto value = JsonValue_Boolean::pick(json);
+        case HomValue::Type::Boolean: {
+            auto value = HomBoolean::pick(json);
             return String::valueToString(value);
         }
-        case JsonValue::Type::String: {
-            auto value = JsonValue_String::pick(json);
+        case HomValue::Type::String: {
+            auto value = HomString::pick(json);
             return String::format("\"%s\"", value.cstr());
         }
-        case JsonValue::Type::Array: {
+        case HomValue::Type::Array: {
             String str = "[";
             bool first = true;
-            auto value = JsonValue_Array::pick(json);
+            auto value = HomArray::pick(json);
             for(const auto& i : value)
             {
                 if(first)
@@ -396,11 +396,11 @@ String Json::stringify(const JsonValue::Ref& json)
             str += "]";
             return str;
         }
-        case JsonValue::Type::Object:
+        case HomValue::Type::Object:
         {
             String str = "{";
             bool first = true;
-            auto value = JsonValue_Object::pick(json);
+            auto value = HomObject::pick(json);
             for(const auto& i : value)
             {
                 if(first)
@@ -418,7 +418,7 @@ String Json::stringify(const JsonValue::Ref& json)
     return "";
 }
 
-JsonValue::Ref Json::parse(const String& source)
+HomValue::Ref Json::parse(const String& source)
 {
     JsonLexer lexer(source);
     return lexer.nextValue();
