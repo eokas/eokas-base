@@ -30,15 +30,15 @@ struct JsonLexer
             default:
                 if(_ascil_is_alpha_(c))
                 {
-                    auto id = this->nextIdentifier(c);
-                    return HomIdentifier::pick(id);
+                    auto identifier = this->nextIdentifier(c);
+                    return identifier;
                 }
         }
 
         return "";
     }
 
-    HomValue::Ref nextValue()
+    HomValueRef nextValue()
     {
         char c = this->nextChar();
         switch(c)
@@ -58,13 +58,12 @@ struct JsonLexer
                 else if(_ascil_is_alpha_(c))
                 {
                     size_t start = mPosition;
-                    auto id = this->nextIdentifier(c);
-                    auto value = HomIdentifier::pick(id);
-                    if(value == "true")
+                    auto identifier = this->nextIdentifier(c);
+                    if(identifier == "true")
                         return HomBoolean::make(true);
-                    else if(value == "false")
+                    else if(identifier == "false")
                         return HomBoolean::make(false);
-                    else if(value == "null")
+                    else if(identifier == "null")
                         return HomNull::make();
                     mPosition = start;
                 }
@@ -72,9 +71,9 @@ struct JsonLexer
         }
     }
 
-    HomValue::Ref nextArray()
+    HomValueRef nextArray()
     {
-        std::vector<HomValue::Ref> list;
+        std::vector<HomValueRef> list;
 
         int count = 0;
 
@@ -90,7 +89,7 @@ struct JsonLexer
 
         while(true)
         {
-            HomValue::Ref value = this->nextValue();
+            HomValueRef value = this->nextValue();
             list.push_back(value);
 
             char c = this->nextCleanChar();
@@ -106,9 +105,9 @@ struct JsonLexer
         }
     }
 
-    HomValue::Ref nextObject()
+    HomValueRef nextObject()
     {
-        std::map<String, HomValue::Ref> object;
+        std::map<String, HomValueRef> object;
 
         /* Peek to see if this is the empty object. */
         char first = this->nextCleanChar();
@@ -155,7 +154,7 @@ struct JsonLexer
         }
     }
 
-    HomValue::Ref nextNumber(char first)
+    HomValueRef nextNumber(char first)
     {
         String str(first);
         if(first != '+' && first != '-')
@@ -217,7 +216,7 @@ struct JsonLexer
         return HomNumber::make(value);
     }
 
-    HomValue::Ref nextString(char quote)
+    HomValueRef nextString(char quote)
     {
         String str = "";
 
@@ -242,7 +241,7 @@ struct JsonLexer
         return HomString::make("");
     }
 
-    HomValue::Ref nextIdentifier(char first)
+    String nextIdentifier(char first)
     {
         String str(first);
         char c = this->nextChar();
@@ -254,7 +253,7 @@ struct JsonLexer
 
         mPosition -= 1;
 
-        return HomIdentifier::make(str);
+        return str;
     }
 
     char escapeChar()
@@ -364,23 +363,23 @@ struct JsonLexer
     }
 };
 
-String Json::stringify(const HomValue::Ref& json)
+String Json::stringify(const HomValueRef& json)
 {
     switch(json->type)
     {
-        case HomValue::Type::Number: {
+        case HomType::Number: {
             auto value = HomNumber::pick(json);
             return String::valueToString(value);
         }
-        case HomValue::Type::Boolean: {
+        case HomType::Boolean: {
             auto value = HomBoolean::pick(json);
             return String::valueToString(value);
         }
-        case HomValue::Type::String: {
+        case HomType::String: {
             auto value = HomString::pick(json);
             return String::format("\"%s\"", value.cstr());
         }
-        case HomValue::Type::Array: {
+        case HomType::Array: {
             String str = "[";
             bool first = true;
             auto value = HomArray::pick(json);
@@ -396,7 +395,7 @@ String Json::stringify(const HomValue::Ref& json)
             str += "]";
             return str;
         }
-        case HomValue::Type::Object:
+        case HomType::Object:
         {
             String str = "{";
             bool first = true;
@@ -418,7 +417,7 @@ String Json::stringify(const HomValue::Ref& json)
     return "";
 }
 
-HomValue::Ref Json::parse(const String& source)
+HomValueRef Json::parse(const String& source)
 {
     JsonLexer lexer(source);
     return lexer.nextValue();

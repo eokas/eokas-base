@@ -8,9 +8,9 @@ _BeginNamespace(eokas)
 
 struct Json
 {
-    static String stringify(const HomValue::Ref& json);
+    static String stringify(const HomValueRef& json);
 
-    static HomValue::Ref parse(const String& source);
+    static HomValueRef parse(const String& source);
 };
 
 _EndNamespace(eokas)

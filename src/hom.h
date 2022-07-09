@@ -8,57 +8,38 @@
 
 _BeginNamespace(eokas)
 
+enum class HomType
+{
+    Null,
+    Number,
+    Boolean,
+    String,
+    Array,
+    Object,
+};
+
 struct HomValue
 {
-    using Ref = std::shared_ptr<HomValue>;
+    HomType type;
 
-    enum class Type
-    {
-        Identifier,
-        Null,
-        Number,
-        Boolean,
-        String,
-        Array,
-        Object,
-    };
-
-    Type type;
-
-    explicit HomValue(Type type)
+    explicit HomValue(HomType type)
         :type(type)
     {}
 };
 
-struct HomIdentifier : public HomValue
-{
-    String value;
-
-    explicit HomIdentifier(const String& value = "")
-        : HomValue(Type::Identifier), value(value)
-    {}
-
-    static HomValue::Ref make(const String& value)
-    {
-        return HomValue::Ref(new HomIdentifier(value));
-    }
-
-    static String pick(const HomValue::Ref& json)
-    {
-        auto ptr = (HomIdentifier*)json.get();
-        return ptr != nullptr ? ptr->value : "";
-    }
-};
+using HomValueRef = std::shared_ptr<HomValue>;
+using HomValueArray = std::vector<HomValueRef>;
+using HomValueMap = std::map<String, HomValueRef>;
 
 struct HomNull : public HomValue
 {
     explicit HomNull()
-        : HomValue(Type::Null)
+        : HomValue(HomType::Null)
     {}
 
-    static HomValue::Ref make()
+    static HomValueRef make()
     {
-        return HomValue::Ref(new HomNull());
+        return HomValueRef(new HomNull());
     }
 };
 
@@ -67,15 +48,15 @@ struct HomNumber : public HomValue
     f64_t value;
 
     explicit HomNumber(f64_t value = 0)
-        : HomValue(Type::Number), value(value)
+        : HomValue(HomType::Number), value(value)
     {}
 
-    static HomValue::Ref make(f64_t value)
+    static HomValueRef make(f64_t value)
     {
-        return HomValue::Ref(new HomNumber(value));
+        return HomValueRef(new HomNumber(value));
     }
 
-    static f64_t pick(const HomValue::Ref& json)
+    static f64_t pick(const HomValueRef& json)
     {
         auto ptr = (HomNumber*)json.get();
         return ptr != nullptr ? ptr->value : 0;
@@ -87,18 +68,18 @@ struct HomBoolean : public HomValue
     bool value;
 
     explicit HomBoolean(bool value = false)
-        : HomValue(Type::Boolean), value(value)
+        : HomValue(HomType::Boolean), value(value)
     {}
 
-    static HomValue::Ref make(bool value)
+    static HomValueRef make(bool value)
     {
-        return HomValue::Ref(new HomBoolean(value));
+        return HomValueRef(new HomBoolean(value));
     }
 
-    static bool pick(const HomValue::Ref& json)
+    static bool pick(const HomValueRef& json)
     {
         auto ptr = (HomBoolean*)json.get();
-        return ptr != nullptr ? ptr->value : false;
+        return ptr != nullptr && ptr->value;
     }
 };
 
@@ -107,15 +88,15 @@ struct HomString : public HomValue
     String value;
 
     explicit HomString(String  value)
-        : HomValue(Type::String), value(std::move(value))
+        : HomValue(HomType::String), value(std::move(value))
     {}
 
-    static HomValue::Ref make(const String& value)
+    static HomValueRef make(const String& value)
     {
-        return HomValue::Ref(new HomString(value));
+        return HomValueRef(new HomString(value));
     }
 
-    static String pick(const HomValue::Ref& json)
+    static String pick(const HomValueRef& json)
     {
         auto ptr = (HomString*)json.get();
         return ptr != nullptr ? ptr->value : "";
@@ -124,42 +105,75 @@ struct HomString : public HomValue
 
 struct HomArray : public HomValue
 {
-    std::vector<HomValue::Ref> value;
+    HomValueArray value;
 
-    explicit HomArray(const std::vector<HomValue::Ref> value = {})
-        : HomValue(Type::Array), value(value)
-    { }
+    explicit HomArray(const HomValueArray& val = {});
 
-    static HomValue::Ref make(const std::vector<HomValue::Ref>& value)
-    {
-        return HomValue::Ref(new HomArray(value));
-    }
+    HomValueRef& operator[](size_t index);
 
-    static std::vector<HomValue::Ref> pick(const HomValue::Ref& json)
-    {
-        auto ptr = (HomArray*)json.get();
-        return ptr != nullptr ? ptr->value : std::vector<HomValue::Ref>();
-    }
+    f64_t getNumber(size_t index, f64_t defaultValue = 0);
+    bool getBoolean(size_t index, bool defaultValue = false);
+    String getString(size_t index, const String& defaultValue = "");
+    HomValueArray getArray(size_t index, const HomValueArray& defaultValue = {});
+    HomValueMap getObject(size_t index, const HomValueMap& defaultValue = {});
+
+    bool get(size_t index, HomValueRef& val);
+    bool get(size_t index, HomType type, HomValueRef& val);
+    bool get(size_t index, f64_t& val);
+    bool get(size_t index, bool& val);
+    bool get(size_t index, String& val);
+    bool get(size_t index, HomValueArray& val);
+    bool get(size_t index, HomValueMap& val);
+
+    void set(size_t index, HomValueRef val);
+    void set(size_t index, f64_t val);
+    void set(size_t index, bool val);
+    void set(size_t index, const String& val);
+    void set(size_t index, const HomValueArray& val);
+    void set(size_t index, const HomValueMap& val);
+
+    HomArray& add(HomValueRef val);
+    HomArray& add(f64_t val);
+    HomArray& add(bool val);
+    HomArray& add(const String& val);
+    HomArray& add(const HomValueArray& val);
+    HomArray& add(const HomValueMap& val);
+
+    static HomValueRef make(const HomValueArray& value);
+    static HomValueArray pick(const HomValueRef& json);
 };
 
 struct HomObject : public HomValue
 {
-    std::map<String, HomValue::Ref> value;
+    HomValueMap value;
 
-    explicit HomObject(const std::map<String, HomValue::Ref> value = {})
-        : HomValue(Type::Object), value(value)
-    {}
+    explicit HomObject(HomValueMap value = {});
 
-    static HomValue::Ref make(const std::map<String, HomValue::Ref>& value)
-    {
-        return HomValue::Ref(new HomObject(value));
-    }
+    HomValueRef& operator[](const String& key);
 
-    static std::map<String, HomValue::Ref> pick(const HomValue::Ref& json)
-    {
-        auto ptr = (HomObject*)json.get();
-        return ptr != nullptr ? ptr->value : std::map<String, HomValue::Ref>();
-    }
+    f64_t getNumber(const String& key, f64_t defaultValue = 0);
+    bool getBoolean(const String& key, bool defaultValue = false);
+    String getString(const String& key, const String& defaultValue = "");
+    HomValueArray getArray(const String& key, const HomValueArray& defaultValue = {});
+    HomValueMap getObject(const String& key, const HomValueMap& defaultValue = {});
+
+    bool get(const String& key, HomValueRef& val);
+    bool get(const String& key, HomType type, HomValueRef& val);
+    bool get(const String& key, f64_t& val);
+    bool get(const String& key, bool& val);
+    bool get(const String& key, String& val);
+    bool get(const String& key, HomValueArray& val);
+    bool get(const String& key, HomValueMap& val);
+
+    void set(const String& key, HomValueRef val);
+    void set(const String& key, f64_t val);
+    void set(const String& key, bool val);
+    void set(const String& key, const String& val);
+    void set(const String& key, const HomValueArray& val);
+    void set(const String& key, const HomValueMap& val);
+
+    static HomValueRef make(const HomValueMap& val);
+    static HomValueMap pick(const HomValueRef& json);
 };
 
 _EndNamespace(eokas)
