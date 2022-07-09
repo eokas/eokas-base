@@ -294,8 +294,8 @@ namespace eokas
         }
 
         template<typename T>
-        T as() {
-            return dynamic_cast<T>(this);
+        T* as() {
+            return dynamic_cast<T*>(this);
         }
     };
 };
