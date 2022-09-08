@@ -16,21 +16,9 @@ struct Option
 	String toString() const;
 };
 
-struct Result
-{
-	int code = 0;
-	String message = "";
-	
-	Result();
-	Result(int code, const String message);
-	
-	static Result Ok;
-	static Result InvalidArguments;
-};
-
 struct Command
 {
-	using Func = std::function<Result(const Command& cmd)>;
+	using Func = std::function<void(const Command& cmd)>;
 
 	String name;
 	String info;
@@ -53,7 +41,7 @@ struct Command
 	
 	String toString() const;
 	
-	Result exec(int argc, char** argv);
+	void exec(int argc, char** argv);
 };
 
 _EndNamespace(eokas::cli)

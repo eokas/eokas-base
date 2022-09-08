@@ -8,17 +8,6 @@ String Option::toString() const
 	return String::format("\t%s\t\t\t\t%s (default:%s)\n", name.cstr(), info.cstr(), value.string().cstr());
 }
 
-Result::Result()
-	:code(0), message("")
-{}
-
-Result::Result(int code, const String message)
-	:code(code), message(message)
-{}
-
-Result Result::Ok(0, "");
-Result Result::InvalidArguments(0xFFFF0000, "The argument is invalid.");
-
 Command::Command()
 	:name(), info(), options(), func(), subCommands()
 {}
@@ -96,10 +85,10 @@ String Command::toString() const
 	return str;
 }
 
-Result Command::exec(int argc, char** argv)
+void Command::exec(int argc, char** argv)
 {
 	if(argc <= 0 || this->name != String(argv[0]))
-		return Result::InvalidArguments;
+		throw std::invalid_argument("Invalid arguments");
 	
 	std::vector<StringValue> args;
 	for (int i = 0; i < argc; i++)
@@ -155,14 +144,11 @@ Result Command::exec(int argc, char** argv)
 	
 	// Only has commands but arguments didn't consumed by commands.
 	if(this->subCommands.size() > 0 && this->options.size() <= 0 && !isArgumentsConsumedByCommands)
-	{
-		return Result::InvalidArguments;
-	}
+		throw std::invalid_argument("Invalid arguments.");
+
 	// Has options but arguments didn't consumed by options.
 	if(this->options.size() > 0 && !isArgumentsConsumedByOptions)
-	{
-		return Result::InvalidArguments;
-	}
+		throw std::invalid_argument("Invalid arguments");
 	
 	return this->func(*this);
 }
