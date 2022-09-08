@@ -27,6 +27,9 @@ struct Command
 	
 	std::map <String, Command> subCommands = {};
 	
+	Command();
+	Command(const String& name, const String& info = "");
+	
 	Command& option(const String& name, const String& info, const StringValue& defaultValue);
 	Command& action(const Func& func);
 	

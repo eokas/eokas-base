@@ -8,6 +8,14 @@ String Option::toString() const
 	return String::format("\t%s\t\t\t\t%s (default:%s)\n", name.cstr(), info.cstr(), value.string().cstr());
 }
 
+Command::Command()
+	:name(), info(), options(), func(), subCommands()
+{}
+
+Command::Command(const String& name, const String& info)
+	:name(name), info(info), options(), func(), subCommands()
+{}
+
 Command& Command::option(const String& name, const String& info, const StringValue& defaultValue)
 {
 	Option& opt = this->options[name];
@@ -80,9 +88,6 @@ int Command::exec(int argc, char** argv)
 		String arg = argv[i];
 		args.emplace_back(arg);
 	}
-	
-	if(args[0] != this->name)
-		return -2;
 	
 	// process sub-commands.
 	if(args.size() > 1 && this->subCommands.size() > 0)
