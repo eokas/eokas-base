@@ -16,9 +16,21 @@ struct Option
 	String toString() const;
 };
 
+struct Result
+{
+	int code = 0;
+	String message = "";
+	
+	Result();
+	Result(int code, const String message);
+	
+	static Result Ok;
+	static Result InvalidArguments;
+};
+
 struct Command
 {
-	using Func = std::function<int(const Command& cmd)>;
+	using Func = std::function<Result(const Command& cmd)>;
 
 	String name;
 	String info;
@@ -35,12 +47,13 @@ struct Command
 	
 	Command& subCommand(const String& name, const String& info);
 	
+	StringValue fetchValue(const String& shortName) const;
 	std::optional<Option> fetchOption(const String& shortName) const;
 	std::optional<Command> fetchCommand(const String& shortName) const;
 	
 	String toString() const;
 	
-	int exec(int argc, char** argv);
+	Result exec(int argc, char** argv);
 };
 
 _EndNamespace(eokas::cli)

@@ -8,6 +8,17 @@ String Option::toString() const
 	return String::format("\t%s\t\t\t\t%s (default:%s)\n", name.cstr(), info.cstr(), value.string().cstr());
 }
 
+Result::Result()
+	:code(0), message("")
+{}
+
+Result::Result(int code, const String message)
+	:code(code), message(message)
+{}
+
+Result Result::Ok(0, "");
+Result Result::InvalidArguments(0xFFFF0000, "The argument is invalid.");
+
 Command::Command()
 	:name(), info(), options(), func(), subCommands()
 {}
@@ -39,6 +50,14 @@ Command& Command::subCommand(const String& name, const String& info)
 	cmd.info = info;
 	
 	return cmd;
+}
+
+StringValue Command::fetchValue(const String& shortName) const
+{
+	auto opt = this->fetchOption(shortName);
+	if(opt == std::nullopt)
+		return StringValue();
+	return opt->value;
 }
 
 std::optional<Option> Command::fetchOption(const String& shortName) const
@@ -77,10 +96,10 @@ String Command::toString() const
 	return str;
 }
 
-int Command::exec(int argc, char** argv)
+Result Command::exec(int argc, char** argv)
 {
 	if(argc <= 0 || this->name != String(argv[0]))
-		return -1;
+		return Result::InvalidArguments;
 	
 	std::vector<StringValue> args;
 	for (int i = 0; i < argc; i++)
@@ -88,6 +107,9 @@ int Command::exec(int argc, char** argv)
 		String arg = argv[i];
 		args.emplace_back(arg);
 	}
+	
+	bool isArgumentsConsumedByCommands = false;
+	bool isArgumentsConsumedByOptions = false;
 	
 	// process sub-commands.
 	if(args.size() > 1 && this->subCommands.size() > 0)
@@ -99,8 +121,11 @@ int Command::exec(int argc, char** argv)
 			auto fragments = cmd.first.split(",");
 			if(std::find(fragments.begin(), fragments.end(), cmdName) == fragments.end())
 				continue;
+
+			isArgumentsConsumedByCommands = true;
 			return cmd.second.exec(argc - 1, argv + 1);
 		}
+		
 	}
 	
 	// process options.
@@ -122,9 +147,23 @@ int Command::exec(int argc, char** argv)
 				opt.second.value = argIter == args.end() || argIter->string().startsWith("-")
 					? "true"
 					: *argIter;
+				
+				isArgumentsConsumedByOptions = true;
 			}
 		}
 	}
+	
+	// Only has commands but arguments didn't consumed by commands.
+	if(this->subCommands.size() > 0 && this->options.size() <= 0 && !isArgumentsConsumedByCommands)
+	{
+		return Result::InvalidArguments;
+	}
+	// Has options but arguments didn't consumed by options.
+	if(this->options.size() > 0 && !isArgumentsConsumedByOptions)
+	{
+		return Result::InvalidArguments;
+	}
+	
 	return this->func(*this);
 }
 
