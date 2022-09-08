@@ -3,39 +3,61 @@
 
 _BeginNamespace(eokas::cli)
 
-void Option::set(const String& name, const String& info, const StringValue& value)
-{
-	this->name = name;
-	this->info = info;
-	this->value = value;
-}
+Option::Option()
+	:name(), info(), value()
+{}
+
+Option::Option(const String& name, const String& info, const StringValue& value)
+	:name(name), info(info), value(value)
+{}
 
 String Option::toString() const
 {
 	return String::format("\t%s\t\t\t\t%s (default:%s)\n", name.cstr(), info.cstr(), value.string().cstr());
 }
 
-void Command::set(const String& name, const String& info, const Func& func)
-{
-	this->name = name;
-	this->info = info;
-	this->func = func;
-}
+Command::Command()
+	:name(), info(), func(), options(), subCommands()
+{}
 
-Option Command::option(const String& name, const String& info, const StringValue& defaultValue)
+Command::Command(const String& name, const String& info, const Func& func)
+	:name(name), info(info), func(func), options(), subCommands()
+{}
+
+Option Command::setOption(const String& name, const String& info, const StringValue& defaultValue)
 {
-	Option opt;
-	opt.set(name, info, defaultValue);
+	Option opt(name, info, defaultValue);
 	this->options.insert(std::make_pair(name, opt));
 	return opt;
 }
 
-Command Command::command(const String& name, const String& info, const Func& func)
+Command Command::setCommand(const String& name, const String& info, const Func& func)
 {
-	Command cmd;
-	cmd.set(name, info, func);
+	Command cmd(name, info, func);
 	this->subCommands.insert(std::make_pair(name, cmd));
 	return cmd;
+}
+
+std::optional<Option> Command::fetchOption(const String& shortName) const
+{
+	for(auto& iter : this->options)
+	{
+		auto fragments = iter.first.split(",");
+		if(std::find(fragments.begin(), fragments.end(), shortName) != fragments.end())
+			return iter.second;
+	}
+	return std::nullopt;
+}
+
+std::optional<Command> Command::fetchCommand(const String& shortName) const
+{
+	for(auto& iter : this->subCommands)
+	{
+		auto fragments = iter.first.split(",");
+		if(std::find(fragments.begin(), fragments.end(), shortName) != fragments.end())
+			return iter.second;
+	}
+	return std::nullopt;
 }
 
 String Command::toString() const
@@ -68,24 +90,26 @@ int Command::exec(int argc, char** argv)
 		return -2;
 	
 	// process sub-commands.
-	if(args.size() > 1)
+	if(args.size() > 1 && this->subCommands.size() > 0)
 	{
 		String cmdName = args[1];
-		auto cmdIter = this->subCommands.find(cmdName);
-		if(cmdIter != this->subCommands.end())
+		for(auto& cmd : this->subCommands)
 		{
-			auto& cmd = cmdIter->second;
-			return cmd.exec(argc - 1, argv + 1);
+			// compatible with "-v,--version"
+			auto fragments = cmd.first.split(",");
+			if(std::find(fragments.begin(), fragments.end(), cmdName) == fragments.end())
+				continue;
+			return cmd.second.exec(argc - 1, argv + 1);
 		}
 	}
 	
 	// process options.
-	if(args.size() > 1)
+	if(args.size() > 1 && this->options.size() > 0)
 	{
 		for(auto& opt : this->options)
 		{
 			// compatible with "-v,--version"
-			auto fragments = opt.second.name.split(",");
+			auto fragments = opt.first.split(",");
 			for(auto& frag : fragments)
 			{
 				auto argIter = std::find(args.begin(), args.end(), frag);
@@ -94,6 +118,7 @@ int Command::exec(int argc, char** argv)
 				
 				++argIter;
 				
+				// --option0 --option1
 				opt.second.value = argIter == args.end() || argIter->string().startsWith("-")
 					? "true"
 					: *argIter;

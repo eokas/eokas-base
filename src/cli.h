@@ -12,9 +12,11 @@ struct Option
 	String name = "";
 	String info = "";
 	StringValue value = StringValue::falseValue;
-
-	void set(const String& name, const String& info, const StringValue& value);
-	[[nodiscard]] String toString() const;
+	
+	Option();
+	Option(const String& name, const String& info, const StringValue& value);
+	
+	String toString() const;
 };
 
 struct Command
@@ -24,13 +26,21 @@ struct Command
 	String name;
 	String info;
 	Func func;
+	
 	std::map <String, Option> options = {};
 	std::map <String, Command> subCommands = {};
 	
-	void set(const String& name, const String& info, const Func& func);
-	Option option(const String& name, const String& info, const StringValue& defaultValue);
-	Command command(const String& name, const String& info, const Func& func);
-	[[nodiscard]] String toString() const;
+	Command();
+	Command(const String& name, const String& info, const Func& func);
+	
+	Option setOption(const String& name, const String& info, const StringValue& defaultValue);
+	Command setCommand(const String& name, const String& info, const Func& func);
+	
+	std::optional<Option> fetchOption(const String& shortName) const;
+	std::optional<Command> fetchCommand(const String& shortName) const;
+	
+	String toString() const;
+	
 	int exec(int argc, char** argv);
 };
 
