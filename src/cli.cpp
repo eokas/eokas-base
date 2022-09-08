@@ -3,38 +3,33 @@
 
 _BeginNamespace(eokas::cli)
 
-Option::Option()
-	:name(), info(), value()
-{}
-
-Option::Option(const String& name, const String& info, const StringValue& value)
-	:name(name), info(info), value(value)
-{}
-
 String Option::toString() const
 {
 	return String::format("\t%s\t\t\t\t%s (default:%s)\n", name.cstr(), info.cstr(), value.string().cstr());
 }
 
-Command::Command()
-	:name(), info(), func(), options(), subCommands()
-{}
-
-Command::Command(const String& name, const String& info, const Func& func)
-	:name(name), info(info), func(func), options(), subCommands()
-{}
-
-Option Command::setOption(const String& name, const String& info, const StringValue& defaultValue)
+Command& Command::option(const String& name, const String& info, const StringValue& defaultValue)
 {
-	Option opt(name, info, defaultValue);
-	this->options.insert(std::make_pair(name, opt));
-	return opt;
+	Option& opt = this->options[name];
+	opt.name = name;
+	opt.info = info;
+	opt.value = defaultValue;
+	
+	return *this;
 }
 
-Command Command::setCommand(const String& name, const String& info, const Func& func)
+Command& Command::action(const Func& func)
 {
-	Command cmd(name, info, func);
-	this->subCommands.insert(std::make_pair(name, cmd));
+	this->func = func;
+	return *this;
+}
+
+Command& Command::subCommand(const String& name, const String& info)
+{
+	Command& cmd = this->subCommands[name];
+	cmd.name = name;
+	cmd.info = info;
+	
 	return cmd;
 }
 
