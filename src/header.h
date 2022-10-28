@@ -78,7 +78,7 @@
     #define _EOKAS_ARCH _EOKAS_ARCH_MIPS
 #elif defined(__sh__)
     #define _EOKAS_ARCH _EOKAS_ARCH_SUPERH
-#elif defined(__powerpc) || defined(__powerpc__) || defined(__powerpc64__) || defined(__POWERPC__) || defined(__ppc__) || defined(__PPC__) || defined(_ARCH_PPC)
+#elif defined(__powerpc) || defined(__powerpc__) || defined(__POWERPC__) || defined(__ppc__) || defined(__PPC__) || defined(_ARCH_PPC)
     #define _EOKAS_ARCH _EOKAS_ARCH_POWERPC
 #elif defined(__PPC64__) || defined(__ppc64__) || defined(_ARCH_PPC64)
     #define _EOKAS_ARCH _EOKAS_ARCH_POWERPC64
@@ -88,6 +88,29 @@
     #define _EOKAS_ARCH _EOKAS_ARCH_M68K
 #else
     #define _EOKAS_ARCH _EOKAS_ARCH_UNKNOWN
+#endif
+
+/*
+=================================================================
+== SIMD
+=================================================================
+*/
+
+#define _EOKAS_SIMD_NONE    0
+#define _EOKAS_SIMD_SSE4    1
+#define _EOKAS_SIMD_AVX2    2
+#define _EOKAS_SIMD_AVX512  4
+#define _EOKAS_SIMD_PPC8    8
+#define _EOKAS_SIMD_NEON    16
+
+#if _EOKAS_ARCH == _EOKAS_ARCH_X64
+    #define _EOKAS_SIMD (_EOKAS_SIMD_SSE4 | _EOKAS_SIMD_AVX2)
+#elif _EOKAS_ARCH == _EOKAS_ARCH_POWERPC64
+    #define _EOKAS_SIMD _EOKAS_SIMD_PPC8
+#elif _EOKAS_ARCH == _EOKAS_ARCH_ARM64
+    #define _EOKAS_SIMD _EOKAS_SIMD_NEON
+#else
+    #define _EOKAS_SIMD _EOKAS_SIMD_NONE
 #endif
 
 /*
@@ -140,6 +163,22 @@
     #endif//_EOKAS_API_EXPRT
 #else
     #define _EOKAS_API
+#endif
+
+if (_EOKAS_COMPILER_FAMILY == _EOKAS_COMPILER_FAMILY_MSVC)
+    #define _RESTRICT __restrict
+    #define _FORCE_INLINE __forceinline
+    #define _NO_INLINE __declspec(noinline)
+    #define _LIKELY(expr) expr
+    #define _TRAP __debugbreak
+    #define _TARGET_ATTR(feature)
+#else
+    #define _RESTRICT __restrict__
+    #define _FORCE_INLINE inline __attribute__((always_inline)) __attribute__((flatten))
+    #define _NO_INLINE inline __attribute__((noinline))
+    #define _LIKELY(expr) __builtin_expect(!!(expr), 1)
+    #define _TRAP __builtin_trap
+    #define _TARGET_ATTR(feature) __attribute__((target(feature)))
 #endif
 
 /*
@@ -230,7 +269,7 @@
 
 namespace eokas
 {
-    using byte = unsigned char;
+    using byte_t = unsigned char;
 
     using i8_t = int8_t;
     using u8_t = uint8_t;
