@@ -4,45 +4,85 @@
 
 #include "header.h"
 
+/**
+SSE/AVX 提供的数据类型和函数的命名规则：
+
+1. 数据类型通常以 _mxxx(T) 的方式进行命名，其中
+    xxx 代表数据的位数，如 SSE 提供的 __m128 为 128 位， AVX 提供的 __m256 为 256 位。
+    T 为类型，若为单精度浮点型则省略，若为整形则为 i，如 __m128i，若为双精度浮点型则为 d，如 __m256d。
+2. 操作浮点数的内置函数命名方式为： _mm(xxx)_name_PT。
+    xxx 为 SIMD 寄存器的位数，若为 __m128 则省略，如 _mm_add_ps，若为 __m256 则为 256，如 _mm256_add_ps。
+    name 为函数执行的操作的名字，如加法为 _mm_add_ps，减法为 _mm_sub_ps。
+    P 代表的是对矢量 (packed data vector) 还是对标量 (scalar) 进行操作，如 _mm_add_ss 是只对最低位的 32 位浮点数执行加法，而 _mm_add_ps 则是对 4 个32位浮点数执行加法操作。
+    T 代表浮点数的类型，若为 s 则为单精度浮点型，若为 d 则为双精度浮点，如 _mm_add_pd 和 _mm_add_ps。
+3. 操作整形的内置函数命名方式为： _mm(xxx)_name_epUY。
+    xxx 为S IMD 寄存器的位数，若为 128 位则省略。
+    name为函数的名字。
+    U 为整数的类型，若为无符号类型则为 u，否在为 i，如 _mm_adds_epu16 和 _mm_adds_epi16。
+    Y 为操作的数据类型的位数，如 _mm_cvtpd_pi32。
+*/
+
 #if (_EOKAS_SIMD & _EOKAS_SIMD_AVX2)
 #include <immintrin.h>
 
-namespace eokas
-{
-    struct AVX2
-    {
+namespace eokas {
+    struct AVX2 {
         template<typename T>
-        static constexpr size_t countOf()
-        {
+        static constexpr size_t countOf() {
             return sizeof(__m256i) / sizeof(T);
         }
     };
 
     template<typename T>
-    struct avx2_value_t
-    {
+    struct avx2_value_t {
         using type = __m256i;
     };
 
     template<>
-    struct avx2_value_t<f32_t>
-    {
+    struct avx2_value_t<f32_t> {
         using type = __m256;
     };
 
     template<>
-    struct avx2_value_t<f64_t>
-    {
+    struct avx2_value_t<f64_t> {
         using type = __m256d;
     };
 
     template<typename T, size_t N = AVX2::countOf<T>()>
-    struct avx2_vector_t
-    {
+    struct avx2_vector_t {
         using value_t = typename avx2_value_t<T>::type;
 
         value_t value;
+
+        avx2_vector_t(value_t v) : value(v) {}
     };
+
+#define _AVX2_DEFINE_BINARY_FUNC_IMPL(func, type, impl) \
+    template<size_t N> \
+    avx2_vector_t<type, N> func(const avx2_vector_t<type, N>& a, const avx2_vector_t<type, N>& b) \
+    { \
+        return  impl(a.value, b.value); \
+    }
+
+#define _AVX2_DEFINE_BINARY_FUNC(func, name) \
+    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, u8_t, _mm2256_##name##_epi8) \
+    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, u16_t, _mm2256_##name##_epi16) \
+    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, u32_t, _mm2256_##name##_epi32) \
+    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, u64_t, _mm2256_##name##_epi64) \
+    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, i8_t, _mm2256_##name##_epi8) \
+    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, i16_t, _mm2256_##name##_epi16) \
+    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, i32_t, _mm2256_##name##_epi32) \
+    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, i64_t, _mm2256_##name##_epi64) \
+    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, f32_t, _mm2256_##name##_ps) \
+    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, f64_t, _mm2256_##name##_pd)
+
+#define _AVX2_DEFINE_BINARY_OPER(op, name) _AVX2_DEFINE_BINARY_FUNC(operator op, name)
+
+    _AVX2_DEFINE_BINARY_OPER(+, add);
+    _AVX2_DEFINE_BINARY_OPER(-, sub);
+    _AVX2_DEFINE_BINARY_OPER(*, mul);
+    _AVX2_DEFINE_BINARY_OPER(/, div);
+    _AVX2_DEFINE_BINARY_FUNC(simd_add_saturated, adds);
 
     using u8x32_t = avx2_vector_t<u8_t, 32>;
     using u16x16_t = avx2_vector_t<u16_t, 16>;
@@ -54,6 +94,37 @@ namespace eokas
     using i64x4_t = avx2_vector_t<i64_t, 4>;
     using f32x8_t = avx2_vector_t<f32_t, 8>;
     using f64x4_t = avx2_vector_t<f64_t, 4>;
+
+    u8x32_t simd_load(u8_t(&data)[32]) {
+        return _mm256_loadu_epi8(data);
+    }
+    u16x16_t simd_load(u16_t(&data)[16]) {
+        return _mm256_loadu_epi16(data);
+    }
+    u32x8_t simd_load(u32_t(&data)[8]){
+        return _mm256_loadu_epi32(data);
+    }
+    u64x4_t simd_load(u64_t(&data)[4]) {
+        return _mm256_loadu_epi64(data);
+    }
+    i8x32_t simd_load(i8_t(&data)[32]) {
+        return _mm256_loadu_epi8(data);
+    }
+    i16x16_t simd_load(i16_t(&data)[16]) {
+        return _mm256_loadu_epi16(data);
+    }
+    i32x8_t simd_load(i32_t(&data)[8]){
+        return _mm256_loadu_epi32(data);
+    }
+    i64x4_t simd_load(i64_t(&data)[4]) {
+        return _mm256_loadu_epi64(data);
+    }
+    f32x8_t simd_load(f32_t(&data)[8]) {
+        return _mm256_loadu_ps(data);
+    }
+    f64x4_t simd_load(f64_t(&data)[4]) {
+        return _mm256_loadu_pd(data);
+    }
 }
 
 #elif (_EOKAS_SIMD & _EOKAS_SIMD_SSE4)
