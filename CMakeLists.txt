@@ -6,7 +6,9 @@ project(eokas-base VERSION 1.0)
 # specify the C++ standard and options
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPENMP_SIMD_FLAGS} -march=armv8-a+simd")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=armv8-a+simd")
 
 message("project name: " ${PROJECT_NAME})
 message("project source dir: " ${PROJECT_SOURCE_DIR})

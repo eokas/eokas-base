@@ -37,6 +37,9 @@ namespace eokas {
     struct avx2_value_t {
         using type = __m256i;
     };
+    template<size_t N>
+    struct avx2_part_t;
+    
 
     template<>
     struct avx2_value_t<f32_t> {
@@ -57,6 +60,13 @@ namespace eokas {
         avx2_vector_t(value_t v) : value(v) {}
     };
 
+#define _AVX2_DEFINE_UNARY_FUNC_IMPL(func, type, impl) \
+    template<size_t N> \
+    avx2_vector_t<type, N> func(const avx2_vector_t<type, N>& a) \
+    { \
+        return  impl(a.value); \
+    }
+
 #define _AVX2_DEFINE_BINARY_FUNC_IMPL(func, type, impl) \
     template<size_t N> \
     avx2_vector_t<type, N> func(const avx2_vector_t<type, N>& a, const avx2_vector_t<type, N>& b) \
@@ -64,25 +74,34 @@ namespace eokas {
         return  impl(a.value, b.value); \
     }
 
-#define _AVX2_DEFINE_BINARY_FUNC(func, name) \
-    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, u8_t, _mm2256_##name##_epi8) \
-    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, u16_t, _mm2256_##name##_epi16) \
-    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, u32_t, _mm2256_##name##_epi32) \
-    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, u64_t, _mm2256_##name##_epi64) \
-    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, i8_t, _mm2256_##name##_epi8) \
-    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, i16_t, _mm2256_##name##_epi16) \
-    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, i32_t, _mm2256_##name##_epi32) \
-    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, i64_t, _mm2256_##name##_epi64) \
-    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, f32_t, _mm2256_##name##_ps) \
-    _AVX2_DEFINE_BINARY_FUNC_IMPL(func, f64_t, _mm2256_##name##_pd)
+#define _AVX2_DEFINE_FUNC(desc, func, name) \
+    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, u8_t, _mm2256_##name##_epi8) \
+    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, u16_t, _mm2256_##name##_epi16) \
+    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, u32_t, _mm2256_##name##_epi32) \
+    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, u64_t, _mm2256_##name##_epi64) \
+    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, i8_t, _mm2256_##name##_epi8) \
+    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, i16_t, _mm2256_##name##_epi16) \
+    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, i32_t, _mm2256_##name##_epi32) \
+    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, i64_t, _mm2256_##name##_epi64) \
+    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, f32_t, _mm2256_##name##_ps) \
+    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, f64_t, _mm2256_##name##_pd)
 
+#define _AVX2_DEFINE_UNARY_FUNC(func, name) _AVX2_DEFINE_FUNC(UNARY, func, name)
+#define _AVX2_DEFINE_UNARY_OPER(op, name) _AVX2_DEFINE_UNARY_FUNC(operator op, name)
+
+#define _AVX2_DEFINE_BINARY_FUNC(func, name) _AVX2_DEFINE_FUNC(BINARY, func, name)
 #define _AVX2_DEFINE_BINARY_OPER(op, name) _AVX2_DEFINE_BINARY_FUNC(operator op, name)
+
+    _AVX2_DEFINE_UNARY_FUNC(abs, abs);
 
     _AVX2_DEFINE_BINARY_OPER(+, add);
     _AVX2_DEFINE_BINARY_OPER(-, sub);
     _AVX2_DEFINE_BINARY_OPER(*, mul);
     _AVX2_DEFINE_BINARY_OPER(/, div);
-    _AVX2_DEFINE_BINARY_FUNC(simd_add_saturated, adds);
+    _AVX2_DEFINE_BINARY_OPER(==, cmpeq);
+    _AVX2_DEFINE_BINARY_OPER(>, cmpgt);
+    _AVX2_DEFINE_BINARY_OPER(<, cmplt);
+    _AVX2_DEFINE_BINARY_FUNC(simd_add_saturate, adds);
 
     using u8x32_t = avx2_vector_t<u8_t, 32>;
     using u16x16_t = avx2_vector_t<u16_t, 16>;
