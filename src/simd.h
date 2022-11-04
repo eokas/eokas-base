@@ -39,7 +39,7 @@ namespace eokas {
     };
     template<size_t N>
     struct avx2_part_t;
-    
+
 
     template<>
     struct avx2_value_t<f32_t> {
@@ -59,49 +59,6 @@ namespace eokas {
 
         avx2_vector_t(value_t v) : value(v) {}
     };
-
-#define _AVX2_DEFINE_UNARY_FUNC_IMPL(func, type, impl) \
-    template<size_t N> \
-    avx2_vector_t<type, N> func(const avx2_vector_t<type, N>& a) \
-    { \
-        return  impl(a.value); \
-    }
-
-#define _AVX2_DEFINE_BINARY_FUNC_IMPL(func, type, impl) \
-    template<size_t N> \
-    avx2_vector_t<type, N> func(const avx2_vector_t<type, N>& a, const avx2_vector_t<type, N>& b) \
-    { \
-        return  impl(a.value, b.value); \
-    }
-
-#define _AVX2_DEFINE_FUNC(desc, func, name) \
-    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, u8_t, _mm2256_##name##_epi8) \
-    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, u16_t, _mm2256_##name##_epi16) \
-    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, u32_t, _mm2256_##name##_epi32) \
-    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, u64_t, _mm2256_##name##_epi64) \
-    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, i8_t, _mm2256_##name##_epi8) \
-    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, i16_t, _mm2256_##name##_epi16) \
-    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, i32_t, _mm2256_##name##_epi32) \
-    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, i64_t, _mm2256_##name##_epi64) \
-    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, f32_t, _mm2256_##name##_ps) \
-    _AVX2_DEFINE_##desc##_FUNC_IMPL(func, f64_t, _mm2256_##name##_pd)
-
-#define _AVX2_DEFINE_UNARY_FUNC(func, name) _AVX2_DEFINE_FUNC(UNARY, func, name)
-#define _AVX2_DEFINE_UNARY_OPER(op, name) _AVX2_DEFINE_UNARY_FUNC(operator op, name)
-
-#define _AVX2_DEFINE_BINARY_FUNC(func, name) _AVX2_DEFINE_FUNC(BINARY, func, name)
-#define _AVX2_DEFINE_BINARY_OPER(op, name) _AVX2_DEFINE_BINARY_FUNC(operator op, name)
-
-    _AVX2_DEFINE_UNARY_FUNC(abs, abs);
-
-    _AVX2_DEFINE_BINARY_OPER(+, add);
-    _AVX2_DEFINE_BINARY_OPER(-, sub);
-    _AVX2_DEFINE_BINARY_OPER(*, mul);
-    _AVX2_DEFINE_BINARY_OPER(/, div);
-    _AVX2_DEFINE_BINARY_OPER(==, cmpeq);
-    _AVX2_DEFINE_BINARY_OPER(>, cmpgt);
-    _AVX2_DEFINE_BINARY_OPER(<, cmplt);
-    _AVX2_DEFINE_BINARY_FUNC(simd_add_saturate, adds);
 
     using u8x32_t = avx2_vector_t<u8_t, 32>;
     using u16x16_t = avx2_vector_t<u16_t, 16>;
@@ -144,6 +101,314 @@ namespace eokas {
     f64x4_t simd_load(f64_t(&data)[4]) {
         return _mm256_loadu_pd(data);
     }
+
+    template<size_t N>
+    avx2_vector_t<u8_t, N> simd_abs(const avx2_vector_t<u8_t, N>& a)
+    {
+        return  _mm256_abs_epi8(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u16_t, N> simd_abs(const avx2_vector_t<u16_t, N>& a)
+    {
+        return  _mm256_abs_epi16(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u32_t, N> simd_abs(const avx2_vector_t<u32_t, N>& a)
+    {
+        return  _mm256_abs_epi32(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u64_t, N> simd_abs(const avx2_vector_t<u64_t, N>& a)
+    {
+        return  _mm256_abs_epi64(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i8_t, N> simd_abs(const avx2_vector_t<i8_t, N>& a)
+    {
+        return  _mm256_abs_epi8(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i16_t, N> simd_abs(const avx2_vector_t<i16_t, N>& a)
+    {
+        return  _mm256_abs_epi16(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i32_t, N> simd_abs(const avx2_vector_t<i32_t, N>& a)
+    {
+        return  _mm256_abs_epi32(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i64_t, N> simd_abs(const avx2_vector_t<i64_t, N>& a)
+    {
+        return  _mm256_abs_epi64(a.value);
+    }
+
+
+    template<size_t N>
+    avx2_vector_t<f32_t, N> simd_sqrt(const avx2_vector_t<f32_t, N>& a)
+    {
+        return  _mm256_sqrt_ps(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<f64_t, N> simd_sqrt(const avx2_vector_t<f64_t, N>& a)
+    {
+        return  _mm256_sqrt_pd(a.value);
+    }
+
+    template<size_t N>
+    avx2_vector_t<u16_t, N> simd_abs(const avx2_vector_t<u16_t, N>& a)
+    {
+        return  _mm256_abs_epi16(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u32_t, N> simd_abs(const avx2_vector_t<u32_t, N>& a)
+    {
+        return  _mm256_abs_epi32(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u64_t, N> simd_abs(const avx2_vector_t<u64_t, N>& a)
+    {
+        return  _mm256_abs_epi64(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i8_t, N> simd_abs(const avx2_vector_t<i8_t, N>& a)
+    {
+        return  _mm256_abs_epi8(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i16_t, N> simd_abs(const avx2_vector_t<i16_t, N>& a)
+    {
+        return  _mm256_abs_epi16(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i32_t, N> simd_abs(const avx2_vector_t<i32_t, N>& a)
+    {
+        return  _mm256_abs_epi32(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i64_t, N> simd_abs(const avx2_vector_t<i64_t, N>& a)
+    {
+        return  _mm256_abs_epi64(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<f32_t, N> simd_abs(const avx2_vector_t<f32_t, N>& a)
+    {
+        return  _mm256_abs_ps(a.value);
+    }
+    template<size_t N>
+    avx2_vector_t<f64_t, N> simd_abs(const avx2_vector_t<f64_t, N>& a)
+    {
+        return  _mm256_abs_pd(a.value);
+    }
+
+
+    template<size_t N>
+    avx2_vector_t<u8_t, N> operator+(const avx2_vector_t<u8_t, N>& a, const avx2_vector_t<u8_t, N>& b)
+    {
+        return  _mm256_add_epi8(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u16_t, N> operator+(const avx2_vector_t<u16_t, N>& a, const avx2_vector_t<u16_t, N>& b)
+    {
+        return  _mm256_add_epi16(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u32_t, N> operator+(const avx2_vector_t<u32_t, N>& a, const avx2_vector_t<u32_t, N>& b)
+    {
+        return  _mm256_add_epi32(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u64_t, N> operator+(const avx2_vector_t<u64_t, N>& a, const avx2_vector_t<u64_t, N>& b)
+    {
+        return  _mm256_add_epi64(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i8_t, N> operator+(const avx2_vector_t<i8_t, N>& a, const avx2_vector_t<i8_t, N>& b)
+    {
+        return  _mm256_add_epi8(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i16_t, N> operator+(const avx2_vector_t<i16_t, N>& a, const avx2_vector_t<i16_t, N>& b)
+    {
+        return  _mm256_add_epi16(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i32_t, N> operator+(const avx2_vector_t<i32_t, N>& a, const avx2_vector_t<i32_t, N>& b)
+    {
+        return  _mm256_add_epi32(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i64_t, N> operator+(const avx2_vector_t<i64_t, N>& a, const avx2_vector_t<i64_t, N>& b)
+    {
+        return  _mm256_add_epi64(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<f32_t, N> operator+(const avx2_vector_t<f32_t, N>& a, const avx2_vector_t<f32_t, N>& b)
+    {
+        return  _mm256_add_ps(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<f64_t, N> operator+(const avx2_vector_t<f64_t, N>& a, const avx2_vector_t<f64_t, N>& b)
+    {
+        return  _mm256_add_pd(a.value, b.value);
+    }
+
+
+    template<size_t N>
+    avx2_vector_t<u8_t, N> operator-(const avx2_vector_t<u8_t, N>& a, const avx2_vector_t<u8_t, N>& b)
+    {
+        return  _mm256_sub_epi8(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u16_t, N> operator-(const avx2_vector_t<u16_t, N>& a, const avx2_vector_t<u16_t, N>& b)
+    {
+        return  _mm256_sub_epi16(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u32_t, N> operator-(const avx2_vector_t<u32_t, N>& a, const avx2_vector_t<u32_t, N>& b)
+    {
+        return  _mm256_sub_epi32(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u64_t, N> operator-(const avx2_vector_t<u64_t, N>& a, const avx2_vector_t<u64_t, N>& b)
+    {
+        return  _mm256_sub_epi64(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i8_t, N> operator-(const avx2_vector_t<i8_t, N>& a, const avx2_vector_t<i8_t, N>& b)
+    {
+        return  _mm256_sub_epi8(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i16_t, N> operator-(const avx2_vector_t<i16_t, N>& a, const avx2_vector_t<i16_t, N>& b)
+    {
+        return  _mm256_sub_epi16(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i32_t, N> operator-(const avx2_vector_t<i32_t, N>& a, const avx2_vector_t<i32_t, N>& b)
+    {
+        return  _mm256_sub_epi32(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i64_t, N> operator-(const avx2_vector_t<i64_t, N>& a, const avx2_vector_t<i64_t, N>& b)
+    {
+        return  _mm256_sub_epi64(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<f32_t, N> operator-(const avx2_vector_t<f32_t, N>& a, const avx2_vector_t<f32_t, N>& b)
+    {
+        return  _mm256_sub_ps(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<f64_t, N> operator-(const avx2_vector_t<f64_t, N>& a, const avx2_vector_t<f64_t, N>& b)
+    {
+        return  _mm256_sub_pd(a.value, b.value);
+    }
+
+
+    template<size_t N>
+    avx2_vector_t<u8_t, N> operator*(const avx2_vector_t<u8_t, N>& a, const avx2_vector_t<u8_t, N>& b)
+    {
+        return  _mm256_mul_epi8(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u16_t, N> operator*(const avx2_vector_t<u16_t, N>& a, const avx2_vector_t<u16_t, N>& b)
+    {
+        return  _mm256_mul_epi16(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u32_t, N> operator*(const avx2_vector_t<u32_t, N>& a, const avx2_vector_t<u32_t, N>& b)
+    {
+        return  _mm256_mul_epi32(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u64_t, N> operator*(const avx2_vector_t<u64_t, N>& a, const avx2_vector_t<u64_t, N>& b)
+    {
+        return  _mm256_mul_epi64(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i8_t, N> operator*(const avx2_vector_t<i8_t, N>& a, const avx2_vector_t<i8_t, N>& b)
+    {
+        return  _mm256_mul_epi8(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i16_t, N> operator*(const avx2_vector_t<i16_t, N>& a, const avx2_vector_t<i16_t, N>& b)
+    {
+        return  _mm256_mul_epi16(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i32_t, N> operator*(const avx2_vector_t<i32_t, N>& a, const avx2_vector_t<i32_t, N>& b)
+    {
+        return  _mm256_mul_epi32(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i64_t, N> operator*(const avx2_vector_t<i64_t, N>& a, const avx2_vector_t<i64_t, N>& b)
+    {
+        return  _mm256_mul_epi64(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<f32_t, N> operator*(const avx2_vector_t<f32_t, N>& a, const avx2_vector_t<f32_t, N>& b)
+    {
+        return  _mm256_mul_ps(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<f64_t, N> operator*(const avx2_vector_t<f64_t, N>& a, const avx2_vector_t<f64_t, N>& b)
+    {
+        return  _mm256_mul_pd(a.value, b.value);
+    }
+
+
+    template<size_t N>
+    avx2_vector_t<u8_t, N> operator/(const avx2_vector_t<u8_t, N>& a, const avx2_vector_t<u8_t, N>& b)
+    {
+        return  _mm256_div_epi8(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u16_t, N> operator/(const avx2_vector_t<u16_t, N>& a, const avx2_vector_t<u16_t, N>& b)
+    {
+        return  _mm256_div_epi16(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u32_t, N> operator/(const avx2_vector_t<u32_t, N>& a, const avx2_vector_t<u32_t, N>& b)
+    {
+        return  _mm256_div_epi32(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<u64_t, N> operator/(const avx2_vector_t<u64_t, N>& a, const avx2_vector_t<u64_t, N>& b)
+    {
+        return  _mm256_div_epi64(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i8_t, N> operator/(const avx2_vector_t<i8_t, N>& a, const avx2_vector_t<i8_t, N>& b)
+    {
+        return  _mm256_div_epi8(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i16_t, N> operator/(const avx2_vector_t<i16_t, N>& a, const avx2_vector_t<i16_t, N>& b)
+    {
+        return  _mm256_div_epi16(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i32_t, N> operator/(const avx2_vector_t<i32_t, N>& a, const avx2_vector_t<i32_t, N>& b)
+    {
+        return  _mm256_div_epi32(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<i64_t, N> operator/(const avx2_vector_t<i64_t, N>& a, const avx2_vector_t<i64_t, N>& b)
+    {
+        return  _mm256_div_epi64(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<f32_t, N> operator/(const avx2_vector_t<f32_t, N>& a, const avx2_vector_t<f32_t, N>& b)
+    {
+        return  _mm256_div_ps(a.value, b.value);
+    }
+    template<size_t N>
+    avx2_vector_t<f64_t, N> operator/(const avx2_vector_t<f64_t, N>& a, const avx2_vector_t<f64_t, N>& b)
+    {
+        return  _mm256_div_pd(a.value, b.value);
+    }
+
 }
 
 #elif (_EOKAS_SIMD & _EOKAS_SIMD_SSE4)
