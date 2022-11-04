@@ -97,14 +97,18 @@
 */
 
 #define _EOKAS_SIMD_NONE    0
-#define _EOKAS_SIMD_AVX2    1
-#define _EOKAS_SIMD_SSE4    2
+#define _EOKAS_SIMD_SSE4    1
+#define _EOKAS_SIMD_AVX2    2
 #define _EOKAS_SIMD_AVX512  4
 #define _EOKAS_SIMD_PPC8    8
 #define _EOKAS_SIMD_NEON    16
 
 #if _EOKAS_ARCH == _EOKAS_ARCH_X64
-    #define _EOKAS_SIMD (_EOKAS_SIMD_AVX2 | _EOKAS_SIMD_SSE4)
+    #if __AVX2__
+        #define _EOKAS_SIMD (_EOKAS_SIMD_AVX2 | _EOKAS_SIMD_SSE4)
+    #elif __SSE4_2__
+        #define _EOKAS_SIMD _EOKAS_SIMD_SSE4
+    #endif
 #elif _EOKAS_ARCH == _EOKAS_ARCH_POWERPC64
     #define _EOKAS_SIMD _EOKAS_SIMD_PPC8
 #elif _EOKAS_ARCH == _EOKAS_ARCH_ARM64

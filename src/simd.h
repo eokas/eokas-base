@@ -22,6 +22,8 @@ SSE/AVX 提供的数据类型和函数的命名规则：
     Y 为操作的数据类型的位数，如 _mm_cvtpd_pi32。
 */
 
+#if ((_EOKAS_SIMD & _EOKAS_SIMD_AVX2) || (_EOKAS_SIMD & _EOKAS_SIMD_SSE4))
+
 #if (_EOKAS_SIMD & _EOKAS_SIMD_AVX2)
 #include <immintrin.h>
 
@@ -410,8 +412,9 @@ namespace eokas {
     }
 
 }
+#endif
 
-#elif (_EOKAS_SIMD & _EOKAS_SIMD_SSE4)
+#if (_EOKAS_SIMD & _EOKAS_SIMD_SSE4)
 
 #include <smmintrin.h>
 
@@ -481,6 +484,7 @@ namespace eokas
     using i32x1_t = sse4_vector_t<i32_t, 1>;
     using f32x1_t = sse4_vector_t<f32_t, 1>;
 }
+#endif
 
 #elif (_EOKAS_SIMD & _EOKAS_SIMD_NEON)
 
