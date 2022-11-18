@@ -104,11 +104,7 @@
 #define _EOKAS_SIMD_NEON    16
 
 #if _EOKAS_ARCH == _EOKAS_ARCH_X64
-    #if __AVX2__
-        #define _EOKAS_SIMD (_EOKAS_SIMD_AVX2 | _EOKAS_SIMD_SSE4)
-    #elif __SSE4_2__
-        #define _EOKAS_SIMD _EOKAS_SIMD_SSE4
-    #endif
+    #define _EOKAS_SIMD (_EOKAS_SIMD_AVX2 | _EOKAS_SIMD_SSE4)
 #elif _EOKAS_ARCH == _EOKAS_ARCH_POWERPC64
     #define _EOKAS_SIMD _EOKAS_SIMD_PPC8
 #elif _EOKAS_ARCH == _EOKAS_ARCH_ARM64
