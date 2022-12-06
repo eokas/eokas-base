@@ -1,7 +1,7 @@
 			  
 #include "network.h"
 
-#if _EOKAS_OS == _EOKAS_OS_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
 
 #include <mutex>
 #include <WinSock2.h>

@@ -1,5 +1,6 @@
 
-#include "pixels.h"
+#include "./pixels.h"
+#include <cstring>
 #include <algorithm>
 
 _BeginNamespace(eokas)

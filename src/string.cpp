@@ -1,5 +1,6 @@
 
-#include "string.h"
+#include "./string.h"
+#include <cstring>
 #include <algorithm>
 
 _BeginNamespace(eokas)
@@ -1332,6 +1333,16 @@ bool StringValue::operator==(const StringValue& rhs) const
 bool StringValue::operator!=(const StringValue& rhs) const
 {
 	return mValue != rhs.mValue;
+}
+
+bool StringValue::operator==(const String& rhs) const
+{
+    return mValue == rhs;
+}
+
+bool StringValue::operator!=(const String& rhs) const
+{
+    return mValue != rhs;
 }
 
 _EndNamespace(eokas)

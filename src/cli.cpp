@@ -1,5 +1,5 @@
 
-#include "cli.h"
+#include "./cli.h"
 
 _BeginNamespace(eokas::cli)
 
@@ -124,7 +124,7 @@ void Command::exec(int argc, char** argv)
 		{
 			// compatible with "-v,--version"
 			auto fragments = opt.first.split(",");
-			for(auto& frag : fragments)
+			for(const auto& frag : fragments)
 			{
 				auto argIter = std::find(args.begin(), args.end(), frag);
 				if(argIter == args.end())
