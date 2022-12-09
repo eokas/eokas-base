@@ -9,11 +9,11 @@ _BeginNamespace(eokas)
 ==== TimeSpan
 ============================================================================================
 */
-const i64_t TimeSpan::kUsecsPerMsec = 1000;
-const i64_t TimeSpan::kUsecsPerSecond = 1000000;
-const i64_t TimeSpan::kUsecsPerMinute = 60000000;
-const i64_t TimeSpan::kUsecsPerHour = 3600000000;
-const i64_t TimeSpan::kUsecsPerDay = 86400000000;
+const i64_t TimeSpan::US_COUNT_PER_MS = 1000;
+const i64_t TimeSpan::US_COUNT_PER_SECOND = 1000000;
+const i64_t TimeSpan::US_COUNT_PER_MINUTE = 60000000;
+const i64_t TimeSpan::US_COUNT_PER_HOUR = 3600000000;
+const i64_t TimeSpan::US_COUNT_PER_DAY = 86400000000;
 
 TimeSpan TimeSpan::maxValue()
 {
@@ -30,7 +30,7 @@ TimeSpan::TimeSpan(i64_t usecs)
 {}
 
 TimeSpan::TimeSpan(i32_t days, i32_t hours, i32_t mins, i32_t secs, i32_t msecs, i32_t usecs)
-	:mSpan(kUsecsPerDay*days + kUsecsPerHour*hours + kUsecsPerMinute*mins + kUsecsPerSecond*secs + kUsecsPerMsec*msecs + usecs)
+	:mSpan(US_COUNT_PER_DAY * days + US_COUNT_PER_HOUR * hours + US_COUNT_PER_MINUTE * mins + US_COUNT_PER_SECOND * secs + US_COUNT_PER_MS * msecs + usecs)
 {}
 
 TimeSpan::TimeSpan(const TimeSpan& other)
@@ -100,38 +100,38 @@ bool TimeSpan::operator!=(const TimeSpan& other)
 
 i64_t TimeSpan::dayPart() const
 {
-	return mSpan / kUsecsPerDay;
+	return mSpan / US_COUNT_PER_DAY;
 }
 
 i64_t TimeSpan::hourPart() const
 {
-	return mSpan % kUsecsPerDay / kUsecsPerHour;
+	return mSpan % US_COUNT_PER_DAY / US_COUNT_PER_HOUR;
 }
 
 i64_t TimeSpan::minutePart() const
 {
-	return mSpan % kUsecsPerDay % kUsecsPerHour / kUsecsPerMinute;
+	return mSpan % US_COUNT_PER_DAY % US_COUNT_PER_HOUR / US_COUNT_PER_MINUTE;
 }
 
 i64_t TimeSpan::secondPart() const
 {
-	return mSpan % kUsecsPerDay % kUsecsPerHour % kUsecsPerMinute / kUsecsPerSecond;
+	return mSpan % US_COUNT_PER_DAY % US_COUNT_PER_HOUR % US_COUNT_PER_MINUTE / US_COUNT_PER_SECOND;
 }
 
 i64_t TimeSpan::millisecondPart() const
 {
-	return mSpan % kUsecsPerDay % kUsecsPerHour % kUsecsPerMinute % kUsecsPerSecond / kUsecsPerMsec;
+	return mSpan % US_COUNT_PER_DAY % US_COUNT_PER_HOUR % US_COUNT_PER_MINUTE % US_COUNT_PER_SECOND / US_COUNT_PER_MS;
 }
 
 i64_t TimeSpan::microsecondPart() const
 {
-	return mSpan % kUsecsPerMsec;
+	return mSpan % US_COUNT_PER_MS;
 }
 
 i64_t TimeSpan::totalDays() const
 {
-	i64_t result = mSpan / kUsecsPerDay;
-	if(mSpan % kUsecsPerDay > 0)
+	i64_t result = mSpan / US_COUNT_PER_DAY;
+	if(mSpan % US_COUNT_PER_DAY > 0)
 	{
 		result += 1;
 	}
@@ -140,8 +140,8 @@ i64_t TimeSpan::totalDays() const
 
 i64_t TimeSpan::totalHours() const
 {
-	i64_t result = mSpan / kUsecsPerHour;
-	if(mSpan % kUsecsPerHour > 0)
+	i64_t result = mSpan / US_COUNT_PER_HOUR;
+	if(mSpan % US_COUNT_PER_HOUR > 0)
 	{
 		result += 1;
 	}
@@ -150,8 +150,8 @@ i64_t TimeSpan::totalHours() const
 
 i64_t TimeSpan::totalMinutes() const
 {
-	i64_t result = mSpan / kUsecsPerMinute;
-	if(mSpan % kUsecsPerMinute > 0)
+	i64_t result = mSpan / US_COUNT_PER_MINUTE;
+	if(mSpan % US_COUNT_PER_MINUTE > 0)
 	{
 		result += 1;
 	}
@@ -160,8 +160,8 @@ i64_t TimeSpan::totalMinutes() const
 
 i64_t TimeSpan::totalSeconds() const
 {
-	i64_t result = mSpan / kUsecsPerSecond;
-	if(mSpan % kUsecsPerSecond > 0)
+	i64_t result = mSpan / US_COUNT_PER_SECOND;
+	if(mSpan % US_COUNT_PER_SECOND > 0)
 	{
 		result += 1;
 	}
@@ -170,8 +170,8 @@ i64_t TimeSpan::totalSeconds() const
 
 i64_t TimeSpan::totalMilliseconds() const
 {
-	i64_t result = mSpan / kUsecsPerMsec;
-	if(mSpan % kUsecsPerMsec > 0)
+	i64_t result = mSpan / US_COUNT_PER_MS;
+	if(mSpan % US_COUNT_PER_MS > 0)
 	{
 		result += 1;
 	}
@@ -180,31 +180,31 @@ i64_t TimeSpan::totalMilliseconds() const
 
 f64_t TimeSpan::exactDays() const
 {
-	f64_t result = mSpan / (kUsecsPerDay + 0.0);
+	f64_t result = mSpan / (US_COUNT_PER_DAY + 0.0);
 	return result;
 }
 
 f64_t TimeSpan::exactHours() const
 {
-	f64_t result = mSpan / (kUsecsPerHour + 0.0);
+	f64_t result = mSpan / (US_COUNT_PER_HOUR + 0.0);
 	return result;
 }
 
 f64_t TimeSpan::exactMinutes() const
 {
-	f64_t result = mSpan / (kUsecsPerMinute + 0.0);
+	f64_t result = mSpan / (US_COUNT_PER_MINUTE + 0.0);
 	return result;
 }
 
 f64_t TimeSpan::exactSeconds() const
 {
-	f64_t result = mSpan / (kUsecsPerSecond + 0.0);
+	f64_t result = mSpan / (US_COUNT_PER_SECOND + 0.0);
 	return result;
 }
 
 f64_t TimeSpan::exactMilliseconds() const
 {
-	f64_t result = mSpan / (kUsecsPerMsec + 0.0);
+	f64_t result = mSpan / (US_COUNT_PER_MS + 0.0);
 	return result;
 }
 
@@ -216,13 +216,13 @@ f64_t TimeSpan::exactMilliseconds() const
 TimePoint::TimePoint()
 	:mTimeStamp(time(nullptr))
 {
-	mTimeStruct = localtime(&mTimeStamp);
+	mTimeStruct = gmtime(&mTimeStamp);
 }
 
 TimePoint::TimePoint(time_t timeStamp)
 	:mTimeStamp(timeStamp)
 {
-	mTimeStruct = localtime(&mTimeStamp);
+	mTimeStruct = gmtime(&mTimeStamp);
 }
 
 TimePoint::TimePoint(int year, int month, int date, int hour, int minute, int sec)
@@ -234,14 +234,15 @@ TimePoint::TimePoint(int year, int month, int date, int hour, int minute, int se
 	t.tm_hour = hour;
 	t.tm_min = minute;
 	t.tm_sec = sec;
+    t.tm_isdst = -1;
 	mTimeStamp = mktime(&t);
-	mTimeStruct = localtime(&mTimeStamp);
+	mTimeStruct = gmtime(&mTimeStamp);
 }
 
 TimePoint::TimePoint(const TimePoint& other)
 	:mTimeStamp(other.mTimeStamp)
 {
-	mTimeStruct = localtime(&mTimeStamp);
+	mTimeStruct = gmtime(&mTimeStamp);
 }
 
 TimePoint::~TimePoint()
@@ -250,7 +251,7 @@ TimePoint::~TimePoint()
 TimePoint& TimePoint::operator=(const TimePoint& other)
 {
 	mTimeStamp = other.mTimeStamp;
-	mTimeStruct = localtime(&mTimeStamp);
+	mTimeStruct = gmtime(&mTimeStamp);
 	return *this;
 }
 
@@ -267,20 +268,20 @@ TimePoint TimePoint::operator-(const TimeSpan& span)
 TimePoint& TimePoint::operator+=(const TimeSpan& span)
 {
 	mTimeStamp += span.totalSeconds();
-	mTimeStruct = localtime(&mTimeStamp);
+	mTimeStruct = gmtime(&mTimeStamp);
 	return *this;
 }
 
 TimePoint& TimePoint::operator-=(const TimeSpan& span)
 {
 	mTimeStamp -= span.totalSeconds();
-	mTimeStruct = localtime(&mTimeStamp);
+	mTimeStruct = gmtime(&mTimeStamp);
 	return *this;
 }
 
 TimeSpan TimePoint::operator-(const TimePoint& other)
 {
-	return TimeSpan((mTimeStamp - other.mTimeStamp)*TimeSpan::kUsecsPerSecond);
+	return TimeSpan((mTimeStamp - other.mTimeStamp)*TimeSpan::US_COUNT_PER_SECOND);
 }
 
 bool TimePoint::operator==(const TimePoint& other)
@@ -313,9 +314,9 @@ bool TimePoint::operator<=(const TimePoint& other)
 	return mTimeStamp <= other.mTimeStamp;
 }
 
-time_t TimePoint::calendarTime() const
+u64_t TimePoint::timestamp() const
 {
-	return mTimeStamp;
+	return (u64_t)mTimeStamp;
 }
 
 i32_t TimePoint::year() const

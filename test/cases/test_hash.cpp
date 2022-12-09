@@ -1,10 +1,14 @@
 
 #include "../engine/main.h"
-#include <iostream>
 
-_test_case(hash)
+_eokas_test_case(hash)
 {
-    std::cerr<<"do test hash" << std::endl;
+    auto md5 = eokas::md5("eokas-test-hash");
+    printf("MD5: %s \n", md5.cstr());
+    _eokas_test_check(md5 == "165f496c17b648d9ca4e1c8face803c5");
+
+    auto sha256 = eokas::sha256("eokas-test-hash");
+    _eokas_test_check(sha256 == "216fd0525ecaffc3b4a48fc5e98e1e69f387f2627c789df2e8b9c5e90df9c09b");
 
     return 0;
 }
