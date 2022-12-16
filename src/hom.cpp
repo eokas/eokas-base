@@ -182,9 +182,9 @@ HomValueRef HomArray::make(const HomValueArray& value)
     return HomValueRef(new HomArray(value));
 }
 
-HomValueArray HomArray::pick(const HomValueRef& json)
+HomValueArray HomArray::pick(const HomValueRef& value)
 {
-    auto ptr = (HomArray*)json.get();
+    auto ptr = (HomArray*)value.get();
     return ptr != nullptr ? ptr->value : HomValueArray();
 }
 
@@ -332,14 +332,14 @@ void HomObject::set(const String& key, const HomValueMap& val)
     this->value[key] = HomObject::make(val);
 }
 
-HomValueRef HomObject::make(const HomValueMap& val)
+HomValueRef HomObject::make(const HomValueMap& value)
 {
-    return HomValueRef(new HomObject(val));
+    return HomValueRef(new HomObject(value));
 }
 
-HomValueMap HomObject::pick(const HomValueRef& json)
+HomValueMap HomObject::pick(const HomValueRef& value)
 {
-    auto ptr = (HomObject*)json.get();
+    auto ptr = (HomObject*)value.get();
     return ptr != nullptr ? ptr->value : HomValueMap();
 }
 

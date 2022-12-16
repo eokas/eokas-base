@@ -62,9 +62,9 @@ struct HomNumber : public HomValue
         return HomValueRef(new HomNumber(value));
     }
 
-    static f64_t pick(const HomValueRef& json)
+    static f64_t pick(const HomValueRef& value)
     {
-        auto ptr = (HomNumber*)json.get();
+        auto ptr = (HomNumber*)value.get();
         return ptr != nullptr ? ptr->value : 0;
     }
 };
@@ -82,9 +82,9 @@ struct HomBoolean : public HomValue
         return HomValueRef(new HomBoolean(value));
     }
 
-    static bool pick(const HomValueRef& json)
+    static bool pick(const HomValueRef& value)
     {
-        auto ptr = (HomBoolean*)json.get();
+        auto ptr = (HomBoolean*)value.get();
         return ptr != nullptr && ptr->value;
     }
 };
@@ -102,9 +102,9 @@ struct HomString : public HomValue
         return HomValueRef(new HomString(value));
     }
 
-    static String pick(const HomValueRef& json)
+    static String pick(const HomValueRef& value)
     {
-        auto ptr = (HomString*)json.get();
+        auto ptr = (HomString*)value.get();
         return ptr != nullptr ? ptr->value : "";
     }
 };
@@ -146,7 +146,7 @@ struct HomArray : public HomValue
     HomArray& add(const HomValueMap& val);
 
     static HomValueRef make(const HomValueArray& value);
-    static HomValueArray pick(const HomValueRef& json);
+    static HomValueArray pick(const HomValueRef& value);
 };
 
 struct HomObject : public HomValue
@@ -179,8 +179,8 @@ struct HomObject : public HomValue
     void set(const String& key, const HomValueArray& val);
     void set(const String& key, const HomValueMap& val);
 
-    static HomValueRef make(const HomValueMap& val);
-    static HomValueMap pick(const HomValueRef& json);
+    static HomValueRef make(const HomValueMap& value);
+    static HomValueMap pick(const HomValueRef& value);
 };
 
 class HOM
