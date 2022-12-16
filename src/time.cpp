@@ -213,6 +213,12 @@ f64_t TimeSpan::exactMilliseconds() const
 ==== TimePoint
 ============================================================================================
 */
+#if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
+    #define _mktime_utc _mkgmtime
+#else
+    #define _mktime_utc timegm
+#endif
+
 TimePoint::TimePoint()
 	:mTimeStamp(time(nullptr))
 {
@@ -227,15 +233,16 @@ TimePoint::TimePoint(time_t timeStamp)
 
 TimePoint::TimePoint(int year, int month, int date, int hour, int minute, int sec)
 {
-	tm t;
-	t.tm_year = year-1900;
-	t.tm_mon = month-1;
-	t.tm_mday = date;
-	t.tm_hour = hour;
-	t.tm_min = minute;
-	t.tm_sec = sec;
-    t.tm_isdst = -1;
-	mTimeStamp = mktime(&t);
+	tm utc;
+    utc.tm_year = year - 1900;
+    utc.tm_mon = month - 1;
+    utc.tm_mday = date;
+    utc.tm_hour = hour;
+    utc.tm_min = minute;
+    utc.tm_sec = sec;
+    utc.tm_isdst = 0;
+
+    mTimeStamp = _mktime_utc(&utc);
 	mTimeStruct = gmtime(&mTimeStamp);
 }
 
@@ -281,7 +288,7 @@ TimePoint& TimePoint::operator-=(const TimeSpan& span)
 
 TimeSpan TimePoint::operator-(const TimePoint& other)
 {
-	return TimeSpan((mTimeStamp - other.mTimeStamp)*TimeSpan::US_COUNT_PER_SECOND);
+	return TimeSpan((mTimeStamp - other.mTimeStamp) * TimeSpan::US_COUNT_PER_SECOND);
 }
 
 bool TimePoint::operator==(const TimePoint& other)

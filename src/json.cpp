@@ -363,7 +363,7 @@ struct JsonLexer
     }
 };
 
-String Json::stringify(const HomValueRef& json)
+String JSON::stringify(const HomValueRef& json)
 {
     switch(json->type)
     {
@@ -417,7 +417,7 @@ String Json::stringify(const HomValueRef& json)
     return "";
 }
 
-HomValueRef Json::parse(const String& source)
+HomValueRef JSON::parse(const String& source)
 {
     JsonLexer lexer(source);
     return lexer.nextValue();

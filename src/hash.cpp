@@ -280,8 +280,7 @@ namespace eokas
 
     String md5(const String& input)
     {
-        MD5 hash;
-        return hash.compute(input);
+        return MD5().compute(input);
     }
 
 /**

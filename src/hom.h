@@ -2,6 +2,12 @@
 #ifndef  _EOKAS_BASE_HOM_H_
 #define  _EOKAS_BASE_HOM_H_
 
+/**
+ * HOM: Hierarchical Object Model.
+ * It is similar with DOM (Document Object Model)
+ * Widely used in JSON
+ * */
+
 #include <utility>
 
 #include "string.h"
@@ -87,9 +93,9 @@ struct HomString : public HomValue
 {
     String value;
 
-    explicit HomString(String  value)
+    explicit HomString(const String& value)
         : HomValue(HomType::String), value(std::move(value))
-    {}
+    { }
 
     static HomValueRef make(const String& value)
     {
@@ -147,10 +153,11 @@ struct HomObject : public HomValue
 {
     HomValueMap value;
 
-    explicit HomObject(HomValueMap value = {});
+    explicit HomObject(const HomValueMap& value = {});
 
     HomValueRef& operator[](const String& key);
 
+    HomValueRef& getValue(const String& key);
     f64_t getNumber(const String& key, f64_t defaultValue = 0);
     bool getBoolean(const String& key, bool defaultValue = false);
     String getString(const String& key, const String& defaultValue = "");
@@ -174,6 +181,56 @@ struct HomObject : public HomValue
 
     static HomValueRef make(const HomValueMap& val);
     static HomValueMap pick(const HomValueRef& json);
+};
+
+class HOM
+{
+public:
+    HOM()
+    { }
+
+    virtual ~HOM()
+    {
+        this->clear();
+    }
+
+    template<typename T>
+    T* make()
+    {
+        T* x = new T();
+        mValues.push_back(x);
+        return x;
+    }
+
+    template<typename T>
+    T* make(const typename T::value_type& value)
+    {
+        T* x = new T();
+        x->value = value;
+        mValues.push_back(x);
+        return x;
+    }
+
+    void drop(HomValue* value)
+    {
+        auto iter = mValues.begin();
+        while(iter != mValues.end())
+        {
+            HomValue* val = *iter;
+            if(val != value)
+                continue;
+            _DeletePointer(val);
+            iter = mValues.erase(iter);
+        }
+    }
+
+    void clear()
+    {
+        _DeleteList(mValues);
+    }
+
+private:
+    std::vector<HomValue*> mValues = {};
 };
 
 _EndNamespace(eokas)

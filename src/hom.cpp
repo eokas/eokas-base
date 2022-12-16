@@ -188,11 +188,16 @@ HomValueArray HomArray::pick(const HomValueRef& json)
     return ptr != nullptr ? ptr->value : HomValueArray();
 }
 
-HomObject::HomObject(HomValueMap value)
+HomObject::HomObject(const HomValueMap& value)
     : HomValue(HomType::Object), value(std::move(value))
 {}
 
 HomValueRef& HomObject::operator[](const String& key)
+{
+    return this->value[key];
+}
+
+HomValueRef& HomObject::getValue(const eokas::String &key)
 {
     return this->value[key];
 }
