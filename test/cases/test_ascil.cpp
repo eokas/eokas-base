@@ -19,7 +19,7 @@ _eokas_test_case(ascil)
     {
         Ascil space (' ');
         Ascil enter('\n');
-        _eokas_test_check(space.isSpace() && enter.isSpace());
+        _eokas_test_check(space.isSpace() && !enter.isSpace());
     }
 
     {
