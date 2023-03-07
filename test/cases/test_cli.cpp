@@ -4,12 +4,11 @@ using namespace eokas;
 
 _eokas_test_case(cli)
 {
-    int argc = 8;
-    char* argv[] = {"docker", "run", "--name=eokas", "-p", "80:80", "-v", "/data:/data", "eokas/eokas" };
+    std::vector<const char*> args = {"docker", "run", "--name=eokas", "-p", "80:80", "-v", "/data:/data", "eokas/eokas" };
 
-    cli::Command program(argv[0]);
+    cli::Command program(args[0]);
     program.action([&](const cli::Command& cmd)->void {
-        printf(cmd.toString().cstr());
+        printf("%s", cmd.toString().cstr());
     });
 
     program.subCommand("run", "")
@@ -17,10 +16,10 @@ _eokas_test_case(cli)
         .option("--publish,-p", "", "")
         .option("--volume,-v", "", "")
         .action([&](const cli::Command& cmd)->void{
-            printf(cmd.toString().cstr());
+            printf("%s", cmd.toString().cstr());
         });
 
-    program.exec(argc, argv);
+    program.exec(args);
 
     return 0;
 }

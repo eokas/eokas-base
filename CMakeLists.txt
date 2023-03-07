@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.22)
 
+## Get system info
+cmake_host_system_information(RESULT OS_NAME QUERY OS_NAME)
+message("OS_NNAME = " ${OS_NAME})
 
 ## Project name and version
 project(eokas-base VERSION 1.0)
-
 
 ## C++ Standard and Options
 # Visual Studio 2022 doesn't support C++20
@@ -27,7 +29,7 @@ add_library(${PROJECT_NAME} STATIC ${SRC_DIR})
 file(GLOB HEADER_FILES "./src/*.h")
 message("headers " ${HEADER_FILES})
 install(FILES ${HEADER_FILES} DESTINATION include/${PROJECT_NAME})
-install(TARGETS ${PROJECT_NAME} DESTINATION lib/${CMAKE_BUILD_TYPE})
+install(TARGETS ${PROJECT_NAME} DESTINATION lib/${OS_NAME}/${CMAKE_BUILD_TYPE})
 
 
 ## Test
