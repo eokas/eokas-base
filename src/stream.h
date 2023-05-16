@@ -1,9 +1,9 @@
 
-#ifndef _EOKAS_DIALECT_STREAM_H_
-#define _EOKAS_DIALECT_STREAM_H_
+#ifndef _EOKAS_BASE_STREAM_H_
+#define _EOKAS_BASE_STREAM_H_
 
-#include "header.h"
-#include "string.h"
+#include "./header.h"
+#include "./string.h"
 
 _BeginNamespace(eokas)
 
@@ -65,20 +65,14 @@ public:
     {}
 
     template<typename T>
-    bool read(T& value);
-
-    template<>
-    bool read<String>(String& value);
-
+    inline bool read(T& value);
+	
     template <typename T>
-    bool write(const T& value);
-
-    template <>
-    bool write<String>(const String& value);
+    inline bool write(const T& value);
 };
 
 template<typename T>
-bool BinaryStream::read(T& value)
+inline bool BinaryStream::read(T& value)
 {
     Stream& base = *this;
     size_t size = sizeof(T);
@@ -86,7 +80,7 @@ bool BinaryStream::read(T& value)
     return rlen == size;
 }
 template<>
-bool BinaryStream::read<String>(String& value)
+inline bool BinaryStream::read<String>(String& value)
 {
     Stream& base = *this;
     u16_t size = 0;
@@ -98,7 +92,7 @@ bool BinaryStream::read<String>(String& value)
 }
 
 template <typename T>
-bool BinaryStream::write(const T& value)
+inline bool BinaryStream::write(const T& value)
 {
     Stream& base = *this;
     size_t size = sizeof(T);
@@ -106,7 +100,7 @@ bool BinaryStream::write(const T& value)
     return wlen == size;
 }
 template <>
-bool BinaryStream::write<String>(const String& value)
+inline bool BinaryStream::write<String>(const String& value)
 {
     Stream& base = *this;
     u16_t size = (u16_t)value.length();
@@ -190,4 +184,4 @@ public:
 
 _EndNamespace(eokas)
 
-#endif//_EOKAS_DIALECT_STREAM_H_
+#endif//_EOKAS_BASE_STREAM_H_
