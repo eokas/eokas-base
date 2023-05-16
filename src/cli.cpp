@@ -85,13 +85,13 @@ String Command::toString() const
 	return str;
 }
 
-void Command::exec(int argc, char** argv)
+void Command::exec(size_t argc, char const* const * argv)
 {
 	if(argc <= 0 || this->name != String(argv[0]))
 		throw std::invalid_argument("Invalid arguments");
 	
 	std::vector<StringValue> args;
-	for (int i = 0; i < argc; i++)
+	for (size_t i = 0; i < argc; i++)
 	{
 		String arg = argv[i];
 		args.emplace_back(arg);
@@ -142,7 +142,7 @@ void Command::exec(int argc, char** argv)
 		}
 	}
 	
-	// Only has commands but arguments didn't consumed by commands.
+	// Only has commands but arguments were not consumed by commands.
 	if(this->subCommands.size() > 0 && this->options.size() <= 0 && !isArgumentsConsumedByCommands)
 		throw std::invalid_argument("Invalid arguments.");
 
@@ -151,6 +151,11 @@ void Command::exec(int argc, char** argv)
 		throw std::invalid_argument("Invalid arguments");
 	
 	return this->func(*this);
+}
+
+void Command::exec(const std::vector<const char *> &args)
+{
+    this->exec(args.size(), args.data());
 }
 
 _EndNamespace(eokas::cli)

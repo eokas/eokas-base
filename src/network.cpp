@@ -82,7 +82,7 @@ struct IOCP
 			HANDLE* handles = this->threads.data();
 			while (WaitForMultipleObjects((DWORD)count, handles, TRUE, 0) != WAIT_OBJECT_0)
 			{
-				PostQueuedCompletionStatus(this->handle, 0, NULL, NULL);
+				PostQueuedCompletionStatus(this->handle, 0, 0, nullptr);
 			}
 
 			for (auto iter = this->threads.begin(); iter != this->threads.end(); ++iter)
