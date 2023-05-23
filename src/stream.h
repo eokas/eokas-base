@@ -1,9 +1,9 @@
 
-#ifndef _EOKAS_DIALECT_STREAM_H_
-#define _EOKAS_DIALECT_STREAM_H_
+#ifndef _EOKAS_BASE_STREAM_H_
+#define _EOKAS_BASE_STREAM_H_
 
-#include "header.h"
-#include "string.h"
+#include "./header.h"
+#include "./string.h"
 
 _BeginNamespace(eokas)
 
@@ -65,44 +65,50 @@ public:
     {}
 
     template<typename T>
-    bool read(T& value)
-    {
-        Stream& base = *this;
-        size_t size = sizeof(T);
-        size_t rlen = base.read((void*)&value, size);
-        return rlen == size;
-    }
-    template<>
-    bool read<String>(String& value)
-    {
-        Stream& base = *this;
-        u16_t size = 0;
-        if (!this->read(size))
-            return false;
-        value = String('\0', (size_t)size);
-        size_t rlen = base.read((void*)value.cstr(), size);
-        return rlen == size;
-    }
-
+    inline bool read(T& value);
+	
     template <typename T>
-    bool write(const T& value)
-    {
-        Stream& base = *this;
-        size_t size = sizeof(T);
-        size_t wlen = base.write((void*)&value, size);
-        return wlen == size;
-    }
-    template <>
-    bool write<String>(const String& value)
-    {
-        Stream& base = *this;
-        u16_t size = (u16_t)value.length();
-        if (!this->write(size))
-            return false;
-        size_t wlen = base.write((void*)value.cstr(), size);
-        return wlen == size;
-    }
+    inline bool write(const T& value);
 };
+
+template<typename T>
+inline bool BinaryStream::read(T& value)
+{
+    Stream& base = *this;
+    size_t size = sizeof(T);
+    size_t rlen = base.read((void*)&value, size);
+    return rlen == size;
+}
+template<>
+inline bool BinaryStream::read<String>(String& value)
+{
+    Stream& base = *this;
+    u16_t size = 0;
+    if (!this->read(size))
+        return false;
+    value = String('\0', (size_t)size);
+    size_t rlen = base.read((void*)value.cstr(), size);
+    return rlen == size;
+}
+
+template <typename T>
+inline bool BinaryStream::write(const T& value)
+{
+    Stream& base = *this;
+    size_t size = sizeof(T);
+    size_t wlen = base.write((void*)&value, size);
+    return wlen == size;
+}
+template <>
+inline bool BinaryStream::write<String>(const String& value)
+{
+    Stream& base = *this;
+    u16_t size = (u16_t)value.length();
+    if (!this->write(size))
+        return false;
+    size_t wlen = base.write((void*)value.cstr(), size);
+    return wlen == size;
+}
 
 class TextStream :public DataStream
 {
@@ -178,4 +184,4 @@ public:
 
 _EndNamespace(eokas)
 
-#endif//_EOKAS_DIALECT_STREAM_H_
+#endif//_EOKAS_BASE_STREAM_H_

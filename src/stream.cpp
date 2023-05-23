@@ -1,6 +1,6 @@
 
-#include "stream.h"
-#include "string.h"
+#include "./stream.h"
+#include "./string.h"
 
 _BeginNamespace(eokas)
 

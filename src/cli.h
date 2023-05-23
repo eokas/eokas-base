@@ -2,8 +2,9 @@
 #ifndef  _EOKAS_BASE_CLI_H_
 #define  _EOKAS_BASE_CLI_H_
 
-#include "header.h"
-#include "string.h"
+#include "./header.h"
+#include "./string.h"
+#include <optional>
 
 _BeginNamespace(eokas::cli)
 
@@ -41,7 +42,8 @@ struct Command
 	
 	String toString() const;
 	
-	void exec(int argc, char** argv);
+	void exec(size_t argc, char const * const * argv);
+    void exec(const std::vector<const char*>& args);
 };
 
 _EndNamespace(eokas::cli)

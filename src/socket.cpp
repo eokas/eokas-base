@@ -1,5 +1,5 @@
 
-#include "socket.h"
+#include "./socket.h"
 
 _BeginNamespace(eokas)
 
@@ -81,46 +81,32 @@ u16_t ByteOrder::h2nI16(u16_t value)
 {
 	return htons(value);
 }
+
 u32_t ByteOrder::h2nI32(u32_t value)
 {
 	return htonl(value);
 }
-u64_t ByteOrder::h2nI64(u64_t value)
-{
-	return htonll(value);
-}
+
 u32_t ByteOrder::h2nF32(f32_t value)
 {
 	u32_t temp = *(u32_t*)&value;
 	return htonl(temp);
-}
-u64_t ByteOrder::h2nF64(f64_t value)
-{
-	u64_t temp = *(u64_t*)&value;
-	return htonll(temp);
 }
 
 u16_t ByteOrder::n2hI16(u16_t value)
 {
 	return ntohs(value);
 }
+
 u32_t ByteOrder::n2hI32(u32_t value)
 {
 	return ntohl(value);
 }
-u64_t ByteOrder::n2hI64(u64_t value)
-{
-	return ntohll(value);
-}
+
 f32_t ByteOrder::n2hF32(u32_t value)
 {
 	u32_t temp = ntohl(value);
 	return *(f32_t*)&temp;
-}
-f64_t ByteOrder::n2hF64(u64_t value)
-{
-	u64_t temp = ntohll(value);
-	return *(f64_t*)&temp;
 }
 
 /*

@@ -9,6 +9,12 @@ eokas base library.
 ./build.sh
 ```
 
+## Test
+```
+cd cmake-build-debug
+ctest --output-on-failure
+```
+
 ## License
 
 MIT License

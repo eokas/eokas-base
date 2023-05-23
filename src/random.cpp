@@ -1,9 +1,11 @@
 
-#include "random.h"
+#include "./random.h"
 #include <ctime>
 #include <cmath>
 
 _BeginNamespace(eokas)
+
+Random_Fake Random_Fake::globalRandom = Random_Fake();
 
 Random_Fake::Random_Fake()
 	:seed(0)

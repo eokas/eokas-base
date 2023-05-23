@@ -1,7 +1,7 @@
 			  
 #include "network.h"
 
-#if _EOKAS_OS == _EOKAS_OS_WIN32
+#if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
 
 #include <mutex>
 #include <WinSock2.h>
@@ -82,7 +82,7 @@ struct IOCP
 			HANDLE* handles = this->threads.data();
 			while (WaitForMultipleObjects((DWORD)count, handles, TRUE, 0) != WAIT_OBJECT_0)
 			{
-				PostQueuedCompletionStatus(this->handle, 0, NULL, NULL);
+				PostQueuedCompletionStatus(this->handle, 0, 0, nullptr);
 			}
 
 			for (auto iter = this->threads.begin(); iter != this->threads.end(); ++iter)
