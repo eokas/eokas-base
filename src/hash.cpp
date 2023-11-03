@@ -3,8 +3,7 @@
 #include "./string.h"
 #include <cstring>
 
-namespace eokas
-{
+namespace eokas {
 /**
  * =================================================================
  * MD5

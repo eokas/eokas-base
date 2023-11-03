@@ -9,116 +9,100 @@
 
 #pragma comment(lib, "wbemuuid.lib")
 
-namespace eokas
-{
+namespace eokas {
     /**
      * WMI: Windows Management Infrastructure
      * https://learn.microsoft.com/en-us/windows/win32/wmisdk/example--getting-wmi-data-from-the-local-computer
      * */
-
-    class WMIQuery
-    {
+    
+    class WMIQuery {
         _ForbidCopy(WMIQuery);
+        
         _ForbidAssign(WMIQuery);
-
+    
     public:
         WMIQuery(IEnumWbemClassObject* enumerator)
-            :m_Enumerator(enumerator)
-        {
-            while (m_Enumerator)
-            {
+            : m_Enumerator(enumerator) {
+            while (m_Enumerator) {
                 ULONG uReturn = 0;
                 HRESULT hr = m_Enumerator->Next(WBEM_INFINITE, 1, &m_ClassObject, &uReturn);
-                if(uReturn == 0)
-                {
+                if (uReturn == 0) {
                     break;
                 }
             }
-
+            
         }
-
-        virtual ~WMIQuery()
-        {
-            if(m_ClassObject != NULL)
-            {
+        
+        virtual ~WMIQuery() {
+            if (m_ClassObject != NULL) {
                 m_ClassObject->Release();
                 m_ClassObject = NULL;
             }
-            if(m_Enumerator != NULL)
-            {
+            if (m_Enumerator != NULL) {
                 m_Enumerator->Release();
                 m_Enumerator = NULL;
             }
         }
-
-        std::string getValue(const std::string& key)
-        {
-            if(m_ClassObject == NULL)
+        
+        std::string getValue(const std::string& key) {
+            if (m_ClassObject == NULL)
                 return "";
-
+            
             std::wstring propKey = String::utf8ToUnicode(key, false);
-
+            
             VARIANT propVal;
             VariantInit(&propVal);
-
+            
             // Get the value of the Name property
             HRESULT hr = m_ClassObject->Get(propKey.c_str(), 0, &propVal, 0, 0);
-            if(FAILED(hr))
-            {
+            if (FAILED(hr)) {
                 VariantClear(&propVal);
                 return "";
             }
-
+            
             std::string ret = String::unicodeToUtf8(propVal.bstrVal, false);
-
+            
             VariantClear(&propVal);
-
+            
             return ret;
         }
-
+    
     private:
         IEnumWbemClassObject* m_Enumerator = NULL;
-        IWbemClassObject *m_ClassObject = NULL;
+        IWbemClassObject* m_ClassObject = NULL;
     };
-
-    class WMIScope
-    {
+    
+    class WMIScope {
         _ForbidCopy(WMIScope);
+        
         _ForbidAssign(WMIScope);
-
+    
     public:
-        static WMIScope& local()
-        {
+        static WMIScope& local() {
             static const wchar_t* server = L"ROOT\\CIMV2";
             static WMIScope scope(server);
             return scope;
         }
-
+    
     public:
-        explicit WMIScope(const wchar_t* server)
-        {
+        explicit WMIScope(const wchar_t* server) {
             this->init(server);
         }
-
-        ~WMIScope()
-        {
+        
+        ~WMIScope() {
             this->quit();
         }
-
-        bool init(const wchar_t* server)
-        {
+        
+        bool init(const wchar_t* server) {
             /**
              * https://learn.microsoft.com/en-us/windows/win32/api/combaseapi/nf-combaseapi-coinitializeex
              * */
             HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
-            if(FAILED(hr))
-            {
+            if (FAILED(hr)) {
                 return false;
             }
-
-            hr = CoInitializeSecurity(
-                NULL,
-                -1,                             // COM authentication
+            
+            hr = CoInitializeSecurity(NULL, -1,                             // COM authentication
                 NULL,                           // Authentication services
                 NULL,                           // Reserved
                 RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication
@@ -127,25 +111,18 @@ namespace eokas
                 EOAC_NONE,                   // Additional capabilities
                 NULL                         // Reserved
             );
-            if(FAILED(hr))
-            {
+            if (FAILED(hr)) {
                 this->quit();
                 return false;
             }
-
-            hr = CoCreateInstance(
-                    CLSID_WbemLocator,
-                    0,
-                    CLSCTX_INPROC_SERVER,
-                    IID_IWbemLocator, (LPVOID *) &m_Locator);
-            if(FAILED(hr))
-            {
+            
+            hr = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*) &m_Locator);
+            if (FAILED(hr)) {
                 this->quit();
                 return false;
             }
-
-            hr = m_Locator->ConnectServer(
-                _bstr_t(server), // Object path of WMI namespace
+            
+            hr = m_Locator->ConnectServer(_bstr_t(server), // Object path of WMI namespace
                 NULL,                    // User name. NULL = current user
                 NULL,                    // User password. NULL = current
                 0,                       // Locale. NULL indicates current
@@ -154,14 +131,12 @@ namespace eokas
                 0,                       // Context object
                 &m_Services           // pointer to IWbemServices proxy
             );
-            if(FAILED(hr))
-            {
+            if (FAILED(hr)) {
                 this->quit();
                 return false;
             }
-
-            hr = CoSetProxyBlanket(
-                m_Services,                        // Indicates the proxy to set
+            
+            hr = CoSetProxyBlanket(m_Services,                        // Indicates the proxy to set
                 RPC_C_AUTHN_WINNT,           // RPC_C_AUTHN_xxx
                 RPC_C_AUTHZ_NONE,            // RPC_C_AUTHZ_xxx
                 NULL,                        // Server principal name
@@ -170,181 +145,153 @@ namespace eokas
                 NULL,                        // client identity
                 EOAC_NONE                    // proxy capabilities
             );
-            if(FAILED(hr))
-            {
+            if (FAILED(hr)) {
                 this->quit();
                 return false;
             }
-
+            
             return true;
         }
-
-        void quit()
-        {
+        
+        void quit() {
             _DeleteList(m_Queries);
-
-            if(m_Services != NULL)
-            {
+            
+            if (m_Services != NULL) {
                 m_Services->Release();
                 m_Services = NULL;
             }
-            if(m_Locator != NULL) {
+            if (m_Locator != NULL) {
                 m_Locator->Release();
                 m_Locator = NULL;
             }
-
+            
             CoUninitialize();
         }
-
-        WMIQuery* query(const char* wql)
-        {
-            if(m_Locator == NULL || m_Services == NULL)
+        
+        WMIQuery* query(const char* wql) {
+            if (m_Locator == NULL || m_Services == NULL)
                 return NULL;
-
+            
             IEnumWbemClassObject* enumerator = NULL;
-            HRESULT hr = m_Services->ExecQuery(
-                bstr_t("WQL"),
-                bstr_t(wql),
-                WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
-                NULL,
-                &enumerator
-            );
-            if(FAILED(hr))
-            {
+            HRESULT hr = m_Services->ExecQuery(bstr_t("WQL"), bstr_t(wql), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &enumerator);
+            if (FAILED(hr)) {
                 return NULL;
             }
-
+            
             WMIQuery* q = new WMIQuery(enumerator);
             m_Queries.push_back(q);
-
+            
             return q;
         }
-
+    
     private:
         IWbemLocator* m_Locator = NULL;
         IWbemServices* m_Services = NULL;
         std::vector<WMIQuery*> m_Queries = {};
     };
-
-    struct WindowsInfo
-    {
-        static String getBaseboardSerialNumber()
-        {
+    
+    struct WindowsInfo {
+        static String getBaseboardSerialNumber() {
             auto* query = WMIScope::local().query("SELECT * FROM Win32_Baseboard");
             return query->getValue("SerialNumber");
         }
-
-        static String getBiosSerialNumber()
-        {
+        
+        static String getBiosSerialNumber() {
             auto* query = WMIScope::local().query("SELECT * FROM Win32_BIOS");
             return query->getValue("SerialNumber");
         }
-
-        static String getProcessorUniqueId()
-        {
+        
+        static String getProcessorUniqueId() {
             auto* query = WMIScope::local().query("SELECT * FROM Win32_Processor");
             return query->getValue("UniqueId");
         }
-
-        static String getDiskDriveSerialNumber()
-        {
+        
+        static String getDiskDriveSerialNumber() {
             auto* query = WMIScope::local().query("SELECT * FROM Win32_DiskDrive");
             return query->getValue("SerialNumber");
         }
-
-        static String getOperatingSystemSerialNumber()
-        {
+        
+        static String getOperatingSystemSerialNumber() {
             auto* query = WMIScope::local().query("SELECT * FROM Win32_OperatingSystem");
             return query->getValue("SerialNumber");
         }
     };
-
-    String OS::getSystemName()
-    {
+    
+    String OS::getSystemName() {
         return "Windows";
     }
-
-    String OS::getSystemVersion()
-    {
+    
+    String OS::getSystemVersion() {
         return "";
     }
-
-    String OS::getDeviceName()
-    {
+    
+    String OS::getDeviceName() {
         CHAR buffer[256] = {0};
         DWORD count = 0;
-        if(!GetComputerNameA(buffer, &count))
+        if (!GetComputerNameA(buffer, &count))
             return "";
         return String(buffer, count);
     };
-
-    u32_t OS::getCpuCount()
-    {
+    
+    u32_t OS::getCpuCount() {
         SYSTEM_INFO sysInfo;
         GetSystemInfo(&sysInfo);
         u32_t cpuCount = sysInfo.dwNumberOfProcessors;
         return cpuCount;
     }
-
-    CpuState& OS::getCpuState(u32_t index)
-    {
+    
+    CpuState& OS::getCpuState(u32_t index) {
         static CpuState cpu;
         return cpu;
     }
-
-    MemoryState& OS::getMemoryState()
-    {
+    
+    MemoryState& OS::getMemoryState() {
         static MemoryState result;
-        if(result.total > 0)
+        if (result.total > 0)
             return result;
-
+        
         MEMORYSTATUSEX memstat;
         memstat.dwLength = sizeof(memstat);
         if (!GlobalMemoryStatusEx(&memstat)) {
             return result;
         }
-
+        
         result.total = memstat.ullTotalPhys;
         result.available = memstat.ullAvailPhys;
         return result;
     }
-
-    String OS::getEnv(const String &name)
-    {
-        if(name.isEmpty())
+    
+    String OS::getEnv(const String& name) {
+        if (name.isEmpty())
             return "";
-
-        char buffer[512] = { 0 };
+        
+        char buffer[512] = {0};
         u32_t length = _ArrayLength(buffer);
-
+        
         u32_t len = GetEnvironmentVariableA(name.cstr(), buffer, length);
-
+        
         return String(buffer, len);
     }
-
-    void OS::setEnv(const String &name, const String &value)
-    {
-        if(name.isEmpty())
+    
+    void OS::setEnv(const String& name, const String& value) {
+        if (name.isEmpty())
             return;
         SetEnvironmentVariableA(name.cstr(), value.cstr());
     }
-
-    String OS::getCurrentUser()
-    {
+    
+    String OS::getCurrentUser() {
         CHAR buffer[256];
         DWORD count = 0;
-        if(!GetUserNameA(buffer, &count))
+        if (!GetUserNameA(buffer, &count))
             return "";
         return String(buffer, count);
     }
-
-    u32_t OS::getCurrentProcess()
-    {
+    
+    u32_t OS::getCurrentProcess() {
         return GetCurrentProcessId();
     }
-
-    u32_t OS::getCurrentThread()
-    {
+    
+    u32_t OS::getCurrentThread() {
         return GetCurrentThreadId();
     }
 }

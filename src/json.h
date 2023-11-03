@@ -4,15 +4,13 @@
 
 #include "hom.h"
 
-_BeginNamespace(eokas)
-
-struct JSON
-{
-    static String stringify(const HomValueRef& json);
-
-    static HomValueRef parse(const String& source);
-};
-
-_EndNamespace(eokas)
+namespace eokas {
+    
+    struct JSON {
+        static String stringify(const HomValueRef& json);
+        static HomValueRef parse(const String& source);
+    };
+    
+}
 
 #endif//_EOKAS_BASE_JSON_H_

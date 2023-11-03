@@ -5,57 +5,51 @@
 
 #include <windows.h>
 
-_BeginNamespace(eokas)
-
-struct TimerImpl
-{
-	f64_t lastCount;
-};
-
-Timer::Timer()
-	:mImpl(new TimerImpl())
-{
-	this->reset();
+namespace eokas {
+    
+    struct TimerImpl {
+        f64_t lastCount;
+    };
+    
+    Timer::Timer()
+        : mImpl(new TimerImpl()) {
+        this->reset();
+    }
+    
+    Timer::~Timer() {
+        delete mImpl;
+    }
+    
+    void Timer::reset() {
+        LARGE_INTEGER counter;
+        QueryPerformanceCounter(&counter);
+        mImpl->lastCount = (f64_t) (counter.QuadPart);
+    }
+    
+    i64_t Timer::elapse(bool isReset) {
+        LARGE_INTEGER count;
+        QueryPerformanceCounter(&count);
+        f64_t curCount = (f64_t) (count.QuadPart);
+        f64_t lastCount = mImpl->lastCount;
+        if (isReset) {
+            mImpl->lastCount = curCount;
+        }
+        
+        LARGE_INTEGER frequency;
+        QueryPerformanceFrequency(&frequency);
+        f64_t curFrequency = (f64_t) (frequency.QuadPart);
+        
+        i64_t result = (i64_t) ((curCount - lastCount) / curFrequency * 1000000);
+        return result;
+    }
+    
 }
-
-Timer::~Timer()
-{
-	delete mImpl;
-}
-
-void Timer::reset()
-{
-	LARGE_INTEGER counter;
-	QueryPerformanceCounter(&counter);
-	mImpl->lastCount = (f64_t)(counter.QuadPart);
-}
-
-i64_t Timer::elapse(bool isReset)
-{
-	LARGE_INTEGER count;
-	QueryPerformanceCounter(&count);
-	f64_t curCount = (f64_t)(count.QuadPart);
-	f64_t lastCount = mImpl->lastCount;
-	if(isReset)
-	{
-		mImpl->lastCount = curCount;
-	}
-
-	LARGE_INTEGER frequency;
-	QueryPerformanceFrequency(&frequency);
-	f64_t curFrequency = (f64_t)(frequency.QuadPart);
-
-	i64_t result = (i64_t)((curCount - lastCount) / curFrequency * 1000000);
-	return result;
-}
-
-_EndNamespace(eokas)
 
 #elif _EOKAS_OS == _EOKAS_OS_MACOS || _EOKAS_OS == _EOKAS_OS_IOS
 
 #include <mach/mach_time.h>
 
-_BeginNamespace(eokas)
+namespace eokas {
 
 struct TimerImpl
 {
@@ -95,6 +89,6 @@ i64_t Timer::elapse(bool isReset)
 	return result;
 }
 
-_EndNamespace(eokas)
+}
 
 #endif

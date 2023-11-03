@@ -150,13 +150,6 @@
 == Frequently used types and macros
 =================================================================
 */
-#ifndef _BeginNamespace
-#define _BeginNamespace(ns) namespace ns {
-#endif//_BeginNamespace
-
-#ifndef _EndNamespace
-#define _EndNamespace(ns) }
-#endif//_EndNamespace
 
 #ifndef _TokenToStr
 #define _TokenToStr(token) (#token)
@@ -231,10 +224,9 @@
 #include <memory>
 #include <functional>
 
-namespace eokas
-{
+namespace eokas {
     using byte = unsigned char;
-
+    
     using i8_t = int8_t;
     using u8_t = uint8_t;
     using i16_t = int16_t;
@@ -243,64 +235,64 @@ namespace eokas
     using u32_t = uint32_t;
     using i64_t = int64_t;
     using u64_t = uint64_t;
-
+    
     using f32_t = float;
     using f64_t = double;
 
 #ifndef _FloatEqual
-    #define _FloatEqual(a, b) ((a)>=(b) ? ((a)-(b)<=0.000001f) : ((b)-(a)<=0.000001f))
+#define _FloatEqual(a, b) ((a)>=(b) ? ((a)-(b)<=0.000001f) : ((b)-(a)<=0.000001f))
 #endif//_FloatEqual
 #ifndef _FloatNotEqual
-    #define _FloatNotEqual(a, b) ((a)-(b)>0.000001f || (a)-(b)<-0.000001f)
+#define _FloatNotEqual(a, b) ((a)-(b)>0.000001f || (a)-(b)<-0.000001f)
 #endif//_FloatNotEqual
-
+    
     using MBString = std::string;
     using WCString = std::wstring;
 #if(_EOKAS_STRINGTYPE == _EOKAS_STRINGTYPE_MBS)
     using StringType = MBString;
-    #ifndef _T
-        #define _T(cstr) (cstr)
-    #endif//_T
-    #ifndef _ToStr
-        #define _ToStr(token) _T(_TokenToStr(token))
-    #endif//_ToStr
+#ifndef _T
+#define _T(cstr) (cstr)
+#endif//_T
+#ifndef _ToStr
+#define _ToStr(token) _T(_TokenToStr(token))
+#endif//_ToStr
 #else
     using StringType = WCString;
-    #ifndef _T
-        #define _T(cstr) (_CombineToken(L, cstr))
-    #endif//_T
-        #ifndef _ToStr
-    #define _ToStr(token) _T(_TokenToStr(token))
-    #endif//_ToStr
+#ifndef _T
+#define _T(cstr) (_CombineToken(L, cstr))
+#endif//_T
+#ifndef _ToStr
+#define _ToStr(token) _T(_TokenToStr(token))
+#endif//_ToStr
 #endif//(_EOKAS_STRINGTYPE == _EOKAS_STRINGTYPE_MBS)
-
+    
     using String = class String;
-
-    class Interface
-    {
+    
+    class Interface {
     public:
-        virtual ~Interface() {}
+        virtual ~Interface() {
+        }
     };
-
-    class Object
-    {
+    
+    class Object {
     public:
-        virtual ~Object() {}
-
-        virtual const std::type_info &dataType() {
+        virtual ~Object() {
+        }
+        
+        virtual const std::type_info& dataType() {
             return typeid(*this);
         }
-
+        
         template<typename T>
         bool is() {
             return typeid(T).before(this->dataType());
         }
-
+        
         template<typename T>
         T* as() {
             return dynamic_cast<T*>(this);
         }
     };
-};
+}
 
 #endif//_EOKAS_BASE_HEADER_H_

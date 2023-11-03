@@ -6,7 +6,7 @@
 #include <sstream>
 #include <cstdarg>
 
-_BeginNamespace(eokas)
+namespace eokas {
 
 typedef std::list<String> StringList;
 typedef std::vector<String> StringVector;
@@ -314,6 +314,6 @@ using StringValueList = std::list<StringValue>;
 using StringValueVector = std::vector<StringValue>;
 using StringValueMap = std::map<String, StringValue>;
 
-_EndNamespace(eokas)
+}
 
 #endif//_EOKAS_BASE_STRING_H_
