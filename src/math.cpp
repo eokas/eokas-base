@@ -1189,6 +1189,25 @@ Sphere& Sphere::expand(const Vector3& p)
 
 /*
 ============================================================
+== Rect
+============================================================
+*/
+Rect::Rect(f32_t x, f32_t y, f32_t w, f32_t h)
+    :x(x), y(y), width(w), height(h)
+{ }
+
+Rect::Rect(const Vector2& pos, const Vector2& size)
+    :x(pos.x), y(pos.y), width(size.x), height(size.y)
+{ }
+
+bool Rect::contains(const Vector2& p)
+{
+    return p.x >= this->x && p.x <= this->x + this->width
+        && p.y >= this->x && p.y <= this->y + this->height;
+}
+
+/*
+============================================================
 == Bounds2
 ============================================================
 */
