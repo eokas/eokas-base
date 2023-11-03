@@ -154,28 +154,18 @@ namespace eokas {
     class Pixelmap {
     public:
         Pixelmap();
-        
         Pixelmap(const Pixelmap& pxmp);
-        
         Pixelmap(u32_t width, u32_t height, PixelFormat format, void* data = nullptr);
-        
         Pixelmap(const Pixelmap& pxmp, u32_t x, u32_t y, u32_t w, u32_t h);
-        
         virtual ~Pixelmap();
     
     public:
         u32_t width() const;
-        
         u32_t height() const;
-        
         PixelFormat format() const;
-        
         void* const data() const;
-        
         Pixelmap getArea(u32_t x, u32_t y, u32_t w, u32_t h);
-        
         void setArea(u32_t x, u32_t y, const Pixelmap& pxmp);
-        
         void clear();
     
     private:

@@ -14,12 +14,12 @@ namespace eokas {
     == Vector2
     ============================================================
     */
-    const Vector2 Vector2::zero(0, 0);
-    const Vector2 Vector2::one(1, 1);
-    const Vector2 Vector2::up(0, 1);
-    const Vector2 Vector2::down(0, -1);
-    const Vector2 Vector2::right(1, 0);
-    const Vector2 Vector2::left(-1, 0);
+    const Vector2 Vector2::ZERO(0, 0);
+    const Vector2 Vector2::ONE(1, 1);
+    const Vector2 Vector2::UP(0, 1);
+    const Vector2 Vector2::DOWN(0, -1);
+    const Vector2 Vector2::RIGHT(1, 0);
+    const Vector2 Vector2::LEFT(-1, 0);
     
     Vector2 Vector2::random(f32_t scale) {
         f32_t angle = Random::value() * Math::PI_MUL_2;
@@ -27,6 +27,27 @@ namespace eokas {
         out.x = std::cos(angle) * scale;
         out.y = std::sin(angle) * scale;
         return out;
+    }
+    
+    f32_t Vector2::dot(const Vector2& v1, const Vector2& v2) {
+        return v1.x * v2.x + v1.y * v2.y;
+    }
+    
+    f32_t Vector2::cosA(const Vector2& v1, const Vector2& v2) {
+        f32_t dot12 = Vector2::dot(v1, v2);
+        f32_t len1 = v1.magnitude();
+        f32_t len2 = v2.magnitude();
+        return dot12 / (len1 * len2);
+    }
+    
+    f32_t Vector2::radians(const Vector2& v1, const Vector2& v2) {
+        f32_t cosA = Vector2::cosA(v1, v2);
+        return std::acos(cosA);
+    }
+    
+    f32_t Vector2::angles(const Vector2& v1, const Vector2& v2) {
+        f32_t r = Vector2::radians(v1, v2);
+        return Math::radianToAngle(r);
     }
     
     Vector2::Vector2()
@@ -133,14 +154,14 @@ namespace eokas {
     == Vector3
     ============================================================
     */
-    const Vector3 Vector3::zero(0, 0, 0);
-    const Vector3 Vector3::one(1, 1, 1);
-    const Vector3 Vector3::up(0, 1, 0);
-    const Vector3 Vector3::down(0, -1, 0);
-    const Vector3 Vector3::right(1, 0, 0);
-    const Vector3 Vector3::left(-1, 0, 0);
-    const Vector3 Vector3::forward(0, 0, 1);
-    const Vector3 Vector3::back(0, 0, -1);
+    const Vector3 Vector3::ZERO(0, 0, 0);
+    const Vector3 Vector3::ONE(1, 1, 1);
+    const Vector3 Vector3::UP(0, 1, 0);
+    const Vector3 Vector3::DOWN(0, -1, 0);
+    const Vector3 Vector3::RIGHT(1, 0, 0);
+    const Vector3 Vector3::LEFT(-1, 0, 0);
+    const Vector3 Vector3::FORWARD(0, 0, 1);
+    const Vector3 Vector3::BACK(0, 0, -1);
     
     Vector3 Vector3::random(f32_t scale) {
         f32_t angle = Random::value() * Math::PI_MUL_2;
@@ -152,6 +173,32 @@ namespace eokas {
         out.y = std::sin(angle) * xyScale;
         out.z = z * scale;
         return out;
+    }
+    
+    Vector3 Vector3::cross(const Vector3& v1, const Vector3& v2) {
+        //( y1z2 - z1y2 , z1x2 - x1z2 , x1y2 - y1x2 )
+        return Vector3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
+    }
+    
+    f32_t Vector3::dot(const Vector3& v1, const Vector3& v2) {
+        return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+    }
+    
+    f32_t Vector3::cosA(const Vector3& v1, const Vector3& v2) {
+        f32_t dot12 = Vector3::dot(v1, v2);
+        f32_t len1 = v1.magnitude();
+        f32_t len2 = v2.magnitude();
+        return dot12 / (len1 * len2);
+    }
+    
+    f32_t Vector3::radians(const Vector3& v1, const Vector3& v2) {
+        f32_t cosA = Vector3::cosA(v1, v2);
+        return std::acos(cosA);
+    }
+    
+    f32_t Vector3::angles(const Vector3& v1, const Vector3& v2) {
+        f32_t r = Vector3::radians(v1, v2);
+        return Math::radianToAngle(r);
     }
     
     Vector3::Vector3()
@@ -268,8 +315,12 @@ namespace eokas {
     == Vector4
     ============================================================
     */
-    const Vector4 Vector4::zero(0, 0, 0, 0);
-    const Vector4 Vector4::one(1, 1, 1, 1);
+    const Vector4 Vector4::ZERO(0, 0, 0, 0);
+    const Vector4 Vector4::ONE(1, 1, 1, 1);
+    
+    f32_t Vector4::dot(const Vector4& v1, const Vector4& v2) {
+        return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w;
+    }
     
     Vector4::Vector4()
         : x(0), y(0), z(0), w(0) {
@@ -391,7 +442,64 @@ namespace eokas {
     == Matrix3
     ============================================================
     */
-    const Matrix3 Matrix3::identity(1, 0, 0, 0, 1, 0, 0, 0, 1);
+    const Matrix3 Matrix3::IDENTITY(1, 0, 0, 0, 1, 0, 0, 0, 1);
+    
+    Matrix3 Matrix3::translation(const Vector2& dir) {
+        Matrix3 m = Matrix3::IDENTITY;
+        m.value[2][0] = dir.x;
+        m.value[2][1] = dir.y;
+        return m;
+    }
+    
+    /*
+    | 1,  0,  0|     | cosA,  sinA,  0|     | 1,  0,  0|
+    | 0,  1,  0|  X  |-sinA,  cosA,  0|  X  | 0,  1,  0|
+    |-x, -y,  1|     |    0,     0,  1|     | x,  y,  1|
+    */
+    Matrix3 Matrix3::rotation(const Vector2& axis, f32_t angle) {
+        Matrix3 m = Matrix3::IDENTITY;
+        f32_t x = axis.x;
+        f32_t y = axis.y;
+        f32_t sinAngle = sin(angle);
+        f32_t cosAngle = cos(angle);
+        m.value[0][0] = cosAngle;
+        m.value[0][1] = sinAngle;
+        m.value[0][2] = 0.0f;
+        m.value[1][0] = -sinAngle;
+        m.value[1][1] = cosAngle;
+        m.value[1][2] = 0.0f;
+        m.value[2][0] = x * (1.0f - cosAngle) + y * sinAngle;
+        m.value[2][1] = y * (1.0f - cosAngle) - x * cosAngle;
+        m.value[2][2] = 1.0f;
+        return m;
+    }
+    
+    Matrix3 Matrix3::scaling(const Vector2& scale) {
+        Matrix3 m = Matrix3::IDENTITY;
+        m.value[0][0] = scale.x;
+        m.value[1][1] = scale.y;
+        return m;
+    }
+    
+    Vector3 Matrix3::transform(const Vector3& v, const Matrix3& t) {
+        Vector3 result;
+        result.x = v.x * t.value[0][0] + v.y * t.value[1][0] + v.z * t.value[2][0];
+        result.y = v.x * t.value[0][1] + v.y * t.value[1][1] + v.z * t.value[2][1];
+        result.z = v.x * t.value[0][2] + v.y * t.value[1][2] + v.z * t.value[2][2];
+        return result;
+    }
+    
+    Matrix3 Matrix3::transform(const Matrix3& m, const Matrix3& t) {
+        Matrix3 result;
+        for (i32_t i = 0; i < 3; i++) {
+            for (i32_t j = 0; j < 3; j++) {
+                for (i32_t k = 0; k < 3; k++) {
+                    result.value[i][j] += m.value[i][k] * t.value[k][j];
+                }
+            }
+        }
+        return result;
+    }
     
     Matrix3::Matrix3() {
         memset(value, 0, sizeof(value));
@@ -555,7 +663,271 @@ namespace eokas {
     == Matrix4
     ============================================================
     */
-    const Matrix4 Matrix4::identity(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    const Matrix4 Matrix4::IDENTITY(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    
+    Matrix4 Matrix4::translate(const Vector3& dir) {
+        Matrix4 m = Matrix4::IDENTITY;
+        m.value[3][0] = dir.x;
+        m.value[3][1] = dir.y;
+        m.value[3][2] = dir.z;
+        return m;
+    }
+    
+    Matrix4 Matrix4::rotate(const Vector3& axis, f32_t angle) {
+        Matrix4 m = Matrix4::IDENTITY;
+        f32_t x = axis.x;
+        f32_t y = axis.y;
+        f32_t z = axis.z;
+        f32_t sinAngle = sin(angle);
+        f32_t cosAngle = cos(angle);
+        m.value[0][0] = (x * x) * (1.0f - cosAngle) + cosAngle;
+        m.value[1][0] = (x * y) * (1.0f - cosAngle) - (z * sinAngle);
+        m.value[2][0] = (x * z) * (1.0f - cosAngle) + (y * sinAngle);
+        m.value[0][1] = (y * x) * (1.0f - cosAngle) + (z * sinAngle);
+        m.value[1][1] = (y * y) * (1.0f - cosAngle) + cosAngle;
+        m.value[2][1] = (y * z) * (1.0f - cosAngle) - (x * sinAngle);
+        m.value[0][2] = (z * x) * (1.0f - cosAngle) - (y * sinAngle);
+        m.value[1][2] = (z * y) * (1.0f - cosAngle) + (x * sinAngle);
+        m.value[2][2] = (z * z) * (1.0f - cosAngle) + cosAngle;
+        return m;
+    }
+    
+    Matrix4 Matrix4::scale(const Vector3& scale) {
+        Matrix4 m = Matrix4::IDENTITY;
+        m.value[0][0] = scale.x;
+        m.value[1][1] = scale.y;
+        m.value[2][2] = scale.z;
+        return m;
+    }
+    
+    Matrix4 Matrix4::lookToLH(const Vector3& pos, const Vector3& forward, const Vector3& up) {
+        assert(forward != Vector3(0, 0, 0));
+        assert(up != Vector3(0, 0, 0));
+        
+        Vector3 r2 = forward.normalized();
+        Vector3 r0 = Vector3::cross(up, r2);
+        r0.normalize();
+        Vector3 r1 = Vector3::cross(r2, r0);
+        
+        Vector3 negpos = -pos;
+        f32_t d0 = Vector3::dot(r0, negpos);
+        f32_t d1 = Vector3::dot(r1, negpos);
+        f32_t d2 = Vector3::dot(r2, negpos);
+        
+        Matrix4 m;
+        Math::fill(m.value[0], r0.x, r0.y, r0.z, d0);
+        Math::fill(m.value[1], r1.x, r1.y, r1.z, d1);
+        Math::fill(m.value[2], r2.x, r2.y, r2.z, d2);
+        Math::fill(m.value[3], 0.0f, 0.0f, 0.0f, 1.0f);
+        m.transpose();
+        return m;
+    }
+    
+    Matrix4 Matrix4::lookAtLH(const Vector3& pos, const Vector3& focus, const Vector3& up) {
+        Vector3 forward = focus - pos;
+        return Matrix4::lookToLH(pos, forward, up);
+    }
+    
+    Matrix4 Matrix4::lookToRH(const Vector3& pos, const Vector3& forward, const Vector3& up) {
+        Vector3 back = -forward;
+        return Matrix4::lookToLH(pos, back, up);
+    }
+    
+    Matrix4 Matrix4::lookAtRH(const Vector3& pos, const Vector3& focus, const Vector3& up) {
+        Vector3 back = pos - focus;
+        return Matrix4::lookToLH(pos, back, up);
+    }
+    
+    Matrix4 Matrix4::orthographicLH(f32_t width, f32_t height, f32_t near, f32_t far) {
+        assert(_FloatNotEqual(width, 0));
+        assert(_FloatNotEqual(height, 0));
+        assert(_FloatNotEqual(near, far));
+        
+        f32_t range = 1.0f / (far - near);
+        
+        Matrix4 m;
+        Math::fill(m.value[0], 2.0f / width, 0.0f, 0.0f, 0.0f);
+        Math::fill(m.value[1], 0.0f, 2.0f / height, 0.0f, 0.0f);
+        Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
+        Math::fill(m.value[3], 0.0f, 0.0f, -range * near, 1.0f);
+        return m;
+    }
+    
+    Matrix4 Matrix4::orthographicRH(f32_t width, f32_t height, f32_t near, f32_t far) {
+        assert(_FloatNotEqual(width, 0));
+        assert(_FloatNotEqual(height, 0));
+        assert(_FloatNotEqual(near, far));
+        
+        f32_t range = 1.0f / (near - far);
+        
+        Matrix4 m;
+        Math::fill(m.value[0], 2.0f / width, 0.0f, 0.0f, 0.0f);
+        Math::fill(m.value[1], 0.0f, 2.0f / height, 0.0f, 0.0f);
+        Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
+        Math::fill(m.value[3], 0.0f, 0.0f, range * near, 1.0f);
+        return m;
+    }
+    
+    Matrix4 Matrix4::orthographicOffCenterLH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far) {
+        assert(_FloatNotEqual(left, right));
+        assert(_FloatNotEqual(top, bottom));
+        assert(_FloatNotEqual(near, far));
+        
+        f32_t reciprocalWidth = 1.0f / (right - left);
+        f32_t reciprocalHeight = 1.0f / (top - bottom);
+        f32_t range = 1.0f / (far - near);
+        
+        Matrix4 m;
+        Math::fill(m.value[0], reciprocalHeight + reciprocalWidth, 0.0f, 0.0f, 0.0f);
+        Math::fill(m.value[1], 0.0f, reciprocalHeight + reciprocalHeight, 0.0f, 0.0f);
+        Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
+        Math::fill(m.value[3], -(left + right) * reciprocalWidth, -(top + bottom) * reciprocalHeight, -range * near, 1.0f);
+        return m;
+    }
+    
+    Matrix4 Matrix4::orthographicOffCenterRH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far) {
+        assert(_FloatNotEqual(left, right));
+        assert(_FloatNotEqual(top, bottom));
+        assert(_FloatNotEqual(near, far));
+        
+        f32_t reciprocalWidth = 1.0f / (right - left);
+        f32_t reciprocalHeight = 1.0f / (top - bottom);
+        f32_t range = 1.0f / (near - far);
+        
+        Matrix4 m;
+        Math::fill(m.value[0], reciprocalHeight + reciprocalWidth, 0.0f, 0.0f, 0.0f);
+        Math::fill(m.value[1], 0.0f, reciprocalHeight + reciprocalHeight, 0.0f, 0.0f);
+        Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
+        Math::fill(m.value[3], -(left + right) * reciprocalWidth, -(top + bottom) * reciprocalHeight, range * near, 1.0f);
+        return m;
+    }
+    
+    Matrix4 Matrix4::perspectiveLH(f32_t width, f32_t height, f32_t near, f32_t far) {
+        assert(_FloatNotEqual(width, 0.0f));
+        assert(_FloatNotEqual(height, 0.0f));
+        assert(_FloatNotEqual(near, far));
+        
+        f32_t twoNear = near + near;
+        f32_t range = far / (far - near);
+        
+        Matrix4 m;
+        Math::fill(m.value[0], twoNear / width, 0.0f, 0.0f, 0.0f);
+        Math::fill(m.value[1], 0.0f, twoNear / height, 0.0f, 0.0f);
+        Math::fill(m.value[2], 0.0f, 0.0f, range, 1.0f);
+        Math::fill(m.value[3], 0.0f, 0.0f, -range * near, 0.0f);
+        return m;
+    }
+    
+    Matrix4 Matrix4::perspectiveRH(f32_t width, f32_t height, f32_t near, f32_t far) {
+        assert(_FloatNotEqual(width, 0.0f));
+        assert(_FloatNotEqual(height, 0.0f));
+        assert(_FloatNotEqual(near, far));
+        
+        f32_t twoNear = near + near;
+        f32_t range = far / (near - far);
+        
+        Matrix4 m;
+        Math::fill(m.value[0], twoNear / width, 0.0f, 0.0f, 0.0f);
+        Math::fill(m.value[1], 0.0f, twoNear / height, 0.0f, 0.0f);
+        Math::fill(m.value[2], 0.0f, 0.0f, range, -1.0f);
+        Math::fill(m.value[3], 0.0f, 0.0f, range * near, 0.0f);
+        return m;
+    }
+    
+    Matrix4 Matrix4::perspectiveFovLH(f32_t fov, f32_t aspect, f32_t near, f32_t far) {
+        assert(_FloatNotEqual(fov, 0.0f));
+        assert(_FloatNotEqual(aspect, 0.0f));
+        assert(_FloatNotEqual(near, far));
+        
+        f32_t sinFov = std::sin(fov * 0.5f);
+        f32_t cosFov = std::cos(fov * 0.5f);
+        f32_t height = cosFov / sinFov;
+        f32_t width = height / aspect;
+        f32_t range = far / (far - near);
+        
+        Matrix4 m;
+        Math::fill(m.value[0], width, 0.0f, 0.0f, 0.0f);
+        Math::fill(m.value[1], 0.0f, height, 0.0f, 0.0f);
+        Math::fill(m.value[2], 0.0f, 0.0f, range, 1.0f);
+        Math::fill(m.value[3], 0.0f, 0.0f, -range * near, 0.0f);
+        return m;
+    }
+    
+    Matrix4 Matrix4::perspectiveFovRH(f32_t fov, f32_t aspect, f32_t near, f32_t far) {
+        assert(_FloatNotEqual(fov, 0.0f));
+        assert(_FloatNotEqual(aspect, 0.0f));
+        assert(_FloatNotEqual(near, far));
+        
+        f32_t sinFov = std::sin(fov * 0.5f);
+        f32_t cosFov = std::cos(fov * 0.5f);
+        f32_t height = cosFov / sinFov;
+        f32_t width = height / aspect;
+        f32_t range = far / (near - far);
+        
+        Matrix4 m;
+        Math::fill(m.value[0], width, 0.0f, 0.0f, 0.0f);
+        Math::fill(m.value[1], 0.0f, height, 0.0f, 0.0f);
+        Math::fill(m.value[2], 0.0f, 0.0f, range, 1.0f);
+        Math::fill(m.value[3], 0.0f, 0.0f, range * near, 0.0f);
+        return m;
+    }
+    
+    Matrix4 Matrix4::perspectiveOffCenterLH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far) {
+        assert(_FloatNotEqual(left, right));
+        assert(_FloatNotEqual(top, bottom));
+        assert(_FloatNotEqual(near, far));
+        
+        f32_t twoNear = near + near;
+        f32_t reciprocalWidth = 1.0f / (right - left);
+        f32_t reciprocalHeight = 1.0f / (top - bottom);
+        f32_t range = far / (far - near);
+        
+        Matrix4 m;
+        Math::fill(m.value[0], twoNear * reciprocalWidth, 0.0f, 0.0f, 0.0f);
+        Math::fill(m.value[1], 0.0f, twoNear * reciprocalHeight, 0.0f, 0.0f);
+        Math::fill(m.value[2], -(left + right) * reciprocalWidth, -(top + bottom) * reciprocalHeight, range, 1.0f);
+        Math::fill(m.value[3], 0.0f, 0.0f, -range * near, 0.0f);
+        return m;
+    }
+    
+    Matrix4 Matrix4::perspectiveOffCenterRH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far) {
+        assert(_FloatNotEqual(left, right));
+        assert(_FloatNotEqual(top, bottom));
+        assert(_FloatNotEqual(near, far));
+        
+        f32_t twoNear = near + near;
+        f32_t reciprocalWidth = 1.0f / (right - left);
+        f32_t reciprocalHeight = 1.0f / (top - bottom);
+        f32_t range = far / (near - far);
+        
+        Matrix4 m;
+        Math::fill(m.value[0], twoNear * reciprocalWidth, 0.0f, 0.0f, 0.0f);
+        Math::fill(m.value[1], 0.0f, twoNear * reciprocalHeight, 0.0f, 0.0f);
+        Math::fill(m.value[2], (left + right) * reciprocalWidth, (top + bottom) * reciprocalHeight, range, -1.0f);
+        Math::fill(m.value[3], 0.0f, 0.0f, range * near, 0.0f);
+        return m;
+    }
+    
+    Vector4 Matrix4::transform(const Vector4& v, const Matrix4& t) {
+        Vector4 result;
+        result.x = v.x * t.value[0][0] + v.y * t.value[1][0] + v.z * t.value[2][0] + v.w * t.value[3][0];
+        result.y = v.x * t.value[0][1] + v.y * t.value[1][1] + v.z * t.value[2][1] + v.w * t.value[3][1];
+        result.z = v.x * t.value[0][2] + v.y * t.value[1][2] + v.z * t.value[2][2] + v.w * t.value[3][2];
+        result.w = v.x * t.value[0][3] + v.y * t.value[1][3] + v.z * t.value[2][3] + v.w * t.value[3][3];
+        return result;
+    }
+    
+    Matrix4 Matrix4::transform(const Matrix4& m, const Matrix4& t) {
+        Matrix4 result;
+        for (i32_t i = 0; i < 4; i++) {
+            for (i32_t j = 0; j < 4; j++) {
+                for (i32_t k = 0; k < 4; k++) {
+                    result.value[i][j] += m.value[i][k] * t.value[k][j];
+                }
+            }
+        }
+        return result;
+    }
     
     Matrix4::Matrix4() {
         memset(value, 0, sizeof(value));
@@ -740,7 +1112,28 @@ namespace eokas {
     == Quaternion
     ============================================================
     */
-    const Quaternion Quaternion::identity(0, 0, 0, 1);
+    const Quaternion Quaternion::IDENTITY(0, 0, 0, 1);
+    
+    Quaternion Quaternion::rotateEulerAngles(f32_t x, f32_t y, f32_t z) {
+        return Quaternion();
+    }
+    
+    Quaternion Quaternion::rotateAxisAngle(const Vector3& axis, f32_t angle) {
+        Vector3 n = axis.normalized();
+        f32_t a = Math::angleToRadian(angle);
+        f32_t cosAv2 = cos(a * 0.5f);
+        f32_t sinAv2 = sin(a * 0.5f);
+        return Quaternion(n.x * sinAv2, n.y * sinAv2, n.z * sinAv2, cosAv2);
+    }
+    
+    Quaternion Quaternion::rotateBetween(const Vector3& a, const Vector3& b) {
+        return Quaternion();
+    }
+    
+    // d = inverse(a) X b
+    Quaternion Quaternion::rotateBetween(const Quaternion& a, const Quaternion& b) {
+        return Quaternion();
+    }
     
     Quaternion::Quaternion()
         : x(0), y(0), z(0), w(0) {
@@ -922,16 +1315,16 @@ namespace eokas {
         : normal(normal), distance(0) {
         const Vector3 n = normal.normalized();
         const Vector3& p = position;
-        distance = Math::dot(n, p);
+        distance = Vector3::dot(n, p);
     }
     
     Plane::Plane(const Vector3& p1, const Vector3& p2, const Vector3& p3)
         : normal(0, 1, 0), distance(0) {
         Vector3 a = p2 - p1;
         Vector3 b = p3 - p1;
-        normal = Math::cross(a, b);
+        normal = Vector3::cross(a, b);
         normal.normalize();
-        distance = Math::dot(normal, p1);
+        distance = Vector3::dot(normal, p1);
     }
     
     Plane::Plane(const Plane& other)
@@ -945,7 +1338,7 @@ namespace eokas {
         Vector3 n = normal.normalized();
         Vector3 o = n * distance;
         Vector3 m = p - o;
-        return Math::cosA(n, m);
+        return Vector3::cosA(n, m);
     }
     
     /*
@@ -1245,57 +1638,6 @@ namespace eokas {
         return p0 * (1 - t) * (1 - t) * (1 - t) + p1 * 3 * t * (1 - t) * (1 - t) + p2 * 3 * t * t * (1 - t) + p3 * t * t * t;
     }
     
-    Vector3 Math::cross(const Vector3& v1, const Vector3& v2) {
-        //( y1z2 - z1y2 , z1x2 - x1z2 , x1y2 - y1x2 )
-        return Vector3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
-    }
-    
-    f32_t Math::dot(const Vector2& v1, const Vector2& v2) {
-        return v1.x * v2.x + v1.y * v2.y;
-    }
-    
-    f32_t Math::dot(const Vector3& v1, const Vector3& v2) {
-        return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
-    }
-    
-    f32_t Math::dot(const Vector4& v1, const Vector4& v2) {
-        return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w;
-    }
-    
-    f32_t Math::cosA(const Vector2& v1, const Vector2& v2) {
-        f32_t dot12 = Math::dot(v1, v2);
-        f32_t len1 = v1.magnitude();
-        f32_t len2 = v2.magnitude();
-        return dot12 / (len1 * len2);
-    }
-    
-    f32_t Math::cosA(const Vector3& v1, const Vector3& v2) {
-        f32_t dot12 = Math::dot(v1, v2);
-        f32_t len1 = v1.magnitude();
-        f32_t len2 = v2.magnitude();
-        return dot12 / (len1 * len2);
-    }
-    
-    f32_t Math::radians(const Vector2& v1, const Vector2& v2) {
-        f32_t cosA = Math::cosA(v1, v2);
-        return std::acos(cosA);
-    }
-    
-    f32_t Math::radians(const Vector3& v1, const Vector3& v2) {
-        f32_t cosA = Math::cosA(v1, v2);
-        return std::acos(cosA);
-    }
-    
-    f32_t Math::angles(const Vector2& v1, const Vector2& v2) {
-        f32_t r = Math::radians(v1, v2);
-        return Math::radianToAngle(r);
-    }
-    
-    f32_t Math::angles(const Vector3& v1, const Vector3& v2) {
-        f32_t r = Math::radians(v1, v2);
-        return Math::radianToAngle(r);
-    }
-    
     bool Math::intersects(const Ray& ray, const Plane& plane) {
         f32_t t = FLT_MAX;
         return Math::intersects(t, ray, plane);
@@ -1317,11 +1659,11 @@ namespace eokas {
         t = (n*p1 - n*p0) / (n*u)
     */
     bool Math::intersects(f32_t& t, const Ray& ray, const Plane& plane) {
-        f32_t a = Math::dot(plane.normal, ray.diBounds2ion);
+        f32_t a = Vector3::dot(plane.normal, ray.diBounds2ion);
         if (_FloatEqual(a, 0))
             return false;
-        f32_t b = Math::dot(plane.normal, plane.normal * plane.distance);
-        f32_t c = Math::dot(plane.normal, ray.origin);
+        f32_t b = Vector3::dot(plane.normal, plane.normal * plane.distance);
+        f32_t c = Vector3::dot(plane.normal, ray.origin);
         t = (b - c) / a;
         return t >= 0;
     }
@@ -1331,7 +1673,7 @@ namespace eokas {
         if (d.sqrmagnitude() < sphere.radius * sphere.radius)
             return false;
         Vector3 ao = sphere.origin - ray.origin;
-        f32_t hv = Math::dot(ao, ray.diBounds2ion);
+        f32_t hv = Vector3::dot(ao, ray.diBounds2ion);
         Vector3 ap = ray.diBounds2ion * hv;
         f32_t el = (sphere.radius * sphere.radius) - (ao - ap).sqrmagnitude();
         if (el < 0)
@@ -1387,10 +1729,10 @@ namespace eokas {
         
         Vector3 e1 = v1 - v0;
         Vector3 e2 = v2 - v0;
-        Vector3 p = Math::cross(ray.diBounds2ion, e2);
+        Vector3 p = Vector3::cross(ray.diBounds2ion, e2);
         
         // determinant
-        float det = Math::dot(e1, p);
+        float det = Vector3::dot(e1, p);
         
         // keep det > 0, modify T accordingly
         Vector3 T;
@@ -1406,20 +1748,20 @@ namespace eokas {
             return false;
         
         // Q
-        Vector3 Q = Math::cross(T, e1);
+        Vector3 Q = Vector3::cross(T, e1);
         
         // Calculate u and make sure u <= 1
-        u = Math::dot(T, p);
+        u = Vector3::dot(T, p);
         if (u < 0.0f || u > det)
             return false;
         
         // Calculate v and make sure u + v <= 1
-        v = Math::dot(ray.diBounds2ion, Q);
+        v = Vector3::dot(ray.diBounds2ion, Q);
         if (v < 0.0f || u + v > det)
             return false;
         
         // Calculate t, scale parameters, ray intersects triangle
-        t = Math::dot(e2, Q);
+        t = Vector3::dot(e2, Q);
         
         float invdet = 1.0f / det;
         t *= invdet;
@@ -1427,339 +1769,5 @@ namespace eokas {
         v *= invdet;
         
         return true;
-    }
-    
-    void Math::transform(Vector3& result, const Vector3& v, const Matrix3& m) {
-        result.x = v.x * m.value[0][0] + v.y * m.value[1][0] + v.z * m.value[2][0];
-        result.y = v.x * m.value[0][1] + v.y * m.value[1][1] + v.z * m.value[2][1];
-        result.z = v.x * m.value[0][2] + v.y * m.value[1][2] + v.z * m.value[2][2];
-    }
-    
-    void Math::transform(Vector4& result, const Vector4& v, const Matrix4& m) {
-        result.x = v.x * m.value[0][0] + v.y * m.value[1][0] + v.z * m.value[2][0] + v.w * m.value[3][0];
-        result.y = v.x * m.value[0][1] + v.y * m.value[1][1] + v.z * m.value[2][1] + v.w * m.value[3][1];
-        result.z = v.x * m.value[0][2] + v.y * m.value[1][2] + v.z * m.value[2][2] + v.w * m.value[3][2];
-        result.w = v.x * m.value[0][3] + v.y * m.value[1][3] + v.z * m.value[2][3] + v.w * m.value[3][3];
-    }
-    
-    void Math::transform(Matrix3& result, const Matrix3& m1, const Matrix3& m2) {
-        for (i32_t i = 0; i < 3; i++) {
-            for (i32_t j = 0; j < 3; j++) {
-                for (i32_t k = 0; k < 3; k++) {
-                    result.value[i][j] += m1.value[i][k] * m2.value[k][j];
-                }
-            }
-        }
-    }
-    
-    void Math::transform(Matrix4& result, const Matrix4& m1, const Matrix4& m2) {
-        for (i32_t i = 0; i < 4; i++) {
-            for (i32_t j = 0; j < 4; j++) {
-                for (i32_t k = 0; k < 4; k++) {
-                    result.value[i][j] += m1.value[i][k] * m2.value[k][j];
-                }
-            }
-        }
-    }
-    
-    Matrix3 Math::matrixTranslation(const Vector2& dir) {
-        Matrix3 m = Matrix3::identity;
-        m.value[2][0] = dir.x;
-        m.value[2][1] = dir.y;
-        return m;
-    }
-    
-    Matrix4 Math::matrixTranslation(const Vector3& dir) {
-        Matrix4 m = Matrix4::identity;
-        m.value[3][0] = dir.x;
-        m.value[3][1] = dir.y;
-        m.value[3][2] = dir.z;
-        return m;
-    }
-    
-    /*
-    | 1,  0,  0|     | cosA,  sinA,  0|     | 1,  0,  0|
-    | 0,  1,  0|  X  |-sinA,  cosA,  0|  X  | 0,  1,  0|
-    |-x, -y,  1|     |    0,     0,  1|     | x,  y,  1|
-    */
-    Matrix3 Math::matrixRotation(const Vector2& axis, f32_t angle) {
-        Matrix3 m = Matrix3::identity;
-        f32_t x = axis.x;
-        f32_t y = axis.y;
-        f32_t sinAngle = sin(angle);
-        f32_t cosAngle = cos(angle);
-        m.value[0][0] = cosAngle;
-        m.value[0][1] = sinAngle;
-        m.value[0][2] = 0.0f;
-        m.value[1][0] = -sinAngle;
-        m.value[1][1] = cosAngle;
-        m.value[1][2] = 0.0f;
-        m.value[2][0] = x * (1.0f - cosAngle) + y * sinAngle;
-        m.value[2][1] = y * (1.0f - cosAngle) - x * cosAngle;
-        m.value[2][2] = 1.0f;
-        return m;
-    }
-    
-    Matrix4 Math::matrixRotation(const Vector3& axis, f32_t angle) {
-        Matrix4 m = Matrix4::identity;
-        f32_t x = axis.x;
-        f32_t y = axis.y;
-        f32_t z = axis.z;
-        f32_t sinAngle = sin(angle);
-        f32_t cosAngle = cos(angle);
-        m.value[0][0] = (x * x) * (1.0f - cosAngle) + cosAngle;
-        m.value[1][0] = (x * y) * (1.0f - cosAngle) - (z * sinAngle);
-        m.value[2][0] = (x * z) * (1.0f - cosAngle) + (y * sinAngle);
-        m.value[0][1] = (y * x) * (1.0f - cosAngle) + (z * sinAngle);
-        m.value[1][1] = (y * y) * (1.0f - cosAngle) + cosAngle;
-        m.value[2][1] = (y * z) * (1.0f - cosAngle) - (x * sinAngle);
-        m.value[0][2] = (z * x) * (1.0f - cosAngle) - (y * sinAngle);
-        m.value[1][2] = (z * y) * (1.0f - cosAngle) + (x * sinAngle);
-        m.value[2][2] = (z * z) * (1.0f - cosAngle) + cosAngle;
-        return m;
-    }
-    
-    Matrix3 Math::matrixScaling(const Vector2& scale) {
-        Matrix3 m = Matrix3::identity;
-        m.value[0][0] = scale.x;
-        m.value[1][1] = scale.y;
-        return m;
-    }
-    
-    Matrix4 Math::matrixScaling(const Vector3& scale) {
-        Matrix4 m = Matrix4::identity;
-        m.value[0][0] = scale.x;
-        m.value[1][1] = scale.y;
-        m.value[2][2] = scale.z;
-        return m;
-    }
-    
-    Matrix4 Math::matrixLookToLH(const Vector3& pos, const Vector3& forward, const Vector3& up) {
-        assert(forward != Vector3(0, 0, 0));
-        assert(up != Vector3(0, 0, 0));
-        
-        Vector3 r2 = forward.normalized();
-        Vector3 r0 = Math::cross(up, r2);
-        r0.normalize();
-        Vector3 r1 = Math::cross(r2, r0);
-        
-        Vector3 negpos = -pos;
-        f32_t d0 = Math::dot(r0, negpos);
-        f32_t d1 = Math::dot(r1, negpos);
-        f32_t d2 = Math::dot(r2, negpos);
-        
-        Matrix4 m;
-        Math::fill(m.value[0], r0.x, r0.y, r0.z, d0);
-        Math::fill(m.value[1], r1.x, r1.y, r1.z, d1);
-        Math::fill(m.value[2], r2.x, r2.y, r2.z, d2);
-        Math::fill(m.value[3], 0.0f, 0.0f, 0.0f, 1.0f);
-        m.transpose();
-        return m;
-    }
-    
-    Matrix4 Math::matrixLookAtLH(const Vector3& pos, const Vector3& focus, const Vector3& up) {
-        Vector3 forward = focus - pos;
-        return Math::matrixLookToLH(pos, forward, up);
-    }
-    
-    Matrix4 Math::matrixLookToRH(const Vector3& pos, const Vector3& forward, const Vector3& up) {
-        Vector3 back = -forward;
-        return Math::matrixLookToLH(pos, back, up);
-    }
-    
-    Matrix4 Math::matrixLookAtRH(const Vector3& pos, const Vector3& focus, const Vector3& up) {
-        Vector3 back = pos - focus;
-        return Math::matrixLookToLH(pos, back, up);
-    }
-    
-    Matrix4 Math::matrixOrthographicLH(f32_t width, f32_t height, f32_t near, f32_t far) {
-        assert(_FloatNotEqual(width, 0));
-        assert(_FloatNotEqual(height, 0));
-        assert(_FloatNotEqual(near, far));
-        
-        f32_t range = 1.0f / (far - near);
-        
-        Matrix4 m;
-        Math::fill(m.value[0], 2.0f / width, 0.0f, 0.0f, 0.0f);
-        Math::fill(m.value[1], 0.0f, 2.0f / height, 0.0f, 0.0f);
-        Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
-        Math::fill(m.value[3], 0.0f, 0.0f, -range * near, 1.0f);
-        return m;
-    }
-    
-    Matrix4 Math::matrixOrthographicRH(f32_t width, f32_t height, f32_t near, f32_t far) {
-        assert(_FloatNotEqual(width, 0));
-        assert(_FloatNotEqual(height, 0));
-        assert(_FloatNotEqual(near, far));
-        
-        f32_t range = 1.0f / (near - far);
-        
-        Matrix4 m;
-        Math::fill(m.value[0], 2.0f / width, 0.0f, 0.0f, 0.0f);
-        Math::fill(m.value[1], 0.0f, 2.0f / height, 0.0f, 0.0f);
-        Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
-        Math::fill(m.value[3], 0.0f, 0.0f, range * near, 1.0f);
-        return m;
-    }
-    
-    Matrix4 Math::matrixOrthographicOffCenterLH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far) {
-        assert(_FloatNotEqual(left, right));
-        assert(_FloatNotEqual(top, bottom));
-        assert(_FloatNotEqual(near, far));
-        
-        f32_t reciprocalWidth = 1.0f / (right - left);
-        f32_t reciprocalHeight = 1.0f / (top - bottom);
-        f32_t range = 1.0f / (far - near);
-        
-        Matrix4 m;
-        Math::fill(m.value[0], reciprocalHeight + reciprocalWidth, 0.0f, 0.0f, 0.0f);
-        Math::fill(m.value[1], 0.0f, reciprocalHeight + reciprocalHeight, 0.0f, 0.0f);
-        Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
-        Math::fill(m.value[3], -(left + right) * reciprocalWidth, -(top + bottom) * reciprocalHeight, -range * near, 1.0f);
-        return m;
-    }
-    
-    Matrix4 Math::matrixOrthographicOffCenterRH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far) {
-        assert(_FloatNotEqual(left, right));
-        assert(_FloatNotEqual(top, bottom));
-        assert(_FloatNotEqual(near, far));
-        
-        f32_t reciprocalWidth = 1.0f / (right - left);
-        f32_t reciprocalHeight = 1.0f / (top - bottom);
-        f32_t range = 1.0f / (near - far);
-        
-        Matrix4 m;
-        Math::fill(m.value[0], reciprocalHeight + reciprocalWidth, 0.0f, 0.0f, 0.0f);
-        Math::fill(m.value[1], 0.0f, reciprocalHeight + reciprocalHeight, 0.0f, 0.0f);
-        Math::fill(m.value[2], 0.0f, 0.0f, range, 0.0f);
-        Math::fill(m.value[3], -(left + right) * reciprocalWidth, -(top + bottom) * reciprocalHeight, range * near, 1.0f);
-        return m;
-    }
-    
-    Matrix4 Math::matrixPerspectiveLH(f32_t width, f32_t height, f32_t near, f32_t far) {
-        assert(_FloatNotEqual(width, 0.0f));
-        assert(_FloatNotEqual(height, 0.0f));
-        assert(_FloatNotEqual(near, far));
-        
-        f32_t twoNear = near + near;
-        f32_t range = far / (far - near);
-        
-        Matrix4 m;
-        Math::fill(m.value[0], twoNear / width, 0.0f, 0.0f, 0.0f);
-        Math::fill(m.value[1], 0.0f, twoNear / height, 0.0f, 0.0f);
-        Math::fill(m.value[2], 0.0f, 0.0f, range, 1.0f);
-        Math::fill(m.value[3], 0.0f, 0.0f, -range * near, 0.0f);
-        return m;
-    }
-    
-    Matrix4 Math::matrixPerspectiveRH(f32_t width, f32_t height, f32_t near, f32_t far) {
-        assert(_FloatNotEqual(width, 0.0f));
-        assert(_FloatNotEqual(height, 0.0f));
-        assert(_FloatNotEqual(near, far));
-        
-        f32_t twoNear = near + near;
-        f32_t range = far / (near - far);
-        
-        Matrix4 m;
-        Math::fill(m.value[0], twoNear / width, 0.0f, 0.0f, 0.0f);
-        Math::fill(m.value[1], 0.0f, twoNear / height, 0.0f, 0.0f);
-        Math::fill(m.value[2], 0.0f, 0.0f, range, -1.0f);
-        Math::fill(m.value[3], 0.0f, 0.0f, range * near, 0.0f);
-        return m;
-    }
-    
-    Matrix4 Math::matrixPerspectiveFovLH(f32_t fov, f32_t aspect, f32_t near, f32_t far) {
-        assert(_FloatNotEqual(fov, 0.0f));
-        assert(_FloatNotEqual(aspect, 0.0f));
-        assert(_FloatNotEqual(near, far));
-        
-        f32_t sinFov = std::sin(fov * 0.5f);
-        f32_t cosFov = std::cos(fov * 0.5f);
-        f32_t height = cosFov / sinFov;
-        f32_t width = height / aspect;
-        f32_t range = far / (far - near);
-        
-        Matrix4 m;
-        Math::fill(m.value[0], width, 0.0f, 0.0f, 0.0f);
-        Math::fill(m.value[1], 0.0f, height, 0.0f, 0.0f);
-        Math::fill(m.value[2], 0.0f, 0.0f, range, 1.0f);
-        Math::fill(m.value[3], 0.0f, 0.0f, -range * near, 0.0f);
-        return m;
-    }
-    
-    Matrix4 Math::matrixPerspectiveFovRH(f32_t fov, f32_t aspect, f32_t near, f32_t far) {
-        assert(_FloatNotEqual(fov, 0.0f));
-        assert(_FloatNotEqual(aspect, 0.0f));
-        assert(_FloatNotEqual(near, far));
-        
-        f32_t sinFov = std::sin(fov * 0.5f);
-        f32_t cosFov = std::cos(fov * 0.5f);
-        f32_t height = cosFov / sinFov;
-        f32_t width = height / aspect;
-        f32_t range = far / (near - far);
-        
-        Matrix4 m;
-        Math::fill(m.value[0], width, 0.0f, 0.0f, 0.0f);
-        Math::fill(m.value[1], 0.0f, height, 0.0f, 0.0f);
-        Math::fill(m.value[2], 0.0f, 0.0f, range, 1.0f);
-        Math::fill(m.value[3], 0.0f, 0.0f, range * near, 0.0f);
-        return m;
-    }
-    
-    Matrix4 Math::matrixPerspectiveOffCenterLH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far) {
-        assert(_FloatNotEqual(left, right));
-        assert(_FloatNotEqual(top, bottom));
-        assert(_FloatNotEqual(near, far));
-        
-        f32_t twoNear = near + near;
-        f32_t reciprocalWidth = 1.0f / (right - left);
-        f32_t reciprocalHeight = 1.0f / (top - bottom);
-        f32_t range = far / (far - near);
-        
-        Matrix4 m;
-        Math::fill(m.value[0], twoNear * reciprocalWidth, 0.0f, 0.0f, 0.0f);
-        Math::fill(m.value[1], 0.0f, twoNear * reciprocalHeight, 0.0f, 0.0f);
-        Math::fill(m.value[2], -(left + right) * reciprocalWidth, -(top + bottom) * reciprocalHeight, range, 1.0f);
-        Math::fill(m.value[3], 0.0f, 0.0f, -range * near, 0.0f);
-        return m;
-    }
-    
-    Matrix4 Math::matrixPerspectiveOffCenterRH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far) {
-        assert(_FloatNotEqual(left, right));
-        assert(_FloatNotEqual(top, bottom));
-        assert(_FloatNotEqual(near, far));
-        
-        f32_t twoNear = near + near;
-        f32_t reciprocalWidth = 1.0f / (right - left);
-        f32_t reciprocalHeight = 1.0f / (top - bottom);
-        f32_t range = far / (near - far);
-        
-        Matrix4 m;
-        Math::fill(m.value[0], twoNear * reciprocalWidth, 0.0f, 0.0f, 0.0f);
-        Math::fill(m.value[1], 0.0f, twoNear * reciprocalHeight, 0.0f, 0.0f);
-        Math::fill(m.value[2], (left + right) * reciprocalWidth, (top + bottom) * reciprocalHeight, range, -1.0f);
-        Math::fill(m.value[3], 0.0f, 0.0f, range * near, 0.0f);
-        return m;
-    }
-    
-    Quaternion Math::quaternionFromEulerAngles(f32_t x, f32_t y, f32_t z) {
-        return Quaternion();
-    }
-    
-    Quaternion Math::quaternionFromAxisAngle(const Vector3& axis, f32_t angle) {
-        Vector3 n = axis.normalized();
-        f32_t a = Math::angleToRadian(angle);
-        f32_t cosAv2 = cos(a * 0.5f);
-        f32_t sinAv2 = sin(a * 0.5f);
-        return Quaternion(n.x * sinAv2, n.y * sinAv2, n.z * sinAv2, cosAv2);
-    }
-    
-    Quaternion Math::quaternionBetween(const Vector3& a, const Vector3& b) {
-        return Quaternion();
-    }
-    
-    // d = inverse(a) X b
-    Quaternion Math::quaternionBetween(const Quaternion& a, const Quaternion& b) {
-        return Quaternion();
     }
 }

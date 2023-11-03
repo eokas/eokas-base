@@ -10,31 +10,20 @@ namespace eokas {
     class Stream : public Interface {
     public:
         virtual bool open() = 0;
-        
         virtual void close() = 0;
-        
         virtual bool isOpen() const = 0;
-        
         virtual bool readable() const = 0;
-        
         virtual bool writable() const = 0;
-        
         virtual bool eos() const = 0;
-        
         virtual size_t pos() const = 0;
-        
         virtual size_t size() const = 0;
-        
         virtual size_t read(void* data, size_t size) = 0;
-        
         virtual size_t write(void* data, size_t size) = 0;
-        
         virtual bool seek(int offset, int origin) = 0; // 0:beg, 1:cur, 2:end
         virtual void flush() = 0;
     
     public:
         void read(Stream& stream);
-        
         void write(Stream& stream);
     };
     
@@ -45,31 +34,20 @@ namespace eokas {
     
     public:
         virtual bool open() override;
-        
         virtual void close() override;
-        
         virtual bool isOpen() const override;
-        
         virtual bool readable() const override;
-        
         virtual bool writable() const override;
-        
         virtual bool eos() const override;
-        
         virtual size_t pos() const override;
-        
         virtual size_t size() const override;
-        
         virtual size_t read(void* data, size_t size) override;
-        
         virtual size_t write(void* data, size_t size) override;
-        
         virtual bool seek(int offset, int origin) override; // 0:beg, 1:cur, 2:end
         virtual void flush() override;
     
     public:
         Stream& target() const;
-        
         void bind(Stream& target);
     
     private:

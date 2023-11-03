@@ -40,7 +40,6 @@ namespace eokas {
         static const u32_t DIGEST_SIZE = 16;
         
         MD5();
-        
         String compute(const String& input);
     
     private:
@@ -48,33 +47,20 @@ namespace eokas {
         
         // low level logic operations
         static inline u32_t F(u32_t x, u32_t y, u32_t z);
-        
         static inline u32_t G(u32_t x, u32_t y, u32_t z);
-        
         static inline u32_t H(u32_t x, u32_t y, u32_t z);
-        
         static inline u32_t I(u32_t x, u32_t y, u32_t z);
-        
         static inline u32_t rotate_left(u32_t x, int n);
-        
         static inline void FF(u32_t& a, u32_t b, u32_t c, u32_t d, u32_t x, u32_t s, u32_t ac);
-        
         static inline void GG(u32_t& a, u32_t b, u32_t c, u32_t d, u32_t x, u32_t s, u32_t ac);
-        
         static inline void HH(u32_t& a, u32_t b, u32_t c, u32_t d, u32_t x, u32_t s, u32_t ac);
-        
         static inline void II(u32_t& a, u32_t b, u32_t c, u32_t d, u32_t x, u32_t s, u32_t ac);
-        
         static void encode(u8_t* output, const u32_t* input, u32_t len);
-        
         static void decode(u32_t* output, const u8_t* input, u32_t len);
         
         void init();
-        
         void transform(const u8_t block[blocksize]);
-        
         void update(const u8_t* buf, u32_t length);
-        
         void finalize(u8_t* digest);
         
         u8_t buffer[blocksize];         // bytes that didn't fit in last 64 byte chunk
@@ -125,7 +111,6 @@ namespace eokas {
         static const u32_t DIGEST_SIZE = (256 / 8);
         
         SHA256();
-        
         String compute(const String& input);
     
     private:
@@ -133,11 +118,8 @@ namespace eokas {
         static const u32_t SHA224_256_BLOCK_SIZE = (512 / 8);
         
         void init();
-        
         void transform(const u8_t* message, u32_t block_nb);
-        
         void update(const u8_t* message, u32_t len);
-        
         void finalize(u8_t* digest);
         
         u32_t m_tot_len;

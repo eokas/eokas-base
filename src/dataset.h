@@ -23,67 +23,40 @@ namespace eokas {
     class DataCell {
     public:
         DataCell();
-        
         ~DataCell();
     
     public:
         u8_t* data() const;
-        
         u16_t length() const;
-        
         void setData(u8_t* data, u16_t length);
-        
         void clear();
     
     public:
         DataCell& operator=(const DataCell& cell);
-        
         DataCell& operator=(const String& value);
-        
         DataCell& operator=(char value);
-        
         DataCell& operator=(u8_t value);
-        
         DataCell& operator=(i16_t value);
-        
         DataCell& operator=(u16_t value);
-        
         DataCell& operator=(i32_t value);
-        
         DataCell& operator=(u32_t value);
-        
         DataCell& operator=(i64_t value);
-        
         DataCell& operator=(u64_t value);
-        
         DataCell& operator=(f32_t value);
-        
         DataCell& operator=(f64_t value);
-        
         DataCell& operator=(bool value);
         
         operator String();
-        
         operator char();
-        
         operator u8_t();
-        
         operator i16_t();
-        
         operator u16_t();
-        
         operator i32_t();
-        
         operator u32_t();
-        
         operator i64_t();
-        
         operator u64_t();
-        
         operator f32_t();
-        
         operator f64_t();
-        
         operator bool();
     
     private:
@@ -101,30 +74,19 @@ namespace eokas {
     
     public:
         DataCol(const String& name);
-        
         ~DataCol();
     
     public:
         const String& name() const;
-        
         const String& comm() const;
-        
         u16_t length() const;
-        
         const DataType& type() const;
-        
         void setComm(const String& comm);
-        
         void setLength(u16_t length);
-        
         void setType(const DataType& type);
-        
         DataCell* createCell();
-        
         DataCell* selectCell(size_t rowId);
-        
         void deleteCell(size_t rowId);
-        
         void clearCells();
     
     private:
@@ -143,7 +105,6 @@ namespace eokas {
     class DataRow {
     public:
         DataRow();
-        
         ~DataRow();
     
     public:
@@ -151,7 +112,6 @@ namespace eokas {
     
     public:
         void setCell(const String& colName, DataCell* cell);
-        
         DataCell* getCell(const String& colName);
     
     private:
@@ -168,39 +128,25 @@ namespace eokas {
     
     public:
         DataTable(const String& name);
-        
         ~DataTable();
     
     public:
         DataCol& operator[](const String& colName);
-        
         DataRow operator[](size_t rowId);
     
     public:
         const String& name() const;
-        
         const String& comm() const;
-        
         void setComm(const String& comm);
-        
         size_t colCount() const;
-        
         size_t rowCount() const;
-        
         bool containsCol(const String& colName);
-        
         DataCol* createCol(const String& colName);
-        
         DataCol* selectCol(const String& colName);
-        
         void deleteCol(const String& colName);
-        
         DataRow createRow();
-        
         DataRow selectRow(size_t rowId);
-        
         void deleteRow(size_t rowId);
-        
         void clear();
     
     private:
@@ -218,7 +164,6 @@ namespace eokas {
     class DataSet {
     public:
         DataSet();
-        
         ~DataSet();
     
     public:
@@ -226,19 +171,12 @@ namespace eokas {
     
     public:
         size_t tableCount() const;
-        
         bool containsTable(const String& tableName);
-        
         DataTable* createTable(const String& tableName);
-        
         DataTable* selectTable(const String& tableName);
-        
         void deleteTable(const String& tableName);
-        
         void load(u8_t* bytes);
-        
         void save(u8_t* bytes, size_t* length);
-        
         void clear();
     
     private:
