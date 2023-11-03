@@ -6,6 +6,7 @@
 #include <Windows.h>
 #include <comdef.h>
 #include <Wbemidl.h>
+#include <iphlpapi.h>
 
 #pragma comment(lib, "wbemuuid.lib")
 
@@ -294,6 +295,29 @@ namespace eokas {
     u32_t OS::getCurrentThread() {
         return GetCurrentThreadId();
     }
+    
+    String OS::getMacAddress() {
+        IP_ADAPTER_INFO AdapterInfo[16];
+        DWORD dwBufLen = sizeof(AdapterInfo);
+        
+        DWORD dwStatus = GetAdaptersInfo(AdapterInfo, &dwBufLen);
+        if (dwStatus != ERROR_SUCCESS) {
+            return "";
+        }
+        
+        PIP_ADAPTER_INFO pAdapterInfo = AdapterInfo;
+        
+        String macAddress;
+        while (pAdapterInfo) {
+            macAddress += pAdapterInfo->Address[0];
+            for (UINT i = 1; i < pAdapterInfo->AddressLength; i++) {
+                macAddress += "-" + pAdapterInfo->Address[i];
+            }
+            pAdapterInfo = pAdapterInfo->Next;
+        }
+        
+        return macAddress;
+    }
 }
 
 #elif _EOKAS_OS == _EOKAS_OS_MACOS
@@ -318,7 +342,31 @@ namespace eokas
         getlogin_r(buffer, LOGIN_NAME_MAX);
         return String(buffer);
     }
+    
+    String OS::getMacAddress() {
+        struct ifaddrs* ifap;
+        struct ifaddrs* ifa;
+        struct sockaddr_dl* sdl;
+    
+        if (getifaddrs(&ifap) != 0) {
+            return "";
+        }
+    
+        String macAddress;
+        for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
+            if ((ifa->ifa_addr->sa_family == AF_LINK) && ((sdl = (struct sockaddr_dl *)ifa->ifa_addr)->sdl_type == IFT_ETHER)) {
+                char* mac = (char*)ether_ntoa((const struct ether_addr*)LLADDR(sdl));
+                macAddress = mac;
+                break;
+            }
+        }
+    
+        freeifaddrs(ifap);
+        
+        return macAddress;
+    }
 }
+
 
 #elif _EOKAS_OS == _EOKAS_OS_IOS
 

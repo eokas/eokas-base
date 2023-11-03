@@ -20,6 +20,11 @@ message("project source dir: " ${PROJECT_SOURCE_DIR})
 message("project binary dir: " ${PROJECT_BINARY_DIR})   
 
 
+set(EOKAS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+
+include("eokas-base.cmake")
+include("eokas-native.cmake")
+
 ## Main Library Target
 aux_source_directory(./src SRC_DIR)
 add_library(${PROJECT_NAME} STATIC ${SRC_DIR})

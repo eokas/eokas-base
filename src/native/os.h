@@ -2,8 +2,8 @@
 #ifndef _EOKAS_BASE_OS_H_
 #define _EOKAS_BASE_OS_H_
 
-#include "header.h"
-#include "String.h"
+#include "../base/header.h"
+#include "../base/string.h"
 
 namespace eokas {
     struct CpuState {
@@ -27,6 +27,7 @@ namespace eokas {
         static String getCurrentUser();
         static u32_t getCurrentProcess();
         static u32_t getCurrentThread();
+        static String getMacAddress();
     };
 }
 

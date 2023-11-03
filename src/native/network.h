@@ -2,8 +2,8 @@
 #ifndef  _EOKAS_BASE_NETWORK_H_
 #define  _EOKAS_BASE_NETWORK_H_
 
-#include "header.h"
-#include "socket.h"
+#include "../base/header.h"
+#include "../base/socket.h"
 
 namespace eokas {
 

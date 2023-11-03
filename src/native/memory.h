@@ -2,8 +2,8 @@
 #ifndef  _EOKAS_BASE_MEMORY_H_
 #define  _EOKAS_BASE_MEMORY_H_
 
-#include "header.h"
-#include "stream.h"
+#include "../base/header.h"
+#include "../base/stream.h"
 
 namespace eokas {
     

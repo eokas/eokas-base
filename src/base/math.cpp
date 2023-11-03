@@ -6,7 +6,7 @@
 #include <cassert>
 #include <algorithm>
 
-#include "./random.h"
+#include "random.h"
 
 namespace eokas {
     /*

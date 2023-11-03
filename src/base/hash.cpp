@@ -1,6 +1,6 @@
 
 #include "./hash.h"
-#include "./string.h"
+#include "string.h"
 #include <cstring>
 
 namespace eokas {

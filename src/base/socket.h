@@ -6,7 +6,7 @@
 
 #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
 
-#include <winsock2.h>
+#include <WinSock2.h>
 
 #define _null_socket INVALID_SOCKET
 #define _closesocket closesocket
