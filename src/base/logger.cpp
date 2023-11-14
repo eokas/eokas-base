@@ -1,6 +1,6 @@
 
-#include "logger.h"
-#include "string.h"
+#include "./logger.h"
+#include "./string.h"
 #include <stack>
 
 namespace eokas {

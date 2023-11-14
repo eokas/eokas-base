@@ -1,6 +1,6 @@
 
-#include "dataset.h"
-#include "string.h"
+#include "./dataset.h"
+#include "./string.h"
 
 namespace eokas {
     /*
