@@ -23,7 +23,7 @@ macro(eokas_test_setup TEST_LIB_NAME)
             message("Test: Build " ${TEST_EXEC_NAME})
 
             file(GLOB TEST_ENGINE_FILES ./test/engine/*.cpp)
-            file(GLOB TEST_CASES_FILES ./test/cases/*.cpp)
+            file(GLOB TEST_CASES_FILES ./test/cases-${TEST_LIB_NAME}/*.cpp)
             add_executable(${TEST_EXEC_NAME} ${TEST_ENGINE_FILES} ${TEST_CASES_FILES})
             target_link_libraries(${TEST_EXEC_NAME} PRIVATE ${TEST_LIB_NAME})
 
