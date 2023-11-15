@@ -2,7 +2,8 @@
 #ifndef _EOKAS_BASE_TEST_H_
 #define _EOKAS_BASE_TEST_H_
 
-#include "../../src/main.h"
+#include "../../src/base/main.h"
+#include "../../src/native/main.h"
 
 namespace eokas {
     using test_case_func_t = std::function<int()>;
