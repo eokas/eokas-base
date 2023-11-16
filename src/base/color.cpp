@@ -1,5 +1,5 @@
 
-#include "color.h"
+#include "./color.h"
 
 namespace eokas {
     

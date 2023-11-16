@@ -8,9 +8,8 @@
  * Widely used in JSON
  * */
 
+#include "./string.h"
 #include <utility>
-
-#include "string.h"
 
 namespace eokas {
     

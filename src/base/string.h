@@ -2,7 +2,7 @@
 #ifndef  _EOKAS_BASE_STRING_H_
 #define  _EOKAS_BASE_STRING_H_
 
-#include "header.h"
+#include "./header.h"
 #include <sstream>
 #include <cstdarg>
 

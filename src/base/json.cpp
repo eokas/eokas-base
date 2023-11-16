@@ -1,6 +1,6 @@
 
-#include "json.h"
-#include "ascil.h"
+#include "./json.h"
+#include "./ascil.h"
 
 namespace eokas {
     
@@ -317,6 +317,9 @@ namespace eokas {
     
     String JSON::stringify(const HomValueRef& json) {
         switch (json->type) {
+            case HomType::Null: {
+                return "null";
+            }
             case HomType::Number: {
                 auto value = HomNumber::pick(json);
                 return String::valueToString(value);

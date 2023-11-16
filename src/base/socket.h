@@ -2,7 +2,7 @@
 #ifndef  _EOKAS_BASE_SOCKET_H_
 #define  _EOKAS_BASE_SOCKET_H_
 
-#include "header.h"
+#include "./header.h"
 
 #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
 

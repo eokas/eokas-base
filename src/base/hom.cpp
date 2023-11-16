@@ -1,5 +1,5 @@
 
-#include "hom.h"
+#include "./hom.h"
 
 namespace eokas {
     
