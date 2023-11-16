@@ -2,8 +2,8 @@
 #ifndef  _EOKAS_BASE_TIME_H_
 #define  _EOKAS_BASE_TIME_H_
 
-#include "header.h"
-#include "string.h"
+#include "./header.h"
+#include "./string.h"
 #include <ctime>
 
 namespace eokas {
