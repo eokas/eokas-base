@@ -309,7 +309,7 @@ namespace eokas {
 		Matrix4 inverse() const;
     
     public:
-        f32_t value[4][4]
+        f32_t value[4][4];
     };
     
     
