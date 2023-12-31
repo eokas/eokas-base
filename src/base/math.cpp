@@ -176,7 +176,7 @@ namespace eokas {
     }
     
     Vector3 Vector3::cross(const Vector3& v1, const Vector3& v2) {
-        //( y1z2 - z1y2 , z1x2 - x1z2 , x1y2 - y1x2 )
+        //(y1z2 - z1y2, z1x2 - x1z2, x1y2 - y1x2)
         return Vector3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
     }
     
@@ -436,12 +436,172 @@ namespace eokas {
         w /= len;
         return *this;
     }
-    
+	
+	/*
+    ============================================================
+    == Matrix2
+    ============================================================
+    */
+	const Matrix2 Matrix2::ZERO(0, 0, 0, 0);
+	const Matrix2 Matrix2::IDENTITY(1, 0, 0, 1);
+	
+	Matrix2::Matrix2() {
+		memset(value, 0, sizeof(value));
+	}
+	
+	Matrix2::Matrix2(f32_t _00, f32_t _01, f32_t _10, f32_t _11) {
+		value[0][0] = _00;
+		value[0][1] = _01;
+		value[1][0] = _10;
+		value[1][1] = _11;
+	}
+	
+	Matrix2::Matrix2(const f32_t (& m)[2][2]) {
+		memcpy(value, m, sizeof(value));
+	}
+	
+	Matrix2::Matrix2(const Matrix2& m) {
+		memcpy(value, m.value, sizeof(value));
+	}
+	
+	Matrix2::~Matrix2() {
+	}
+	
+	Matrix2& Matrix2::operator=(const Matrix2& m) {
+		memcpy(value, m.value, sizeof(value));
+		return *this;
+	}
+	
+	Matrix2 Matrix2::operator-() const {
+		return Matrix2{-value[0][0], -value[0][1], -value[1][0], -value[1][1]};
+	}
+	
+	Matrix2 Matrix2::operator+(const Matrix2& m) const {
+		return Matrix2{
+			value[0][0] + m.value[0][0],
+			value[0][1] + m.value[0][1],
+			value[1][0] + m.value[1][0],
+			value[1][1] + m.value[1][1]
+		};
+	}
+	
+	Matrix2 Matrix2::operator-(const Matrix2& m) const {
+		return Matrix2{
+			value[0][0] - m.value[0][0],
+			value[0][1] - m.value[0][1],
+			value[1][0] - m.value[1][0],
+			value[1][1] - m.value[1][1]
+		};
+	}
+	
+	Matrix2 Matrix2::operator*(const Matrix2& m) const {
+		return Matrix2(
+			value[0][0] * m.value[0][0],
+			value[0][1] * m.value[0][1],
+			value[1][0] * m.value[1][0],
+			value[1][1] * m.value[1][1]
+		);
+	}
+	
+	Matrix2 Matrix2::operator*(f32_t x) const {
+		return Matrix2(
+			value[0][0] * x,
+			value[0][1] * x,
+			value[1][0] * x,
+			value[1][1] * x
+		);
+	}
+	
+	Matrix2& Matrix2::operator+=(const Matrix2& m) {
+		value[0][0] += m.value[0][0];
+		value[0][1] += m.value[0][1];
+		value[1][0] += m.value[1][0];
+		value[1][1] += m.value[1][1];
+		return *this;
+	}
+	
+	Matrix2& Matrix2::operator-=(const Matrix2& m) {
+		value[0][0] -= m.value[0][0];
+		value[0][1] -= m.value[0][1];
+		value[1][0] -= m.value[1][0];
+		value[1][1] -= m.value[1][1];
+		return *this;
+	}
+	
+	Matrix2& Matrix2::operator*=(const Matrix2& m) {
+		value[0][0] *= m.value[0][0];
+		value[0][1] *= m.value[0][1];
+		value[1][0] *= m.value[1][0];
+		value[1][1] *= m.value[1][1];
+		return *this;
+	}
+	
+	Matrix2& Matrix2::operator*=(f32_t x) {
+		value[0][0] *= x;
+		value[0][1] *= x;
+		value[1][0] *= x;
+		value[1][1] *= x;
+		return *this;
+	}
+	
+	bool Matrix2::operator==(const Matrix2& m) const {
+		return
+			_FloatEqual(value[0][0], m.value[0][0]) &&
+			_FloatEqual(value[0][1], m.value[0][1]) &&
+			_FloatEqual(value[1][0], m.value[1][0]) &&
+			_FloatEqual(value[1][1], m.value[1][1]);
+	}
+	
+	bool Matrix2::operator!=(const Matrix2& m) const {
+		return !(*this == m);
+	}
+	
+	f32_t Matrix2::confactor(i32_t i, i32_t j) const {
+		i32_t sign = (i + j) % 2 == 0 ? 1 : -1;
+		i32_t row = 1 - i;
+		i32_t col = 1 - i;
+		return value[row][col] * sign;
+	}
+	
+	f32_t Matrix2::determinant() const {
+		return value[0][0] * value[1][1] - value[0][1] * value[1][0];
+	}
+	
+	Matrix2 Matrix2::transposed() const {
+		return Matrix2{
+			value[0][0], value[1][0],
+			value[0][1], value[1][1]
+		};
+	}
+	
+	Matrix2& Matrix2::transpose() {
+		f32_t temp = value[0][1];
+		value[0][1] = value[1][0];
+		value[1][0] = temp;
+		return *this;
+	}
+	
+	Matrix2 Matrix2::adjoint() const {
+		return Matrix2{
+			+value[1][1], -value[0][1],
+			-value[1][0], +value[0][0]
+		};
+	}
+	
+	Matrix2 Matrix2::inverse() const {
+		f32_t det = this->determinant();
+		if(_FloatEqual(det, 0))
+			return Matrix2::ZERO;
+		f32_t inv = 1.0f / det;
+		return this->adjoint() * inv;
+	}
+	
     /*
     ============================================================
     == Matrix3
     ============================================================
     */
+	const Matrix3 Matrix3::ZERO(0, 0, 0, 0, 0, 0, 0, 0, 0);
     const Matrix3 Matrix3::IDENTITY(1, 0, 0, 0, 1, 0, 0, 0, 1);
     
     Matrix3 Matrix3::translation(const Vector2& dir) {
@@ -572,6 +732,16 @@ namespace eokas {
         }
         return Matrix3(result);
     }
+	
+	Matrix3 Matrix3::operator*(f32_t x) const {
+		f32_t result[3][3];
+		for (i32_t i = 0; i < 3; i++) {
+			for (i32_t j = 0; j < 3; j++) {
+				result[i][j] = value[i][j] * x;
+			}
+		}
+		return Matrix3(result);
+	}
     
     Matrix3& Matrix3::operator+=(const Matrix3& m) {
         for (i32_t i = 0; i < 3; i++) {
@@ -599,6 +769,15 @@ namespace eokas {
         }
         return *this;
     }
+	
+	Matrix3& Matrix3::operator*=(f32_t x) {
+		for (i32_t i = 0; i < 3; i++) {
+			for (i32_t j = 0; j < 3; j++) {
+				value[i][j] *= x;
+			}
+		}
+		return *this;
+	}
     
     bool Matrix3::operator==(const Matrix3& m) const {
         for (i32_t i = 0; i < 3; i++) {
@@ -621,6 +800,20 @@ namespace eokas {
         }
         return false;
     }
+	
+	Matrix2 Matrix3::confactor(i32_t i, i32_t j) const {
+		Matrix2 c;
+		for(i32_t row = 0; row < 3; row++) {
+			for(i32_t col = 0; col < 3; col++) {
+				if(row == i || col == j)
+					continue;
+				f32_t sign = (row + col) % 2 == 0 ? 1.0f : -1.0f;
+				c.value[row < i ? row : row - 1][col < j ? col : col - 1] = value[row][col] * sign;
+			}
+		}
+		
+		return c;
+	}
     
     /*
         a00 a01 a02 a00 a01
@@ -632,10 +825,15 @@ namespace eokas {
             a02a11a20 - a00a12a21 - a01a10a22
     */
     f32_t Matrix3::determinant() const {
-        return value[0][0] * value[1][1] * value[2][2] + value[0][1] * value[1][2] * value[2][0] + value[0][2] * value[1][0] * value[2][1] - value[0][2] * value[1][1] * value[2][0] -
-            value[0][0] * value[1][2] * value[2][1] - value[0][1] * value[1][0] * value[2][2];
+        return
+			value[0][0] * value[1][1] * value[2][2] +
+			value[0][1] * value[1][2] * value[2][0] +
+			value[0][2] * value[1][0] * value[2][1] -
+			value[0][2] * value[1][1] * value[2][0] -
+			value[0][0] * value[1][2] * value[2][1] -
+			value[0][1] * value[1][0] * value[2][2];
     }
-    
+
     Matrix3 Matrix3::transposed() const {
         Matrix3 t(value);
         for (i32_t i = 1; i < 3; i++) {
@@ -657,12 +855,33 @@ namespace eokas {
         }
         return *this;
     }
+	
+	Matrix3 Matrix3::adjoint() const {
+		Matrix3 adj;
+		for(i32_t i = 0; i < 3; i++) {
+			for(i32_t j = 0; j < 3; j++) {
+				Matrix2 c = this->confactor(i, j);
+				adj.value[i][j] = c.determinant();
+			}
+		}
+		adj.transpose();
+		return adj;
+	}
+	
+	Matrix3 Matrix3::inverse() const {
+		f32_t det = this->determinant();
+		if(_FloatEqual(det, 0))
+			return Matrix3::ZERO;
+		float inv = 1.0f / det;
+		return this->adjoint() * inv;
+	}
     
     /*
     ============================================================
     == Matrix4
     ============================================================
     */
+	const Matrix4 Matrix4::ZERO(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     const Matrix4 Matrix4::IDENTITY(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
     
     Matrix4 Matrix4::translate(const Vector3& dir) {
@@ -1017,6 +1236,16 @@ namespace eokas {
         }
         return Matrix4(result);
     }
+	
+	Matrix4 Matrix4::operator*(f32_t x) const {
+		f32_t result[4][4];
+		for (i32_t i = 0; i < 4; i++) {
+			for (i32_t j = 0; j < 4; j++) {
+				result[i][j] = value[i][j] * x;
+			}
+		}
+		return Matrix4(result);
+	}
     
     Matrix4& Matrix4::operator+=(const Matrix4& m) {
         for (i32_t i = 0; i < 4; i++) {
@@ -1044,6 +1273,15 @@ namespace eokas {
         }
         return *this;
     }
+	
+	Matrix4& Matrix4::operator*=(f32_t x) {
+		for (i32_t i = 0; i < 4; i++) {
+			for (i32_t j = 0; j < 4; j++) {
+				value[i][j] *= x;
+			}
+		}
+		return *this;
+	}
     
     bool Matrix4::operator==(const Matrix4& m) const {
         for (i32_t i = 0; i < 4; i++) {
@@ -1066,6 +1304,19 @@ namespace eokas {
         }
         return false;
     }
+	
+	Matrix3 Matrix4::confactor(i32_t i, i32_t j) const {
+		Matrix3 c;
+		for(i32_t row = 0; row < 4; row++) {
+			for(i32_t col = 0; col < 4; col++) {
+				if(row == i || col == j)
+					continue;
+				f32_t sign = (row + col) % 2 == 0 ? 1.0f : -1.0f;
+				c.value[row < i ? row : row - 1][col < j ? col : col - 1] = value[row][col] * sign;
+			}
+		}
+		return c;
+	}
     
     /*
         a00 a01 a02 a03 a00 a01 a02
@@ -1078,10 +1329,14 @@ namespace eokas {
             a03a12a21a30 - a00a13a22a31 - a01a10a23a32 - a02a11a20a33
     */
     f32_t Matrix4::determinant() const {
-        return value[0][0] * value[1][1] * value[2][2] * value[3][3] + value[0][1] * value[1][2] * value[2][3] * value[3][0] + value[0][2] * value[1][3] * value[2][0] * value[3][1] +
+        return
+			value[0][0] * value[1][1] * value[2][2] * value[3][3] +
+			value[0][1] * value[1][2] * value[2][3] * value[3][0] +
+			value[0][2] * value[1][3] * value[2][0] * value[3][1] +
             value[0][3] * value[1][0] * value[2][1] * value[3][2] -
-            
-            value[0][3] * value[1][2] * value[2][1] * value[3][0] - value[0][0] * value[1][3] * value[2][2] * value[3][1] - value[0][1] * value[1][0] * value[2][3] * value[3][2] -
+            value[0][3] * value[1][2] * value[2][1] * value[3][0] -
+			value[0][0] * value[1][3] * value[2][2] * value[3][1] -
+			value[0][1] * value[1][0] * value[2][3] * value[3][2] -
             value[0][2] * value[1][1] * value[2][0] * value[3][3];
     }
     
@@ -1106,6 +1361,26 @@ namespace eokas {
         }
         return *this;
     }
+	
+	Matrix4 Matrix4::adjoint() const {
+		Matrix4 adj;
+		for(i32_t i = 0; i < 4; i++) {
+			for(i32_t j = 0; j < 4; j++) {
+				Matrix3 c = this->confactor(i, j);
+				adj.value[i][j] = c.determinant();
+			}
+		}
+		adj.transpose();
+		return adj;
+	}
+	
+	Matrix4 Matrix4::inverse() const {
+		f32_t det = this->determinant();
+		if(_FloatEqual(det, 0))
+			return Matrix4::ZERO;
+		f32_t inv = 1.0f / det;
+		return this->adjoint() * inv;
+	}
     
     /*
     ============================================================

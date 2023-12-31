@@ -27,13 +27,9 @@ namespace eokas {
         
     public:
         Vector2();
-        
         Vector2(f32_t x, f32_t y);
-        
         Vector2(const f32_t (& v)[2]);
-        
         Vector2(const Vector2& v);
-        
         ~Vector2();
     
     public:
@@ -52,11 +48,8 @@ namespace eokas {
     
     public:
         f32_t sqrmagnitude() const;
-        
         f32_t magnitude() const;
-        
         Vector2 normalized() const;
-        
         Vector2& normalize();
     
     public:
@@ -93,7 +86,6 @@ namespace eokas {
         Vector3(const f32_t (& v)[3]);
         Vector3(const Vector2& v);
         Vector3(const Vector3& v);
-        
         ~Vector3();
     
     public:
@@ -168,11 +160,53 @@ namespace eokas {
         f32_t w;
     };
     
+	/**
+	 * 2x2 Matrix
+	 * */
+	class Matrix2 {
+	public:
+		static const Matrix2 ZERO;
+		static const Matrix2 IDENTITY;
+		
+	public:
+		Matrix2();
+		Matrix2(f32_t _00, f32_t _01, f32_t _10, f32_t _11);
+		Matrix2(const f32_t (& m)[2][2]);
+		Matrix2(const Matrix2& m);
+		~Matrix2();
+	
+	public:
+		Matrix2& operator=(const Matrix2& m);
+		Matrix2 operator-() const;
+		Matrix2 operator+(const Matrix2& m) const;
+		Matrix2 operator-(const Matrix2& m) const;
+		Matrix2 operator*(const Matrix2& m) const;
+		Matrix2 operator*(f32_t x) const;
+		Matrix2& operator+=(const Matrix2& m);
+		Matrix2& operator-=(const Matrix2& m);
+		Matrix2& operator*=(const Matrix2& m);
+		Matrix2& operator*=(f32_t x);
+		bool operator==(const Matrix2& m) const;
+		bool operator!=(const Matrix2& m) const;
+	
+	public:
+		f32_t confactor(i32_t i, i32_t j) const;
+		f32_t determinant() const;
+		Matrix2 transposed() const;
+		Matrix2& transpose();
+		Matrix2 adjoint() const;
+		Matrix2 inverse() const;
+		
+	public:
+		f32_t value[2][2];
+	};
+	
     /**
      * 3x3 Matrix
     */
     class Matrix3 {
     public:
+		static const Matrix3 ZERO;
         static const Matrix3 IDENTITY;
         
         static Matrix3 translation(const Vector2& dir);
@@ -195,16 +229,21 @@ namespace eokas {
         Matrix3 operator+(const Matrix3& m) const;
         Matrix3 operator-(const Matrix3& m) const;
         Matrix3 operator*(const Matrix3& m) const;
+		Matrix3 operator*(f32_t x) const;
         Matrix3& operator+=(const Matrix3& m);
         Matrix3& operator-=(const Matrix3& m);
         Matrix3& operator*=(const Matrix3& m);
+		Matrix3& operator*=(f32_t x);
         bool operator==(const Matrix3& m) const;
         bool operator!=(const Matrix3& m) const;
     
     public:
+		Matrix2 confactor(i32_t i, i32_t j) const;
         f32_t determinant() const;
-        Matrix3 transposed() const;
-        Matrix3& transpose();
+		Matrix3 transposed() const;
+		Matrix3& transpose();
+		Matrix3 adjoint() const;
+		Matrix3 inverse() const;
     
     public:
         f32_t value[3][3];
@@ -215,6 +254,7 @@ namespace eokas {
     */
     class Matrix4 {
     public:
+		static const Matrix4 ZERO;
         static const Matrix4 IDENTITY;
         
         static Matrix4 translate(const Vector3& dir);
@@ -252,19 +292,24 @@ namespace eokas {
         Matrix4 operator+(const Matrix4& m) const;
         Matrix4 operator-(const Matrix4& m) const;
         Matrix4 operator*(const Matrix4& m) const;
+		Matrix4 operator*(f32_t x) const;
         Matrix4& operator+=(const Matrix4& m);
         Matrix4& operator-=(const Matrix4& m);
         Matrix4& operator*=(const Matrix4& m);
+		Matrix4& operator*=(f32_t x);
         bool operator==(const Matrix4& m) const;
         bool operator!=(const Matrix4& m) const;
     
     public:
+		Matrix3 confactor(i32_t i, i32_t j) const;
         float determinant() const;
         Matrix4 transposed() const;
         Matrix4& transpose();
+		Matrix4 adjoint() const;
+		Matrix4 inverse() const;
     
     public:
-        f32_t value[4][4];
+        f32_t value[4][4]
     };
     
     
