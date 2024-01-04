@@ -238,7 +238,7 @@ namespace eokas {
         bool operator!=(const Matrix3& m) const;
     
     public:
-		Matrix2 confactor(i32_t i, i32_t j) const;
+		f32_t confactor(i32_t i, i32_t j) const;
         f32_t determinant() const;
 		Matrix3 transposed() const;
 		Matrix3& transpose();
@@ -301,8 +301,8 @@ namespace eokas {
         bool operator!=(const Matrix4& m) const;
     
     public:
-		Matrix3 confactor(i32_t i, i32_t j) const;
-        float determinant() const;
+		f32_t confactor(i32_t i, i32_t j) const;
+        f32_t determinant() const;
         Matrix4 transposed() const;
         Matrix4& transpose();
 		Matrix4 adjoint() const;

@@ -801,18 +801,20 @@ namespace eokas {
         return false;
     }
 	
-	Matrix2 Matrix3::confactor(i32_t i, i32_t j) const {
-		Matrix2 c;
+	f32_t Matrix3::confactor(i32_t i, i32_t j) const {
+		Matrix2 cm;
 		for(i32_t row = 0; row < 3; row++) {
 			for(i32_t col = 0; col < 3; col++) {
 				if(row == i || col == j)
 					continue;
-				f32_t sign = (row + col) % 2 == 0 ? 1.0f : -1.0f;
-				c.value[row < i ? row : row - 1][col < j ? col : col - 1] = value[row][col] * sign;
+				i32_t r = row < i ? row : row - 1;
+				i32_t c = col < j ? col : col - 1;
+				cm.value[r][c] = value[row][col];
 			}
 		}
 		
-		return c;
+		f32_t sign = (i + j) % 2 == 0 ? 1.0f : -1.0f;
+		return sign * cm.determinant();
 	}
     
     /*
@@ -860,8 +862,7 @@ namespace eokas {
 		Matrix3 adj;
 		for(i32_t i = 0; i < 3; i++) {
 			for(i32_t j = 0; j < 3; j++) {
-				Matrix2 c = this->confactor(i, j);
-				adj.value[i][j] = c.determinant();
+				adj.value[i][j] = this->confactor(i, j);
 			}
 		}
 		adj.transpose();
@@ -1305,17 +1306,20 @@ namespace eokas {
         return false;
     }
 	
-	Matrix3 Matrix4::confactor(i32_t i, i32_t j) const {
-		Matrix3 c;
+	f32_t Matrix4::confactor(i32_t i, i32_t j) const {
+		Matrix3 cm;
 		for(i32_t row = 0; row < 4; row++) {
 			for(i32_t col = 0; col < 4; col++) {
 				if(row == i || col == j)
 					continue;
-				f32_t sign = (row + col) % 2 == 0 ? 1.0f : -1.0f;
-				c.value[row < i ? row : row - 1][col < j ? col : col - 1] = value[row][col] * sign;
+				i32_t r = row < i ? row : row - 1;
+				i32_t c = col < j ? col : col - 1;
+				cm.value[r][c] = value[row][col];
 			}
 		}
-		return c;
+		
+		f32_t sign = (i + j) % 2 == 0 ? 1.0f : -1.0f;
+		return sign * cm.determinant();
 	}
     
     /*
@@ -1366,8 +1370,7 @@ namespace eokas {
 		Matrix4 adj;
 		for(i32_t i = 0; i < 4; i++) {
 			for(i32_t j = 0; j < 4; j++) {
-				Matrix3 c = this->confactor(i, j);
-				adj.value[i][j] = c.determinant();
+				adj.value[i][j] = this->confactor(i, j);
 			}
 		}
 		adj.transpose();
