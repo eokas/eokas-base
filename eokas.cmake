@@ -17,7 +17,7 @@ function(eokas_test_setup TEST_LIB_NAME)
     include(CTest)
 
     if(${BUILD_TESTING})
-        set(TEST_EXEC_NAME ${TEST_LIB_NAME}-test)
+        set(TEST_EXEC_NAME test-${TEST_LIB_NAME})
         message("Test> Build: ${TEST_EXEC_NAME}")
         message("Test> Link: ${TEST_LIB_NAME}; ${ARGN}")
 

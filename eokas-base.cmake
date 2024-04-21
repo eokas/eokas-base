@@ -1,5 +1,5 @@
 
-set(EOKAS_TARGET_NAME "eokas-base")
+set(EOKAS_TARGET_NAME "base")
 set(EOKAS_TARGET_DIR "${EOKAS_SOURCE_DIR}/base")
 
 message("============================================================================")
@@ -40,7 +40,7 @@ target_link_directories(${EOKAS_TARGET_NAME} PRIVATE ${EOKAS_LIBRARY_DIRS})
 target_link_libraries(${EOKAS_TARGET_NAME} ${EOKAS_LIBRARY_FILES})
 
 
-install(FILES ${EOKAS_HEADER_FILES} DESTINATION include/${TARGET_NAME})
+install(FILES ${EOKAS_HEADER_FILES} DESTINATION include/${EOKAS_TARGET_NAME})
 install(TARGETS ${EOKAS_TARGET_NAME} DESTINATION lib/${EOKAS_OS_NAME}/${CMAKE_BUILD_TYPE})
 
 
