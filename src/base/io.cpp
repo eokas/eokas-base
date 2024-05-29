@@ -1,13 +1,16 @@
 
-#include "./file.h"
+#include "./io.h"
 #include "./string.h"
+#include <regex>
 
 #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
 #include <Windows.h>
+#include <direct.h>
 #include <io.h>
 #else
 #include <dirent.h>
 #include <unistd.h>
+#include <limits.h>
 #include <sys/stat.h>
 #endif
 
@@ -23,17 +26,24 @@ namespace eokas {
         *tt = ((LONGLONG)(uln.QuadPart - 116444736000000000) / 10000000);
     }
     
-    #endif
-    
+#endif
+
     /*
     =================================================================
     == FileStream
     =================================================================
     */
-    FileStream::FileStream(const String& fileName, const String& openMode)
-        :mName(fileName),
-        mMode(openMode),
-        mHandle(nullptr)
+    FileStream::FileStream(FILE* handle)
+        :mHandle(handle)
+        ,mPath()
+        ,mMode(){
+        
+    }
+    
+    FileStream::FileStream(const String& path, const String& mode)
+        :mHandle(nullptr)
+        ,mPath(path)
+        ,mMode(mode)
     {}
     
     FileStream::~FileStream()
@@ -48,7 +58,7 @@ namespace eokas {
             fseek(mHandle, 0, SEEK_SET);
             return true;
         }
-        mHandle = fopen(mName.cstr(), mMode.cstr());
+        mHandle = fopen(mPath.cstr(), mMode.cstr());
         return mHandle != nullptr;
     }
     
@@ -125,6 +135,11 @@ namespace eokas {
     == File System Interface
     =================================================================
     */
+    FileStream File::open(const eokas::String& path, const eokas::String& mode) {
+        FILE* handle = fopen(path.cstr(), mode.cstr());
+        return FileStream(handle);
+    }
+    
     bool File::exists(const String& path)
     {
     #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
@@ -170,7 +185,7 @@ namespace eokas {
     #endif
     }
     
-    FileList File::fileInfoList(const String& path)
+    FileList File::listFileInfos(const String& path, FileInfoPredicate predicate)
     {
         FileList list;
     #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
@@ -192,8 +207,9 @@ namespace eokas {
                 FileTimeToTimeT(&f.ftLastAccessTime, &info.atime);
                 FileTimeToTimeT(&f.ftLastWriteTime, &info.mtime);
                 FileTimeToTimeT(&f.ftCreationTime, &info.ctime);
-                list.push_back(info);
-    
+                if(!predicate || predicate(info)) {
+                    list.push_back(info);
+                }
             } while (FindNextFileA(h, &f));
             FindClose(h);
         }
@@ -215,14 +231,16 @@ namespace eokas {
             info.mtime = status.st_mtime;
             info.ctime = status.st_ctime;
     
-            list.push_back(info);
+            if(!predicate || predicate(info)) {
+                list.push_back(info);
+            }
         }
         closedir(dir);
     #endif
         return list;
     }
     
-    StringList File::fileNameList(const String& path)
+    StringList File::listFileNames(const eokas::String& path, FileNamePredicate predicate)
     {
         StringList list;
     #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
@@ -236,7 +254,9 @@ namespace eokas {
                 if (!(f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
                 {
                     const char* name = f.cFileName;
-                    list.push_back(name);
+                    if(!predicate || predicate(name)) {
+                        list.push_back(name);
+                    }
                 }
             } while (FindNextFileA(h, &f));
             FindClose(h);
@@ -247,14 +267,16 @@ namespace eokas {
         while ((ptr = readdir(dir)) != nullptr)
         {
             const char* name = ptr->d_name;
-            list.push_back(name);
+            if(!predicate || predicate(name)) {
+                list.push_back(name);
+            }
         }
         closedir(dir);
     #endif
         return list;
     }
     
-    StringList File::folderNameList(const String& path)
+    StringList File::listFolderNames(const String& path, FileNamePredicate predicate)
     {
         StringList list;
     #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
@@ -270,7 +292,9 @@ namespace eokas {
                     const char* name = f.cFileName;
                     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
                         continue;
-                    list.push_back(name);
+                    if(!predicate || predicate(name)) {
+                        list.push_back(name);
+                    }
                 }
             } while (FindNextFileA(h, &f));
             FindClose(h);
@@ -283,30 +307,25 @@ namespace eokas {
             const char* name = ptr->d_name;
             if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
                 continue;
-            list.push_back(name);
+            if(!predicate || predicate(name)) {
+                list.push_back(name);
+            }
         }
         closedir(dir);
     #endif
         return list;
     }
     
-    String File::executingPath()
-    {
-    #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
-        char buf[MAX_PATH];
-        DWORD ret = GetModuleFileNameA(NULL, buf, MAX_PATH);
-        if (ret == 0)
-            return "";
-        return buf;
-    #else
-        char buf[PATH_MAX];
-        size_t ret = readlink("/proc/self/exe", buf, PATH_MAX - 1);
-        if (ret <= 0 || (ret > PATH_MAX - 1))
-            return "";
-        buf[ret] = '\0';
-        return buf;
-    #endif
-    }
+    FileList File::glob(const eokas::String& path, const eokas::String& pattern) {
+        auto predicate = [&](const FileInfo& info)->bool{
+            std::string regex_pattern = std::regex_replace(pattern.cstr(), std::regex(R"(\.)"), R"(\.)");
+            regex_pattern = std::regex_replace(regex_pattern, std::regex(R"(\*)"), R"(.*)");
+            regex_pattern = std::regex_replace(regex_pattern, std::regex(R"(\?)"), R"(.)");
+            std::regex regex_expr(regex_pattern, std::regex::icase);
+            return std::regex_match(info.name.cstr(), regex_expr);
+        };
+        return File::listFileInfos(path, predicate);
+    };
     
     String File::absolutePath(const String& path)
     {
@@ -375,5 +394,52 @@ namespace eokas {
             return path1 + path2;
         
         return path1 + "/" + path2;
+    }
+    
+    FileStream Process::open(const eokas::String& command, const eokas::String& mode) {
+#if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
+        FILE* handle = _popen(command.cstr(), mode.cstr());
+        return FileStream(handle);
+#else
+        FILE* handle = popen(command.cstr(), mode.cstr());
+        return FileStream(handle);
+#endif
+    }
+    
+    u32_t Process::getPID() {
+#if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
+        return GetCurrentProcessId();
+#else
+        return getpid();
+#endif
+    }
+    
+    String Process::executingPath() {
+#if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
+        char buf[MAX_PATH];
+        DWORD ret = GetModuleFileNameA(NULL, buf, MAX_PATH);
+        if (ret == 0)
+            return "";
+        return buf;
+#else
+        char buf[PATH_MAX];
+        size_t ret = readlink("/proc/self/exe", buf, PATH_MAX - 1);
+        if (ret <= 0 || (ret > PATH_MAX - 1))
+            return "";
+        buf[ret] = '\0';
+        return buf;
+#endif
+    }
+    
+    String Process::workingPath() {
+#if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
+        char buf[MAX_PATH] = { 0 };
+        _getcwd(buf, MAX_PATH);
+        return buf;
+#else
+        char buf[MAX_PATH] = { 0 };
+        getcwd(buf, MAX_PATH);
+        return buf;
+#endif
     }
 }

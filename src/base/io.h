@@ -23,7 +23,8 @@ namespace eokas {
     */
     class FileStream : public Stream {
     public:
-        FileStream(const String& fileName, const String& openMode);
+        FileStream(FILE* handle);
+        FileStream(const String& path, const String& mode);
         virtual ~FileStream();
     
     public:
@@ -44,9 +45,9 @@ namespace eokas {
         FILE* handle() const;
     
     private:
-        String mName;
-        String mMode;
         FILE* mHandle;
+        String mPath;
+        String mMode;
     };
     
     /*
@@ -73,19 +74,36 @@ namespace eokas {
     */
     class File {
     public:
+        using FileInfoPredicate = std::function<bool(const FileInfo& info)>;
+        using FileNamePredicate = std::function<bool(const String& name)>;
+        
+        static FileStream open(const String& path, const String& mode);
         static bool exists(const String& path);
         static bool isFile(const String& path);
         static bool isFolder(const String& path);
-        static FileList fileInfoList(const String& path);
-        static StringList fileNameList(const String& path);
-        static StringList folderNameList(const String& path);
-        static String executingPath();
+        static FileList listFileInfos(const String& path, FileInfoPredicate predicate = FileInfoPredicate());
+        static StringList listFileNames(const String& path, FileNamePredicate predicate = FileNamePredicate());
+        static StringList listFolderNames(const String& path, FileNamePredicate predicate = FileNamePredicate());
+        static FileList glob(const String& path, const String& pattern);
         static String absolutePath(const String& path);
         static String basePath(const String& path);
         static String fileName(const String& path);
         static String fileNameWithoutExtension(const String& path);
         static String fileExtension(const String& path);
         static String combinePath(const String& path1, const String& path2);
+    };
+    
+    /*
+    =================================================================
+    == Process interface
+    =================================================================
+    */
+    class Process {
+    public:
+        static FileStream open(const String& command, const String& mode);
+        static u32_t getPID();
+        static String executingPath();
+        static String workingPath();
     };
 }
 

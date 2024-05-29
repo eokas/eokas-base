@@ -21,7 +21,7 @@
 #include "./json.h"
 #include "./pixels.h"
 #include "./socket.h"
-#include "./file.h"
+#include "./io.h"
 #include "./cli.h"
 
 #endif //_EOKAS_BASE_MAIN_H_
