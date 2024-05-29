@@ -2,8 +2,8 @@
 #ifndef _EOKAS_BASE_OS_H_
 #define _EOKAS_BASE_OS_H_
 
-#include "../base/header.h"
-#include "../base/string.h"
+#include "./header.h"
+#include "./string.h"
 
 namespace eokas {
     struct CpuState {
@@ -19,6 +19,8 @@ namespace eokas {
         static String getSystemName();
         static String getSystemVersion();
         static String getDeviceName();
+        static String getDeviceModel();
+        static String getUniqueIdentifier();
         static u32_t getCpuCount();
         static CpuState& getCpuState(u32_t index);
         static MemoryState& getMemoryState();

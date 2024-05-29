@@ -2,8 +2,8 @@
 #ifndef  _EOKAS_BASE_ASSEMBLY_H_
 #define  _EOKAS_BASE_ASSEMBLY_H_
 
-#include "../base/header.h"
-#include "../base/string.h"
+#include "./header.h"
+#include "./string.h"
 
 namespace eokas {
     

@@ -22,17 +22,28 @@ namespace eokas
     class Window
     {
     public:
-        Window(const String& title, bool isFullScreen);
-
-        void create();
-
-        AccessValue<Vector2> position;
-        AccessValue<Vector2> size;
-
+        Window();
+        virtual ~Window();
+        
+        bool create();
+        void close();
+        
+        const WindowHandle& getHandle() const;
+        
+        const String& getTitle() const;
+        void setTitle(const String& title);
+        
+        bool isFullScreen() const;
+        void setFullScree(bool val);
+        
+        const Rect& getRect();
+        void setRect(const Rect& rect);
+        
+        void minimize();
+        void maximize();
+        
     private:
-        String mTitle;
-        bool mIsFullScreen;
-        WindowHandle mHandle;
+        struct WindowDesc* mDesc;
     };
 }
 

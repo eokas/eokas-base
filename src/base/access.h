@@ -16,11 +16,12 @@ namespace eokas {
     template<typename T, bool read = true, bool write = true>
     class AccessRef {
     public:
+        using ModifyFunc = std::function<void(const T&)>;
+        
         AccessRef(T& ref)
             : mRef(ref) {
         }
-    
-    public:
+        
         const T& get() const {
             static_assert(read, "object access cannot be read.");
             return mRef;
@@ -29,6 +30,7 @@ namespace eokas {
         AccessRef<T, read, true>& set(const T& ref) {
             static_assert(write, "object access cannot be written.");
             mRef = ref;
+            mOnModify(ref);
             return *this;
         }
         
@@ -43,9 +45,14 @@ namespace eokas {
         AccessRef<T, read, true>& operator=(const AccessRef<T, true, write>& access) {
             return this->set(access.mRef);
         }
+        
+        void onModify(const ModifyFunc& func) {
+            this->mOnModify = func;
+        }
     
     private:
         T& mRef;
+        ModifyFunc mOnModify;
     };
     
     /*
@@ -59,6 +66,16 @@ namespace eokas {
     template<typename T, bool read = true, bool write = true>
     class AccessValue {
     public:
+        using ModifyFunc = std::function<void(const T&)>;
+        
+        AccessValue()
+            : mValue() {
+        }
+        
+        AccessValue(const T& value)
+            : mValue(value) {
+        }
+        
         const T& get() const {
             static_assert(read, "access object cannot be read.");
             return mValue;
@@ -67,6 +84,7 @@ namespace eokas {
         AccessValue<T, read, true>& set(const T& value) {
             static_assert(write, "access object cannot be written.");
             mValue = value;
+            mOnModify(value);
             return *this;
         }
         
@@ -81,11 +99,15 @@ namespace eokas {
         AccessValue<T, read, true>& operator=(const AccessValue<T, true, write>& object) {
             return this->set(object.mValue);
         }
+        
+        void onModify(const ModifyFunc& func) {
+            this->mOnModify = func;
+        }
     
     private:
         T mValue;
+        ModifyFunc mOnModify;
     };
-    
 }
 
 #endif//_EOKAS_BASE_ACCESS_H_

@@ -1,5 +1,64 @@
 
-#include "os.h"
+#include "./os.h"
+
+#if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
+
+#include <Windows.h>
+#include <comdef.h>
+#include <Wbemidl.h>
+#include <iphlpapi.h>
+#pragma comment(lib, "wbemuuid.lib")
+
+#else
+
+#include <limits.h>
+#include <unistd.h>
+#include <sys/utsname.h>
+
+#endif
+
+namespace eokas {
+    String OS::getSystemName() {
+#if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
+        return "Windows";
+#elif _EOKAS_OS == __EOKAS_OS_LINUX
+        return "Linux";
+#elif _EOKAS_OS == _EOKAS_OS_MACOS
+        return "macOS";
+#elif _EOKAS_OS == _EOKAS_OS_IOS
+        return "iOS";
+#elif _EOKAS_OS == _EOKAS_OS_ANDROID
+        return "Android";
+
+#else
+        return "Unknown";
+#endif
+    }
+    
+    String OS::getSystemVersion() {
+        return "";
+    }
+    
+    String OS::getDeviceName() {
+#if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
+        CHAR buffer[256] = {0};
+        DWORD count = 0;
+        if (!GetComputerNameA(buffer, &count))
+            return "";
+        return String(buffer, count);
+#elif _EOKAS_OS == _EOKAS_OS_LINUX || _EOKAS_OS == _EOKAS_OS_MACOS
+        char buffer[HOST_NAME_MAX] = {0};
+        gethostname(buffer, HOST_NAME_MAX);
+        return String(buffer);
+#else
+
+#endif
+    }
+    
+    String OS::getDeviceModel() {
+    
+    }
+}
 
 #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
 
@@ -218,20 +277,12 @@ namespace eokas {
         }
     };
     
-    String OS::getSystemName() {
-        return "Windows";
-    }
-    
     String OS::getSystemVersion() {
         return "";
     }
     
     String OS::getDeviceName() {
-        CHAR buffer[256] = {0};
-        DWORD count = 0;
-        if (!GetComputerNameA(buffer, &count))
-            return "";
-        return String(buffer, count);
+    
     };
     
     u32_t OS::getCpuCount() {
@@ -329,13 +380,6 @@ namespace eokas {
 
 namespace eokas
 {
-    String OS::getDeviceName()
-    {
-        char buffer[HOST_NAME_MAX] = {0};
-        gethostname(buffer, HOST_NAME_MAX);
-        return String(buffer);
-    }
-
     String OS::getCurrentUser()
     {
         char buffer[LOGIN_NAME_MAX];
@@ -366,7 +410,6 @@ namespace eokas
         return macAddress;
     }
 }
-
 
 #elif _EOKAS_OS == _EOKAS_OS_IOS
 

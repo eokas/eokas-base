@@ -1,5 +1,5 @@
 			  
-#include "network.h"
+#include "./network.h"
 
 #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
 
