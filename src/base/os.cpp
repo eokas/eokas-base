@@ -1,13 +1,13 @@
 
 #include "./os.h"
+#include "./string.h"
 #include <cstdlib>
 
 #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
 #include <Windows.h>
-#include <comdef.h>
 #include <Wbemidl.h>
 #include <iphlpapi.h>
-#pragma comment(lib, "wbemuuid.lib")
+#pragma comment(lib, "Iphlpapi.lib")
 #else
 #include <limits.h>
 #include <unistd.h>

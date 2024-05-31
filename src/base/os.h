@@ -3,7 +3,6 @@
 #define _EOKAS_BASE_OS_H_
 
 #include "./header.h"
-#include "./string.h"
 
 namespace eokas {
     struct OS {

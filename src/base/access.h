@@ -30,7 +30,9 @@ namespace eokas {
         AccessRef<T, read, true>& set(const T& ref) {
             static_assert(write, "object access cannot be written.");
             mRef = ref;
-            mOnModify(ref);
+            if(mOnModify) {
+                mOnModify(ref);
+            }
             return *this;
         }
         
@@ -84,7 +86,9 @@ namespace eokas {
         AccessValue<T, read, true>& set(const T& value) {
             static_assert(write, "access object cannot be written.");
             mValue = value;
-            mOnModify(value);
+            if(mOnModify) {
+                mOnModify(value);
+            }
             return *this;
         }
         
