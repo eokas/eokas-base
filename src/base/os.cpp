@@ -4,14 +4,19 @@
 #include <cstdlib>
 
 #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
-#include <Windows.h>
-#include <Wbemidl.h>
-#include <iphlpapi.h>
-#pragma comment(lib, "Iphlpapi.lib")
+    #include <Windows.h>
+    #include <Wbemidl.h>
+    #include <iphlpapi.h>
+    #pragma comment(lib, "Iphlpapi.lib")
 #else
-#include <limits.h>
-#include <unistd.h>
-#include <sys/utsname.h>
+    #include <unistd.h>
+    #include <pwd.h>
+    #include <ifaddrs.h>
+    #include <sys/utsname.h>
+    #include <sys/socket.h>
+    #include <net/if_types.h>
+    #include <net/if_dl.h>
+    #include <net/ethernet.h>
 #endif
 
 namespace eokas {
@@ -42,11 +47,11 @@ namespace eokas {
         DWORD count = 0;
         if (!GetComputerNameA(buffer, &count))
             return "";
-        return String(buffer, count);
+        return String{buffer, count};
 #else
-        char buffer[HOST_NAME_MAX] = {0};
-        gethostname(buffer, HOST_NAME_MAX);
-        return String(buffer);
+        char buffer[256] = {0};
+        gethostname(buffer, 256);
+        return String{buffer};
 #endif
     }
     
@@ -120,9 +125,9 @@ namespace eokas {
         }
         
         String macAddress;
-        for (struct ifaddrs* addrPtr = addrs; addrPtr != nullptr; addrPtr = ifa->ifa_next) {
+        for (struct ifaddrs* addrPtr = addrs; addrPtr != nullptr; addrPtr = addrPtr->ifa_next) {
             if(addrPtr->ifa_addr->sa_family == AF_LINK) {
-                struct sockaddr_dl* sdl = (struct sockaddr_dl*)addrPtr->ifa_addr;
+                sockaddr_dl* sdl = (sockaddr_dl*)(addrPtr->ifa_addr);
                 if(sdl->sdl_type == IFT_ETHER) {
                     char* mac = (char*)ether_ntoa((const struct ether_addr*)LLADDR(sdl));
                     macAddress = mac;
