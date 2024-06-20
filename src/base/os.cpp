@@ -104,9 +104,8 @@ namespace eokas {
         PIP_ADAPTER_INFO adapterPtr = adapterInfo;
         while (adapterPtr != nullptr) {
             if(adapterPtr->Type == MIB_IF_TYPE_ETHERNET) {
-                macAddr += String::format("%02X", adapterPtr->Address[0]);
-                for (UINT i = 1; i < adapterPtr->AddressLength; i++) {
-                    macAddr += String::format("-%02X", adapterPtr->Address[i]);
+                for (UINT i = 0; i < adapterPtr->AddressLength; i++) {
+                    macAddr += String::format("%02X", adapterPtr->Address[i]);
                 }
                 break;
             }
