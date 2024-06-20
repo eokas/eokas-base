@@ -10,7 +10,6 @@
 #else
 #include <dirent.h>
 #include <unistd.h>
-#include <limits.h>
 #include <sys/stat.h>
 #endif
 
@@ -437,8 +436,8 @@ namespace eokas {
         _getcwd(buf, MAX_PATH);
         return buf;
 #else
-        char buf[MAX_PATH] = { 0 };
-        getcwd(buf, MAX_PATH);
+        char buf[1024] = { 0 };
+        getcwd(buf, 1024);
         return buf;
 #endif
     }
