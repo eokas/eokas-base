@@ -2,9 +2,10 @@
 #define _EOKAS_DATAPOT_SCHEMA_H_
 
 #include "./header.h"
-#include "./Value.h"
+#include "./value.h"
 
 namespace eokas::datapot {
+
     enum class SchemaType {
         Int,
         Float,
@@ -13,67 +14,63 @@ namespace eokas::datapot {
         List,
         Struct,
     };
-    
-    class Schema {
-    public:
-        Schema(SchemaType type, const String& name);
-        virtual ~Schema();
-        
-        SchemaType type() const { return mType; }
-        String name() const { return mName; }
-        bool is(SchemaType type) const { return mType == type; }
 
-    private:
-        SchemaType mType;
-        String mName;
-    };
-    
-    class IntSchema :public Schema {
-    public:
-        IntSchema();
-    };
-    
-    class FloatSchema :public Schema {
-    public:
-        FloatSchema();
-    };
-    
-    class BoolSchema :public Schema {
-    public:
-        BoolSchema();
-    };
-    
-    class StringSchema :public Schema {
-    public:
-        StringSchema();
-    };
-    
-    class ListSchema :public Schema {
-    public:
-        ListSchema(const String& name);
-    };
-    
-    class StructSchema :public Schema {
+    class Schema {
     public:
         struct Member {
             String name;
             Schema* schema;
         };
-        
-    public:
-        StructSchema(const String& name);
-        virtual ~StructSchema();
-        
+
+        struct ListBody {
+            Schema* element = nullptr;
+        };
+
+        struct StructBody {
+            std::vector<Member> members = {};
+        };
+
+
+        Schema(SchemaType type, const String& name);
+        virtual ~Schema();
+
+        bool operator==(const Schema& other) const;
+        bool operator!=(const Schema& other) const;
+
+        SchemaType type() const { return mType; }
+        String name() const { return mName; }
+        bool is(SchemaType type) const { return mType == type; }
+
+        void setElement(Schema* schema);
+        Schema* getElement() const;
+
         void addMember(const String& name, Schema* schema);
         void setMember(const String& name, Schema* schema);
         void delMember(const String& name);
         Member* getMember(const String& name);
-        Member* getMember(int index);
+        Member* getMember(size_t index);
         size_t getMemberCount();
         size_t getMemberIndex(const String& name);
-        
+
     private:
-        std::vector<Member> mMembers = {};
+        SchemaType mType;
+        String mName;
+        union {
+            ListBody* listBody;
+            StructBody* structBody;
+        } mBody;
+    };
+
+    class SchemaHeap {
+    public:
+        SchemaHeap();
+        virtual ~SchemaHeap();
+
+        Schema* add(SchemaType type, const String& name);
+        Schema* get(const String& name);
+
+    private:
+        std::map<String, Schema*> mSchemas;
     };
 }
 

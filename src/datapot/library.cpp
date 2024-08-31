@@ -5,283 +5,329 @@
 namespace eokas::datapot {
     Library::Library(const String& name)
         : mName(name)
-        , mSchemaTable()
-        , mValueTable()
-        , mSchemaHeap()
-        , mValueHeap()
-        , mMemory()
-    {
-        this->addSchema(new IntSchema());
-        this->addSchema(new FloatSchema());
-        this->addSchema(new BoolSchema());
-        this->addSchema(new StringSchema());
-    }
+        , mSchemas()
+        , mValues(mSchemas)
+        , mRoot() { }
     
     Library::~Library() {
-        mValueTable.clear();
-        mSchemaTable.clear();
-        
-        _DeleteList(mValueHeap);
-        _DeleteList(mSchemaHeap);
+        mValues.clear();
+        mRoot.clear();
     }
     
-    bool Library::addSchema(Schema* schema) {
-        if(this->getSchama(schema->name()) != nullptr) {
-            return false;
-        }
-        mSchemaHeap.push_back(schema);
-        mSchemaTable.insert(std::make_pair(schema->name(), schema));
+    Schema* Library::addSchema(SchemaType type, const String& name) {
+        return mSchemas.add(type, name);
     }
     
     Schema* Library::getSchama(const String& name) {
-        auto iter = mSchemaTable.find(name);
-        if(iter == mSchemaTable.end()) {
-            return nullptr;
-        }
-        return iter->second;
+        return mSchemas.get(name);
     }
-    
+
     Value* Library::make(Schema* schema) {
-        if(schema == nullptr)
-            return nullptr;
-        
-        if(schema->type() == SchemaType::Int) {
-            Value value;
-            value.schema = schema;
-            value.value.i64 = 0;
-            mMemory.values.push_back(value);
-            return &mMemory.values.back();
-        }
-        else if(schema->type() == SchemaType::Float) {
-            Value value;
-            value.schema = schema;
-            value.value.f64 = 0;
-            mMemory.values.push_back(value);
-            return &mMemory.values.back();
-        }
-        else if(schema->type() == SchemaType::Bool) {
-            Value value;
-            value.schema = schema;
-            value.value.i64 = 1;
-            mMemory.values.push_back(value);
-            return &mMemory.values.back();
-        }
-        else if(schema->type() == SchemaType::String) {
-            i64_t index = mMemory.strings.size();
-            Value value;
-            value.schema = schema;
-            value.value.i64 = index;
-            mMemory.strings.push_back("");
-            mMemory.values.push_back(value);
-            return &mMemory.values.back();
-        }
-        else if(schema->type() == SchemaType::List)
-        {
-            i64_t index = mMemory.lists.size();
-            Value value;
-            value.schema = schema;
-            value.value.i64 = index;
-            mMemory.lists.push_back(List{});
-            mMemory.values.push_back(value);
-            return &mMemory.values.back();
-        }
-        else if(schema->type() == SchemaType::Struct)
-        {
-            StructSchema* structSchema = dynamic_cast<StructSchema*>(schema);
-            
-            i64_t index = mMemory.objects.size();
-            Value value;
-            value.schema = schema;
-            value.value.i64 = index;
-            mMemory.objects.push_back(Object{});
-            mMemory.values.push_back(value);
-            
-            Object& object = mMemory.objects.emplace_back();
-            for(size_t i = 0; i < structSchema->getMemberCount(); i++) {
-                auto* member = structSchema->getMember(i);
-                Value* v = this->make(member->schema);
-                
-            }
-            
-            return &mMemory.values.back();
-        }
-        
-        return nullptr;
+        return mValues.make(schema);
+    }
+
+    Value* Library::make(i32_t val) {
+        return mValues.make(val);
     }
     
     Value* Library::make(i64_t val) {
-        Schema* schema = this->getSchama("Int");
-        
-        Value value;
-        value.schema = schema;
-        value.value.i64 = val;
-        mMemory.values.push_back(value);
-        return &mMemory.values.back();
+        return mValues.make(val);
     }
     
     Value* Library::make(f64_t val) {
-        Schema* schema = this->getSchama("Float");
-        
-        Value value;
-        value.schema = schema;
-        value.value.f64 = val;
-        mMemory.values.push_back(value);
-        return &mMemory.values.back();
+        return mValues.make(val);
     }
     
     Value* Library::make(bool val) {
-        Schema* schema = this->getSchama("Bool");
-        
-        Value value;
-        value.schema = schema;
-        value.value.i64 = val ? 1 : 0;
-        mMemory.values.push_back(value);
-        return &mMemory.values.back();
+        return mValues.make(val);
     }
     
     Value* Library::make(const String& val) {
-        Schema* schema = this->getSchama("String");
-        
-        i64_t index = mMemory.strings.size();
-        Value value;
-        value.schema = schema;
-        value.value.i64 = index;
-        mMemory.strings.push_back(val);
-        mMemory.values.push_back(value);
-        return &mMemory.values.back();
+        return mValues.make(val);
+    }
+
+    bool Library::get(Value* ptr, i32_t& val) {
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(Value* ptr, i64_t& val) {
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(Value* ptr, f64_t& val) {
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(Value* ptr, bool& val) {
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(Value* ptr, String& val) {
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::set(Value* ptr, i32_t val) {
+        return mValues.set(ptr, val);
+    }
+
+    bool Library::set(Value* ptr, i64_t val) {
+        return mValues.set(ptr, val);
+    }
+
+    bool Library::set(Value* ptr, f64_t val) {
+        return mValues.set(ptr, val);
+    }
+
+    bool Library::set(Value* ptr, bool val) {
+        return mValues.set(ptr, val);
+    }
+
+    bool Library::set(Value* ptr, const String& val) {
+        return mValues.set(ptr, val);
     }
     
     Value* Library::get(const String& name) {
-        auto iter = mValueTable.find(name);
-        if(iter == mValueTable.end())
+        auto iter = mRoot.find(name);
+        if(iter == mRoot.end())
             return nullptr;
         return iter->second;
     }
+
+    bool Library::get(const String& name, i32_t& val) {
+        Value* ptr = this->get(name);
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(const String& name, i64_t& val) {
+        Value* ptr = this->get(name);
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(const String& name, f64_t& val) {
+        Value* ptr = this->get(name);
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(const String& name, bool& val) {
+        Value* ptr = this->get(name);
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(const String& name, String& val) {
+        Value* ptr = this->get(name);
+        return mValues.get(ptr, val);
+    }
+
+    void Library::set(const String& name, Value* val) {
+        mRoot[name] = val;
+    }
+
+    void Library::set(const String& name, i32_t val) {
+        Value* value = mValues.make(val);
+        mRoot[name] = value;
+    }
+
+    void Library::set(const String& name, i64_t val) {
+        Value* value = mValues.make(val);
+        mRoot[name] = value;
+    }
+
+    void Library::set(const String& name, f64_t val) {
+        Value* value = mValues.make(val);
+        mRoot[name] = value;
+    }
+
+    void Library::set(const String& name, bool val) {
+        Value* value = mValues.make(val);
+        mRoot[name] = value;
+    }
+
+    void Library::set(const String& name, const String& val) {
+        Value* value = mValues.make(val);
+        mRoot[name] = value;
+    }
     
-    Value* Library::get(Value* list, u64_t index) {
-        if(!list->schema->is(SchemaType::List))
-            return nullptr;
-        if(list->value.i64 < 0 || list->value.i64 >= mMemory.lists.size())
-            return nullptr;
-        List& ref = mMemory.lists.at(list->value.i64);
-        if(index < 0 || index >= ref.elements.size())
-            return nullptr;
-        return &ref.elements.at(index);
+    Value* Library::get(Value* list, size_t index) {
+        return mValues.get(list, index);
+    }
+
+    bool Library::get(Value* list, size_t index, i32_t& val) {
+        Value* ptr = mValues.get(list, index);
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(Value* list, size_t index, i64_t& val) {
+        Value* ptr = mValues.get(list, index);
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(Value* list, size_t index, f64_t& val) {
+        Value* ptr = mValues.get(list, index);
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(Value* list, size_t index, bool& val) {
+        Value* ptr = mValues.get(list, index);
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(Value* list, size_t index, String& val) {
+        Value* ptr = mValues.get(list, index);
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::set(Value* list, size_t index, Value* val) {
+        return mValues.set(list, index, val);
+    }
+
+    bool Library::set(Value* list, size_t index, i32_t val) {
+        Value* value = mValues.make(val);
+        return mValues.set(list, index, value);
+    }
+
+    bool Library::set(Value* list, size_t index, i64_t val) {
+        Value* value = mValues.make(val);
+        return mValues.set(list, index, value);
+    }
+
+    bool Library::set(Value* list, size_t index, f64_t val) {
+        Value* value = mValues.make(val);
+        return mValues.set(list, index, value);
+    }
+
+    bool Library::set(Value* list, size_t index, bool val) {
+        Value* value = mValues.make(val);
+        return mValues.set(list, index, value);
+    }
+
+    bool Library::set(Value* list, size_t index, const String& val) {
+        Value* value = mValues.make(val);
+        return mValues.set(list, index, value);
+    }
+
+    bool Library::push(Value* list, Value* val) {
+        return mValues.push(list, val);
+    }
+
+    bool Library::push(Value* list, i32_t val) {
+        Value* value = mValues.make(val);
+        return mValues.push(list, value);
+    }
+    bool Library::push(Value* list, i64_t val) {
+        Value* value = mValues.make(val);
+        return mValues.push(list, value);
+    }
+
+    bool Library::push(Value* list, f64_t val) {
+        Value* value = mValues.make(val);
+        return mValues.push(list, value);
+    }
+
+    bool Library::push(Value* list, bool val) {
+        Value* value = mValues.make(val);
+        return mValues.push(list, value);
+    }
+
+    bool Library::push(Value* list, const String& val) {
+        Value* value = mValues.make(val);
+        return mValues.push(list, value);
+    }
+
+    bool Library::pop(Value* list, Value* val) {
+        return mValues.pop(list, val);
+    }
+
+    bool Library::pop(Value* list, i32_t& val) {
+        Value ptr{};
+        if(!mValues.pop(list, &ptr))
+            return false;
+        return mValues.get(&ptr, val);
+    }
+
+    bool Library::pop(Value* list, i64_t& val) {
+        Value ptr{};
+        if(!mValues.pop(list, &ptr))
+            return false;
+        return mValues.get(&ptr, val);
+    }
+
+    bool Library::pop(Value* list, f64_t& val) {
+        Value ptr{};
+        if(!mValues.pop(list, &ptr))
+            return false;
+        return mValues.get(&ptr, val);
+    }
+
+    bool Library::pop(Value* list, bool& val) {
+        Value ptr{};
+        if(!mValues.pop(list, &ptr))
+            return false;
+        return mValues.get(&ptr, val);
+    }
+
+    bool Library::pop(Value* list, String& val) {
+        Value ptr{};
+        if(!mValues.pop(list, &ptr))
+            return false;
+        return mValues.get(&ptr, val);
     }
     
     Value* Library::get(Value* object, const String& field) {
-        if(!object->schema->is(SchemaType::Struct))
-            return nullptr;
-        if(object->value.i64 < 0 || object->value.i64 >= mMemory.objects.size())
-            return nullptr;
-        Object& ref = mMemory.objects.at(object->value.i64);
-        auto iter = ref.members.find(field);
-        if(iter == ref.members.end())
-            return nullptr;
-        return &iter->second;
+        return mValues.get(object, field);
+    }
+
+    bool Library::get(Value* object, const String& field, i32_t& val) {
+        Value* ptr = mValues.get(object, field);
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(Value* object, const String& field, i64_t& val) {
+        Value* ptr = mValues.get(object, field);
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(Value* object, const String& field, f64_t& val) {
+        Value* ptr = mValues.get(object, field);
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(Value* object, const String& field, bool& val) {
+        Value* ptr = mValues.get(object, field);
+        return mValues.get(ptr, val);
+    }
+
+    bool Library::get(Value* object, const String& field, String& val) {
+        Value* ptr = mValues.get(object, field);
+        return mValues.get(ptr, val);
     }
     
-    void Library::set(const String& name, Value* val) {
-        mValueTable[name] = val;
+    bool Library::set(Value* object, const String& field, Value* val) {
+        return mValues.set(object, field, val);
     }
-    
-    void Library::set(Value* list, u64_t index, Value* val) {
-        if(!list->schema->is(SchemaType::List))
-            return;
-        if(list->value.i64 < 0 || list->value.i64 >= mMemory.lists.size())
-            return;
-        List& ref = mMemory.lists.at(list->value.i64);
-        if(index < 0 || index >= ref.elements.size())
-            return;
-        ref.elements[index] = *val;
+
+    bool Library::set(Value* object, const String& field, i32_t val) {
+        Value* value = mValues.make(val);
+        return mValues.set(object, field, value);
     }
-    
-    void Library::set(Value* object, const String& field, Value* val) {
-        if(!object->schema->is(SchemaType::Struct))
-            return;
-        if(object->value.i64 < 0 || object->value.i64 >= mMemory.objects.size())
-            return;
-        Object& ref = mMemory.objects.at(object->value.i64);
-        ref.members[field] = *val;
+
+    bool Library::set(Value* object, const String& field, i64_t val) {
+        Value* value = mValues.make(val);
+        return mValues.set(object, field, value);
     }
-    
-    bool Library::get(Value* ptr, i64_t* val) {
-        if(!ptr->schema->is(SchemaType::Int))
-            return false;
-        *val = ptr->value.i64;
-        return true;
+
+    bool Library::set(Value* object, const String& field, f64_t val) {
+        Value* value = mValues.make(val);
+        return mValues.set(object, field, value);
     }
-    
-    bool Library::get(Value* ptr, f64_t* val) {
-        if(!ptr->schema->is(SchemaType::Float))
-            return false;
-        *val = ptr->value.f64;
-        return true;
+
+    bool Library::set(Value* object, const String& field, bool val) {
+        Value* value = mValues.make(val);
+        return mValues.set(object, field, value);
     }
-    
-    bool Library::get(Value* ptr, bool* val) {
-        if(!ptr->schema->is(SchemaType::Bool))
-            return false;
-        *val = ptr->value.i64 != 0;
-        return true;
-    }
-    
-    bool Library::get(Value* ptr, String& val) {
-        if(!ptr->schema->is(SchemaType::String))
-            return false;
-        i64_t index = ptr->value.i64;
-        if(index < 0 || index > mMemory.strings.size())
-            return false;
-        val = mMemory.strings.at(index);
-        return true;
-    }
-    
-    bool Library::set(Value* ptr, i32_t val) {
-        if(!ptr->schema->is(SchemaType::Int))
-            return false;
-        ptr->value.i64 = val;
-        return true;
-    }
-    
-    bool Library::set(Value* ptr, i64_t val) {
-        if(!ptr->schema->is(SchemaType::Int))
-            return false;
-        ptr->value.i64 = val;
-        return true;
-    }
-    
-    bool Library::set(Value* ptr, f64_t val) {
-        if(!ptr->schema->is(SchemaType::Float))
-            return false;
-        ptr->value.f64 = val;
-        return true;
-    }
-    
-    bool Library::set(Value* ptr, bool val) {
-        if(!ptr->schema->is(SchemaType::Bool))
-            return false;
-        ptr->value.i64 = val ? 1 : 0;
-        return true;
-    }
-    
-    bool Library::set(Value* ptr, const String& val) {
-        if(!ptr->schema->is(SchemaType::String))
-            return false;
-        
-        i64_t index = mMemory.strings.size();
-        for(size_t i = 0; i < mMemory.strings.size(); i++) {
-            if(val == mMemory.strings.at(i)) {
-                index = i;
-                break;
-            }
-        }
-        if(index == mMemory.strings.size()) {
-            mMemory.strings.push_back(val);
-        }
-        
-        ptr->value.i64 = index;
-        
-        return true;
+
+    bool Library::set(Value* object, const String& field, const String& val) {
+        Value* value = mValues.make(val);
+        return mValues.set(object, field, value);
     }
 }
 

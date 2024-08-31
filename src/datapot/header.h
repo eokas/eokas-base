@@ -6,8 +6,11 @@
 
 namespace eokas::datapot {
     class Library;
+
     class Schema;
-    class Value;
+    class SchemaHeap;
+
+    struct Value;
 }
 
 #endif //_EOKAS_DATAPOT_HEADER_H_

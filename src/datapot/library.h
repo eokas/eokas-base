@@ -3,7 +3,8 @@
 #define _EOKAS_DATAPOT_LIBRARY_H_
 
 #include "./header.h"
-#include "./Value.h"
+#include "./value.h"
+#include "./schema.h"
 
 namespace eokas::datapot {
     class Library {
@@ -13,41 +14,91 @@ namespace eokas::datapot {
         
         const String& name() const { return mName; }
         
-        bool addSchema(Schema* schema);
+        Schema* addSchema(SchemaType type, const String& name);
         Schema* getSchama(const String& name);
 
         Value* make(Schema* schema);
+        Value* make(i32_t val);
         Value* make(i64_t val);
         Value* make(f64_t val);
         Value* make(bool val);
         Value* make(const String& val);
-        
-        Value* get(const String& name);
-        Value* get(Value* list, u64_t index);
-        Value* get(Value* object, const String& field);
-        
-        void set(const String& name, Value* val);
-        void set(Value* list, u64_t index, Value* val);
-        void set(Value* object, const String& field, Value* val);
-        
-        bool get(Value* ptr, i64_t* val);
-        bool get(Value* ptr, f64_t* val);
-        bool get(Value* ptr, bool* val);
+
+        bool get(Value* ptr, i32_t& val);
+        bool get(Value* ptr, i64_t& val);
+        bool get(Value* ptr, f64_t& val);
+        bool get(Value* ptr, bool& val);
         bool get(Value* ptr, String& val);
- 
+
         bool set(Value* ptr, i32_t val);
         bool set(Value* ptr, i64_t val);
         bool set(Value* ptr, f64_t val);
         bool set(Value* ptr, bool val);
         bool set(Value* ptr, const String& val);
+
+        Value* get(const String& name);
+        bool get(const String& name, i32_t& val);
+        bool get(const String& name, i64_t& val);
+        bool get(const String& name, f64_t& val);
+        bool get(const String& name, bool& val);
+        bool get(const String& name, String& val);
+
+        void set(const String& name, Value* val);
+        void set(const String& name, i32_t val);
+        void set(const String& name, i64_t val);
+        void set(const String& name, f64_t val);
+        void set(const String& name, bool val);
+        void set(const String& name, const String& val);
+
+        Value* get(Value* list, size_t index);
+        bool get(Value* list, size_t index, i32_t& val);
+        bool get(Value* list, size_t index, i64_t& val);
+        bool get(Value* list, size_t index, f64_t& val);
+        bool get(Value* list, size_t index, bool& val);
+        bool get(Value* list, size_t index, String& val);
+
+        bool set(Value* list, size_t index, Value* val);
+        bool set(Value* list, size_t index, i32_t val);
+        bool set(Value* list, size_t index, i64_t val);
+        bool set(Value* list, size_t index, f64_t val);
+        bool set(Value* list, size_t index, bool val);
+        bool set(Value* list, size_t index, const String& val);
+
+        bool push(Value* list, Value* val);
+        bool push(Value* list, i32_t val);
+        bool push(Value* list, i64_t val);
+        bool push(Value* list, f64_t val);
+        bool push(Value* list, bool val);
+        bool push(Value* list, const String& val);
+
+        bool pop(Value* list, Value* val);
+        bool pop(Value* list, i32_t& val);
+        bool pop(Value* list, i64_t& val);
+        bool pop(Value* list, f64_t& val);
+        bool pop(Value* list, bool& val);
+        bool pop(Value* list, String& val);
+
+        Value* get(Value* object, const String& field);
+        bool get(Value* object, const String& field, i32_t& val);
+        bool get(Value* object, const String& field, i64_t& val);
+        bool get(Value* object, const String& field, f64_t& val);
+        bool get(Value* object, const String& field, bool& val);
+        bool get(Value* object, const String& field, String& val);
+
+        bool set(Value* object, const String& field, Value* val);
+        bool set(Value* object, const String& field, i32_t val);
+        bool set(Value* object, const String& field, i64_t val);
+        bool set(Value* object, const String& field, f64_t val);
+        bool set(Value* object, const String& field, bool val);
+        bool set(Value* object, const String& field, const String& val);
         
     private:
         String mName;
-        std::map<String, Schema*> mSchemaTable;
-        std::map<String, Value*> mValueTable;
-        std::vector<Schema*> mSchemaHeap;
-        std::vector<Value*> mValueHeap;
-        Memory mMemory;
+
+        SchemaHeap mSchemas;
+        ValueHeap mValues;
+
+        std::map<String, Value*> mRoot;
     };
 }
 
