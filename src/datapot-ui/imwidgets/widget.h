@@ -3,17 +3,22 @@
 #include "base/main.h"
 
 namespace eokas::datapot {
-    enum class WidgetType {
-        None, MenuBar, Menu, MenuItem,
-    };
-    
-    struct Widget {
+    class Widget {
+    public:
+        bool visible = true;
+        
         Widget();
         virtual ~Widget();
         
         virtual void init();
         virtual void quit();
         virtual void render(float deltaTime);
+    };
+    
+    class ContainerWidget : public Widget {
+    public:
+        ContainerWidget();
+        virtual ~ContainerWidget();
         
         template<typename ChildType, typename... Args>
         ChildType* addChild(Args&&... args) {
@@ -24,17 +29,22 @@ namespace eokas::datapot {
         
     protected:
         std::vector<Widget*> children = {};
+        
+        void renderChildren(float deltaTime);
     };
     
-    struct MainMenuBar : public Widget {
+    class MainMenuBar : public ContainerWidget {
+    public:
         virtual void render(float deltaTime) override;
     };
     
-    struct MenuBar : public Widget {
+    class MenuBar : public ContainerWidget {
+    public:
         virtual void render(float deltaTime) override;
     };
     
-    struct Menu : public Widget {
+    class Menu : public ContainerWidget {
+    public:
         String label = "";
         bool enabled = true;
         
@@ -46,7 +56,8 @@ namespace eokas::datapot {
         virtual void render(float deltaTime) override;
     };
     
-    struct MenuItem : public Widget {
+    class MenuItem : public Widget {
+    public:
         String label = "";
         std::function<void()> onClick = {};
         
@@ -58,7 +69,8 @@ namespace eokas::datapot {
         virtual void render(float deltaTime) override;
     };
     
-    struct MainWindow : public Widget {
+    class MainWindow : public ContainerWidget {
+    public:
         virtual void render(float deltaTime) override;
     };
 }

@@ -1,6 +1,8 @@
 #pragma once
 
-#include "./window.h"
+#include "./models.h"
+#include "./controllers.h"
+#include "./views.h"
 using namespace eokas::datapot;
 
 struct ImApp
@@ -9,5 +11,5 @@ struct ImApp
 	void quit();
 	void tick();
     
-    struct MyMainWindow* mainWindow;
+    MyMainWindow* mainWindow;
 };

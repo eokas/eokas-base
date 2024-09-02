@@ -29,6 +29,7 @@ file(GLOB EOKAS_HEADER_FILES
         "${EOKAS_TARGET_DIR}/imgui/*.h"
         "${EOKAS_TARGET_DIR}/implot/*.h"
         "${EOKAS_TARGET_DIR}/imwidgets/*.h"
+        "${EOKAS_TARGET_DIR}/utils/*.h"
         "${EOKAS_TARGET_DIR}/app/*.h"
 )
 
@@ -37,6 +38,7 @@ file(GLOB EOKAS_SOURCE_FILES
         "${EOKAS_TARGET_DIR}/imgui/*.cpp"
         "${EOKAS_TARGET_DIR}/implot/*.cpp"
         "${EOKAS_TARGET_DIR}/imwidgets/*.cpp"
+        "${EOKAS_TARGET_DIR}/utils/*.cpp"
         "${EOKAS_TARGET_DIR}/app/*.cpp"
 )
 

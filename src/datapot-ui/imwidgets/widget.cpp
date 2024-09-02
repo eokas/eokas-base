@@ -5,7 +5,6 @@ namespace eokas::datapot {
     Widget::Widget() { }
     
     Widget::~Widget() {
-        _DeleteList(children);
     }
     
     void Widget::init() { }
@@ -14,29 +13,37 @@ namespace eokas::datapot {
     
     void Widget::render(float deltaTime) { }
     
-    void MainMenuBar::render(float deltaTime) {
-        if (ImGui::BeginMainMenuBar()) {
-            for(Widget* child : children) {
+    ContainerWidget::ContainerWidget() { }
+    
+    ContainerWidget::~ContainerWidget() {
+        _DeleteList(children);
+    }
+    
+    void ContainerWidget::renderChildren(float deltaTime) {
+        for(Widget* child : children) {
+            if(child->visible) {
                 child->render(deltaTime);
             }
+        }
+    }
+    
+    void MainMenuBar::render(float deltaTime) {
+        if (ImGui::BeginMainMenuBar()) {
+            this->renderChildren(deltaTime);
             ImGui::EndMainMenuBar();
         }
     }
     
     void MenuBar::render(float deltaTime) {
         if (ImGui::BeginMenuBar()) {
-            for(Widget* child : children) {
-                child->render(deltaTime);
-            }
+            this->renderChildren(deltaTime);
             ImGui::EndMenuBar();
         }
     }
     
     void Menu::render(float deltaTime) {
         if(ImGui::BeginMenu(this->label.cstr(), this->enabled)) {
-            for(Widget* child : children) {
-                child->render(deltaTime);
-            }
+            this->renderChildren(deltaTime);
             ImGui::EndMenu();
         }
     }
@@ -61,10 +68,7 @@ namespace eokas::datapot {
         ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y - ImGui::GetFrameHeight()));
         if (ImGui::Begin(content_window_name, nullptr, content_window_flags))
         {
-            for(Widget* child : children) {
-                child->render(deltaTime);
-            }
-            
+            this->renderChildren(deltaTime);
             ImGui::End();
         }
     }

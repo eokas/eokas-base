@@ -15,8 +15,14 @@
 #define _EOKAS_OS_ANDROID 6
 
 #if defined(_WIN64) || defined(WIN64)
+    #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+    #endif
     #define _EOKAS_OS _EOKAS_OS_WIN64
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+    #ifndef WIN32_LEAN_AND_MEAN
+            #define WIN32_LEAN_AND_MEAN
+    #endif
     #define _EOKAS_OS _EOKAS_OS_WIN32
 #elif defined(__APPLE_CC__)
     #if (__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__ >= 30000 || __IPHONE_OS_VERSION_MIN_REQUIRED >= 30000)
