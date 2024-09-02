@@ -11,12 +11,7 @@ namespace eokas::datapot {
             i64_t i64;
             f64_t f64;
         } value;
-
-        void set(Schema* schema, u64_t val) {
-            this->schema = schema;
-            this->value.u64 = val;
-        }
-
+        
         void set(Schema* schema, size_t val) {
             this->schema = schema;
             this->value.u64 = static_cast<u64_t>(val);

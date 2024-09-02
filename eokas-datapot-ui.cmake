@@ -1,6 +1,6 @@
 
-set(EOKAS_TARGET_NAME "datapot")
-set(EOKAS_TARGET_DIR "${EOKAS_SOURCE_DIR}/datapot")
+set(EOKAS_TARGET_NAME "datapot-ui")
+set(EOKAS_TARGET_DIR "${EOKAS_SOURCE_DIR}/datapot-ui")
 
 message("============================================================================")
 message("EOKAS_TARGET_NAME = ${EOKAS_TARGET_NAME}")
@@ -25,7 +25,7 @@ file(GLOB EOKAS_SOURCE_FILES
 )
 
 set(EOKAS_LIBRARY_FILES
-    "base"
+    "base" "datapot"
 )
 
 message("EOKAS_HEADER_DIRS = ${EOKAS_HEADER_DIRS}")
@@ -34,7 +34,7 @@ message("EOKAS_HEADER_FILES = ${EOKAS_HEADER_FILES}")
 message("EOKAS_SOURCE_FILES = ${EOKAS_SOURCE_FILES}")
 message("EOKAS_LIBRARY_FILES = ${EOKAS_LIBRARY_FILES}")
 
-add_library(${EOKAS_TARGET_NAME} STATIC ${EOKAS_HEADER_FILES} ${EOKAS_SOURCE_FILES})
+add_executable(${EOKAS_TARGET_NAME} ${EOKAS_HEADER_FILES} ${EOKAS_SOURCE_FILES})
 target_include_directories(${EOKAS_TARGET_NAME} PRIVATE ${EOKAS_HEADER_DIRS})
 target_link_directories(${EOKAS_TARGET_NAME} PRIVATE ${EOKAS_LIBRARY_DIRS})
 target_link_libraries(${EOKAS_TARGET_NAME} ${EOKAS_LIBRARY_FILES})

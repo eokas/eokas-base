@@ -1,7 +1,7 @@
 
-#include "./header.h"
-#include "./schema.h"
-#include "./library.h"
+#include "datapot/header.h"
+#include "datapot/schema.h"
+#include "datapot/library.h"
 using namespace eokas::datapot;
 
 int main(int argc, char** argv)
