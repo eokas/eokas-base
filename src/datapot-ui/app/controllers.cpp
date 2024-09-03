@@ -2,7 +2,12 @@
 #include "utils/utils.h"
 
 namespace eokas::datapot {
-    void Controller::actionNewFile() { }
+    void Controller::actionNewFile() {
+        String filePath = "";
+        if(OpenDirectoryDialog(filePath, "")) {
+        
+        }
+    }
     
     void Controller::actionOpenFile() {
         String filePath = "";

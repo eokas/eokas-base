@@ -43,7 +43,7 @@ file(GLOB EOKAS_SOURCE_FILES
 )
 
 set(EOKAS_LIBRARY_FILES
-    "base" "datapot" "vulkan-1" "glfw3" "freetype"
+    "base" "native" "datapot" "vulkan-1" "glfw3" "freetype"
 )
 
 message("EOKAS_HEADER_DIRS = ${EOKAS_HEADER_DIRS}")
