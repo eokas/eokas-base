@@ -20,6 +20,9 @@ namespace eokas::datapot {
         
         MyMainWindow* mainWindow = nullptr;
         
+        Logic();
+        virtual ~Logic();
+        
         void actionFileNew();
         void actionFileOpen();
         void actionFileSave();

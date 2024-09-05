@@ -10,7 +10,6 @@ namespace eokas::datapot {
         , mRoot() { }
     
     Library::~Library() {
-        mValues.clear();
         mRoot.clear();
     }
     

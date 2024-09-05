@@ -3,8 +3,14 @@
 #include "datapot/library.h"
 
 namespace eokas::datapot {
+    Logic::Logic() {}
+    
+    Logic::~Logic() {
+        _DeletePointer(this->library);
+    }
+    
     void Logic::actionFileNew() {
-        mainWindow->createLibraryDialog->open();
+        mainWindow->createLibrary->show();
     }
     
     void Logic::actionFileOpen() {
@@ -29,11 +35,12 @@ namespace eokas::datapot {
         String filePath = File::combinePath(home, fileName);
         if(File::exists(filePath)) {
             String msg = String::format("The file: %s is existed already.", filePath.cstr());
-            mainWindow->toastDialog->open(msg);
+            mainWindow->toast->open(msg);
             return Result{false, msg};
         }
         
         this->library = new Library(filePath);
+        this->library->save(filePath);
         
         return Result{true};
     }

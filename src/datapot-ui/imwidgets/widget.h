@@ -90,6 +90,9 @@ namespace eokas::datapot {
             , docking(docking) { }
         
         virtual void render(float deltaTime) override;
+        
+    protected:
+        bool isOpened = true;
     };
     
     class Dialog :public ContainerWidget {
@@ -104,10 +107,11 @@ namespace eokas::datapot {
         
         virtual void render(float deltaTime) override;
         
-        void open();
+        void show();
+        void hide();
         
     private:
-        bool isOpened = false;
+        bool bOpenPopup = false;
     };
     
     class Text : public Widget {

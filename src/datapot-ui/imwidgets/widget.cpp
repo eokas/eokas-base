@@ -54,7 +54,7 @@ namespace eokas::datapot {
             this->onClick();
         }
     }
-    
+
     void MainWindow::render(float deltaTime) {
         ImGuiIO& io = ImGui::GetIO();
         
@@ -67,30 +67,28 @@ namespace eokas::datapot {
         ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetFrameHeight()));
         ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y - ImGui::GetFrameHeight()));
         
-        if (ImGui::Begin(this->name.cstr(), nullptr, window_flags)) {
+        if(ImGui::Begin(this->name.cstr(), nullptr, window_flags)) {
             if (this->dockSpace && (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)) {
                 ImGuiID dockspace_id = ImGui::GetID((this->name + "-dockspace").cstr());
                 ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
             }
             
             this->renderChildren(deltaTime);
-            
-            ImGui::End();
         }
+        ImGui::End();
     }
     
     void Window::render(float deltaTime) {
-        static ImGuiWindowFlags window_flags =
-            ImGuiWindowFlags_NoCollapse;
+        static ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse;
         
-        if(!this->docking)
+        static ImGuiDockNodeFlags dockspace_flags = ~ImGuiDockNodeFlags_PassthruCentralNode;
+        
+        if (!this->docking)
             window_flags |= ImGuiWindowFlags_NoDocking;
         
-        bool window_opened = true;
-        if (ImGui::Begin(this->name.cstr(), &window_opened, window_flags)) {
-            this->renderChildren(deltaTime);
-            ImGui::End();
-        }
+        ImGui::Begin(this->name.cstr(), &visible, window_flags);
+        this->renderChildren(deltaTime);
+        ImGui::End();
     }
     
     void Dialog::render(float deltaTime) {
@@ -98,14 +96,13 @@ namespace eokas::datapot {
             ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoMove;
         
-        if(this->isOpened) {
+        if(this->bOpenPopup) {
             ImGui::OpenPopup(this->name.cstr());
-            this->isOpened = false;
+            this->bOpenPopup = false;
         }
         
-        bool window_opened = true;
         if(this->modal) {
-            if (ImGui::BeginPopupModal(this->name.cstr(), &window_opened, window_flags)) {
+            if (ImGui::BeginPopupModal(this->name.cstr(), &visible, window_flags)) {
                 this->renderChildren(deltaTime);
                 ImGui::EndPopup();
             }
@@ -118,8 +115,14 @@ namespace eokas::datapot {
         }
     }
     
-    void Dialog::open() {
-        this->isOpened = true;
+    void Dialog::show() {
+        this->visible = true;
+        this->bOpenPopup = true;
+    }
+    
+    void Dialog::hide() {
+        this->visible = false;
+        this->bOpenPopup = false;
     }
     
     void Text::render(float deltaTime) {

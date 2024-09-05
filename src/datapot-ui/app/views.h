@@ -19,6 +19,14 @@ namespace eokas::datapot {
         MyCreateLibraryDialog();
     };
     
+    struct MySchemaBrowserWindow :public Window {
+        MySchemaBrowserWindow();
+    };
+    
+    struct MyObjectBrowserWindow :public Window {
+        MyObjectBrowserWindow();
+    };
+    
     struct MyToastDialog :public Dialog {
         Text* text;
         
@@ -28,8 +36,10 @@ namespace eokas::datapot {
     
     struct MyMainWindow :public MainWindow {
         MyMainMenuBar* mainMenuBar;
-        MyCreateLibraryDialog* createLibraryDialog;
-        MyToastDialog* toastDialog;
+        MySchemaBrowserWindow* schemaBrowser;
+        MyObjectBrowserWindow* objectBrowser;
+        MyCreateLibraryDialog* createLibrary;
+        MyToastDialog* toast;
         
         MyMainWindow();
     };

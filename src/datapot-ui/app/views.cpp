@@ -26,9 +26,21 @@ namespace eokas::datapot {
             String name = fieldName->value;
             String home = fieldHome->value;
             if (!name.isEmpty() && !home.isEmpty()) {
-                Logic::instance().createLibrary(name, home);
+                const Result& result = Logic::instance().createLibrary(name, home);
+                if(result.ok) {
+                    this->hide();
+                }
             }
         };
+    }
+    
+    MySchemaBrowserWindow::MySchemaBrowserWindow()
+        : Window("Schemas", true) {
+    }
+    
+    MyObjectBrowserWindow::MyObjectBrowserWindow()
+        : Window("Objects", true){
+        
     }
     
     MyToastDialog::MyToastDialog()
@@ -38,14 +50,16 @@ namespace eokas::datapot {
     
     void MyToastDialog::open(const eokas::String& content) {
         this->text->content = content;
-        Dialog::open();
+        this->show();
     }
     
     MyMainWindow::MyMainWindow()
         : MainWindow("datapot", true)
     {
         mainMenuBar = this->add<MyMainMenuBar>();
-        createLibraryDialog = this->add<MyCreateLibraryDialog>();
-        toastDialog = this->add<MyToastDialog>();
+        schemaBrowser = this->add<MySchemaBrowserWindow>();
+        objectBrowser = this->add<MyObjectBrowserWindow>();
+        createLibrary = this->add<MyCreateLibraryDialog>();
+        toast = this->add<MyToastDialog>();
     }
 }
