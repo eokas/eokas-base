@@ -3,43 +3,52 @@
 #include "./schema.h"
 
 namespace eokas::datapot {
-    ValueHeap::ValueHeap(SchemaHeap& schemaManager)
-        : mSchemaManager(schemaManager) { }
+    ValueHeap::ValueHeap(SchemaHeap& schemaHeap)
+        : mSchemaHeap(schemaHeap) { }
 
     ValueHeap::~ValueHeap() {
         this->clear();
     }
+    
+    size_t ValueHeap::indexOf(Value* val) {
+        for(size_t index = 0; index < values.size(); index++) {
+            if(val == &values.at(index)) {
+                return index;
+            }
+        }
+        return -1;
+    }
 
     Value* ValueHeap::make(i32_t val) {
-        Schema* schema = mSchemaManager.get("Int");
+        Schema* schema = mSchemaHeap.get("Int");
         Value& value = this->values.emplace_back();
         value.set(schema, val);
         return &value;
     }
 
     Value* ValueHeap::make(i64_t val) {
-        Schema* schema = mSchemaManager.get("Int");
+        Schema* schema = mSchemaHeap.get("Int");
         Value& value = this->values.emplace_back();
         value.set(schema, val);
         return &value;
     }
 
     Value* ValueHeap::make(f64_t val) {
-        Schema* schema = mSchemaManager.get("Float");
+        Schema* schema = mSchemaHeap.get("Float");
         Value& value = this->values.emplace_back();
         value.set(schema, val);
         return &value;
     }
 
     Value* ValueHeap::make(bool val) {
-        Schema* schema = mSchemaManager.get("Bool");
+        Schema* schema = mSchemaHeap.get("Bool");
         Value& value = this->values.emplace_back();
         value.set(schema, val ? 1 : 0);
         return &value;
     }
 
     Value* ValueHeap::make(const String& val) {
-        Schema* schema = mSchemaManager.get("String");
+        Schema* schema = mSchemaHeap.get("String");
 
         size_t index = this->strings.size();
         String& str = this->strings.emplace_back(val);

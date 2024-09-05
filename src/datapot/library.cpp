@@ -14,6 +14,224 @@ namespace eokas::datapot {
         mRoot.clear();
     }
     
+    bool Library::load(const String& filePath) {
+        FileStream file = File::open(filePath, "rb");
+        if(!file.isOpen()) {
+            return false;
+        }
+        
+        BinaryStream stream(file);
+        return this->load(stream);
+    }
+    
+    bool Library::save(const String& filePath) {
+        FileStream file = File::open(filePath, "wb");
+        if(!file.isOpen()) {
+            return false;
+        }
+        
+        BinaryStream stream(file);
+        return this->save(stream);
+    }
+    
+    bool Library::load(BinaryStream& stream) {
+        static const String MAGIC = "DATAPOT";
+        static const i32_t VERSION = 1;
+        
+        if(!stream.isOpen()) {
+            return false;
+        }
+        
+        String magic{};
+        if(!stream.read(magic))
+            return false;
+        i32_t version = 0;
+        if(!stream.read(version))
+            return false;
+        if(magic != MAGIC || version != VERSION)
+            return false;
+        
+        size_t schemaCount = 0;
+        if(!stream.read(schemaCount)) return false;
+        for(size_t schemaIndex = 0; schemaIndex < schemaCount; schemaIndex++) {
+            SchemaType type;
+            if(!stream.read(type)) return false;
+            String name;
+            if(!stream.read(name)) return false;
+            
+            Schema* schema = mSchemas.add(type, name);
+            
+            if(type == SchemaType::List) {
+                size_t elementSchemaIndex = -1;
+                if(!stream.read(elementSchemaIndex)) return false;
+                Schema* elementSchema = mSchemas.get(elementSchemaIndex);
+                schema->setElement(elementSchema);
+            }
+            else if(type == SchemaType::Struct) {
+                size_t memberCount = 0;
+                if(!stream.read(memberCount)) return false;
+                for(size_t memberIndex = 0; memberIndex < memberCount; memberIndex ++) {
+                    String memberName;
+                    size_t memberSchemaIndex = -1;
+                    if(!stream.read(memberName)) return false;
+                    if(!stream.read(memberSchemaIndex)) return false;
+                    Schema* memberSchema = mSchemas.get(memberSchemaIndex);
+                    schema->addMember(memberName, memberSchema);
+                }
+            }
+        }
+        
+        auto readValue = [this](BinaryStream& stream, Value& value)->bool {
+            size_t schemaIndex = -1;
+            u64_t valueU64 = 0;
+            if(!stream.read(schemaIndex)) return false;
+            if(!stream.read(valueU64)) return false;
+            value.schema = mSchemas.get(schemaIndex);
+            value.value.u64 = valueU64;
+            return true;
+        };
+        
+        auto readValueList = [this, &readValue](BinaryStream& stream, std::vector<Value>& list)->bool {
+            size_t count = -1;
+            if(!stream.read(count)) return false;
+            for(size_t index = 0; index < count; index++) {
+                Value& value = list.emplace_back();
+                if(!readValue(stream, value))
+                    return false;
+            }
+            return true;
+        };
+        
+        auto readValueMap = [this, &readValue](BinaryStream& stream, std::map<String, Value>& map)->bool {
+            size_t count = -1;
+            if(!stream.read(count)) return false;
+            for(size_t index = 0; index < count; index++) {
+                String name;
+                if(!stream.read(name)) return false;
+                Value& value = map[name];
+                if(!readValue(stream, value)) return false;
+            }
+            return true;
+        };
+        
+        if(!readValueList(stream, mValues.values)) {
+            return false;
+        }
+        
+        size_t listCount = 0;
+        if(!stream.read(listCount)) return false;
+        for(size_t index = 0; index < listCount; index++) {
+            List& list = mValues.lists.emplace_back();
+            if(!readValueList(stream, list.elements)) return false;
+        }
+        
+        size_t objectCount = 0;
+        if(!stream.read(objectCount)) return false;
+        for(size_t index = 0; index < objectCount; index++) {
+            Object& obj = mValues.objects.emplace_back();
+            if(!readValueMap(stream, obj.members)) return false;
+        }
+        
+        size_t stringCount = 0;
+        if(!stream.read(stringCount)) return false;
+        for(size_t index = 0; index < stringCount; index++) {
+            String& str = mValues.strings.emplace_back();
+            if(!stream.read(str)) return false;
+        }
+        
+        size_t rootCount = 0;
+        if(!stream.read(rootCount)) return false;
+        for(size_t index = 0; index < rootCount; index++) {
+            String name;
+            if(!stream.read(name)) return false;
+            size_t valueIndex = -1;
+            if(!stream.read(valueIndex)) return false;
+            mRoot[name] = &mValues.values.at(valueIndex);
+        }
+        
+        return true;
+    }
+    
+    bool Library::save(BinaryStream& stream) {
+        static const String MAGIC_TOKEN = "DATAPOT";
+        static const i32_t VERSION = 1;
+        
+        if(!stream.isOpen()) {
+            return false;
+        }
+        
+        stream.write(MAGIC_TOKEN);
+        stream.write(VERSION);
+        
+        stream.write(mSchemas.count());
+        for(size_t index = 0; index < mSchemas.count(); index++) {
+            Schema* schema = mSchemas.get(index);
+            
+            SchemaType type = schema->type();
+            stream.write(type);
+            
+            const String& name = schema->name();
+            stream.write(name);
+            
+            if(type == SchemaType::List) {
+                Schema* elementSchema = schema->getElement();
+                stream.write(mSchemas.indexOf(elementSchema));
+            }
+            else if(type == SchemaType::Struct) {
+                size_t memberCount = schema->getMemberCount();
+                stream.write(memberCount);
+                for(size_t memberIndex = 0; memberIndex < memberCount; memberIndex++) {
+                    auto* member = schema->getMember(memberIndex);
+                    stream.write(member->name);
+                    stream.write(mSchemas.indexOf(member->schema));
+                }
+            }
+        }
+        
+        auto saveValueList = [this](BinaryStream& stream, const std::vector<Value>& list) {
+            stream.write(list.size());
+            for(const auto& value : list) {
+                stream.write(mSchemas.indexOf(value.schema));
+                stream.write(value.value.u64);
+            }
+        };
+        auto saveValueMap = [this](BinaryStream& stream, const std::map<String, Value>& map) {
+            stream.write(map.size());
+            for(auto& pair : map) {
+                stream.write(pair.first);
+                stream.write(mSchemas.indexOf(pair.second.schema));
+                stream.write(pair.second.value.u64);
+            }
+        };
+        
+        saveValueList(stream, mValues.values);
+        
+        stream.write(mValues.lists.size());
+        for(size_t index = 0; index < mValues.lists.size(); index++) {
+            List& list = mValues.lists.at(index);
+            saveValueList(stream, list.elements);
+        }
+        
+        stream.write(mValues.objects.size());
+        for(size_t index = 0; index < mValues.objects.size(); index++) {
+            Object& obj = mValues.objects.at(index);
+            saveValueMap(stream, obj.members);
+        }
+        
+        stream.write(mValues.strings.size());
+        for(const String& str : mValues.strings) {
+            stream.write(str);
+        }
+        
+        stream.write(mRoot.size());
+        for(auto& pair : mRoot) {
+            stream.write(pair.first);
+            stream.write(mValues.indexOf(pair.second));
+        }
+        
+        return true;
+    }
+    
     Schema* Library::addSchema(SchemaType type, const String& name) {
         return mSchemas.add(type, name);
     }

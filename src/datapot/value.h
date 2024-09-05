@@ -72,7 +72,7 @@ namespace eokas::datapot {
     
     class ValueHeap {
     public:
-        ValueHeap(SchemaHeap& schemaManager);
+        ValueHeap(SchemaHeap& schemaHeap);
         virtual ~ValueHeap();
 
         std::vector<Value> values;
@@ -81,7 +81,9 @@ namespace eokas::datapot {
         std::vector<Object> objects;
         
         std::vector<String> strings;
-
+        
+        size_t indexOf(Value* val);
+        
         Value* make(i32_t val);
         Value* make(i64_t val);
         Value* make(f64_t val);
@@ -112,7 +114,7 @@ namespace eokas::datapot {
         void clear();
 
     private:
-        SchemaHeap& mSchemaManager;
+        SchemaHeap& mSchemaHeap;
     };
 }
 

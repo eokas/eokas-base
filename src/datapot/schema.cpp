@@ -125,24 +125,42 @@ namespace eokas::datapot {
     }
 
     SchemaHeap::~SchemaHeap() {
-        _DeleteMap(mSchemas);
+        mSchemaMap.clear();
+        _DeleteList(mSchemas);
     }
 
     Schema* SchemaHeap::add(SchemaType type, const String& name) {
-        auto iter = mSchemas.find(name);
-        if(iter != mSchemas.end())
+        auto iter = mSchemaMap.find(name);
+        if(iter != mSchemaMap.end())
             return nullptr;
-
-        auto* schema = new Schema(type, name);
-        mSchemas.insert(std::make_pair(name, schema));
+        
+        Schema*& schema = mSchemas.emplace_back();
+        schema = new Schema(type, name);
+        
+        mSchemaMap.insert(std::make_pair(name, mSchemas.size() - 1));
 
         return schema;
     }
 
     Schema* SchemaHeap::get(const String& name) {
-        auto iter = mSchemas.find(name);
-        if(iter == mSchemas.end())
+        auto iter = mSchemaMap.find(name);
+        if(iter == mSchemaMap.end())
             return nullptr;
-        return iter->second;
+        size_t index = iter->second;
+        return mSchemas.at(index);
+    }
+    
+    Schema* SchemaHeap::get(size_t index) {
+        return mSchemas.at(index);
+    }
+    
+    size_t SchemaHeap::count() const {
+        return mSchemas.size();
+    }
+    
+    size_t SchemaHeap::indexOf(Schema* schema) {
+        if(schema == nullptr)
+            return -1;
+        return mSchemaMap[schema->name()];
     }
 }

@@ -14,6 +14,12 @@ namespace eokas::datapot {
         
         const String& name() const { return mName; }
         
+        bool load(const String& filePath);
+        bool save(const String& filePath);
+        
+        bool load(BinaryStream& stream);
+        bool save(BinaryStream& stream);
+        
         Schema* addSchema(SchemaType type, const String& name);
         Schema* getSchama(const String& name);
 

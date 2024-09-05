@@ -33,7 +33,7 @@ namespace eokas::datapot {
 
         Schema(SchemaType type, const String& name);
         virtual ~Schema();
-
+        
         bool operator==(const Schema& other) const;
         bool operator!=(const Schema& other) const;
 
@@ -65,12 +65,16 @@ namespace eokas::datapot {
     public:
         SchemaHeap();
         virtual ~SchemaHeap();
-
+        
         Schema* add(SchemaType type, const String& name);
         Schema* get(const String& name);
+        Schema* get(size_t index);
+        size_t count() const;
+        size_t indexOf(Schema* schema);
 
     private:
-        std::map<String, Schema*> mSchemas;
+        std::map<String, size_t> mSchemaMap;
+        std::vector<Schema*> mSchemas;
     };
 }
 
