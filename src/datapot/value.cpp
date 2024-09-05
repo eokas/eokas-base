@@ -10,10 +10,10 @@ namespace eokas::datapot {
         this->clear();
     }
     
-    size_t ValueHeap::indexOf(Value* val) {
+    u32_t ValueHeap::indexOf(Value* val) {
         for(size_t index = 0; index < values.size(); index++) {
             if(val == &values.at(index)) {
-                return index;
+                return u32_t(index);
             }
         }
         return -1;
@@ -54,7 +54,7 @@ namespace eokas::datapot {
         String& str = this->strings.emplace_back(val);
 
         Value& value = this->values.emplace_back();
-        value.set(schema, index);
+        value.set(schema, u32_t(index));
 
         return &value;
     }
@@ -86,7 +86,7 @@ namespace eokas::datapot {
             String& str = this->strings.emplace_back("");
 
             Value& value = this->values.emplace_back();
-            value.set(schema, index);
+            value.set(schema, u32_t(index));
 
             return &value;
         }
@@ -97,7 +97,7 @@ namespace eokas::datapot {
             List& list = this->lists.emplace_back();
 
             Value& value = this->values.emplace_back();
-            value.set(schema, index);
+            value.set(schema, u32_t(index));
 
             return &value;
         }
@@ -108,7 +108,7 @@ namespace eokas::datapot {
             Object& object = this->objects.emplace_back();
 
             Value& value = this->values.emplace_back();
-            value.set(schema, index);
+            value.set(schema, u32_t(index));
 
             for(size_t i = 0; i < schema->getMemberCount(); i++) {
                 auto* member = schema->getMember(i);
@@ -122,7 +122,7 @@ namespace eokas::datapot {
         return nullptr;
     }
 
-    Value* ValueHeap::get(Value* list, size_t index) {
+    Value* ValueHeap::get(Value* list, u32_t index) {
         if(list == nullptr)
             return nullptr;
         if(!list->schema->is(SchemaType::List))
@@ -133,7 +133,7 @@ namespace eokas::datapot {
         return &ref.get(index);
     }
 
-    bool ValueHeap::set(Value* list, size_t index, Value* val) {
+    bool ValueHeap::set(Value* list, u32_t index, Value* val) {
         if(list == nullptr)
             return false;
         if(!list->schema->is(SchemaType::List))
@@ -292,7 +292,7 @@ namespace eokas::datapot {
             this->strings.push_back(val);
         }
 
-        ptr->value.u64 = index;
+        ptr->value.u64 = u32_t(index);
 
         return true;
     }

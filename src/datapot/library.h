@@ -55,20 +55,21 @@ namespace eokas::datapot {
         void set(const String& name, f64_t val);
         void set(const String& name, bool val);
         void set(const String& name, const String& val);
+        
+        
+        Value* get(Value* list, u32_t index);
+        bool get(Value* list, u32_t index, i32_t& val);
+        bool get(Value* list, u32_t index, i64_t& val);
+        bool get(Value* list, u32_t index, f64_t& val);
+        bool get(Value* list, u32_t index, bool& val);
+        bool get(Value* list, u32_t index, String& val);
 
-        Value* get(Value* list, size_t index);
-        bool get(Value* list, size_t index, i32_t& val);
-        bool get(Value* list, size_t index, i64_t& val);
-        bool get(Value* list, size_t index, f64_t& val);
-        bool get(Value* list, size_t index, bool& val);
-        bool get(Value* list, size_t index, String& val);
-
-        bool set(Value* list, size_t index, Value* val);
-        bool set(Value* list, size_t index, i32_t val);
-        bool set(Value* list, size_t index, i64_t val);
-        bool set(Value* list, size_t index, f64_t val);
-        bool set(Value* list, size_t index, bool val);
-        bool set(Value* list, size_t index, const String& val);
+        bool set(Value* list, u32_t index, Value* val);
+        bool set(Value* list, u32_t index, i32_t val);
+        bool set(Value* list, u32_t index, i64_t val);
+        bool set(Value* list, u32_t index, f64_t val);
+        bool set(Value* list, u32_t index, bool val);
+        bool set(Value* list, u32_t index, const String& val);
 
         bool push(Value* list, Value* val);
         bool push(Value* list, i32_t val);

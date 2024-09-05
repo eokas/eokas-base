@@ -92,24 +92,25 @@ namespace eokas::datapot {
         return nullptr;
     }
 
-    Schema::Member* Schema::getMember(size_t index) {
+    Schema::Member* Schema::getMember(u32_t index) {
         if(mType != SchemaType::Struct)
             return nullptr;
         return &mBody.structBody->members.at(index);
     }
-
-    size_t Schema::getMemberCount() {
+    
+    u32_t Schema::getMemberCount() {
         if(mType != SchemaType::Struct)
             return 0;
-        return mBody.structBody->members.size();
+        return u32_t(mBody.structBody->members.size());
     }
-
-    size_t Schema::getMemberIndex(const String& name) {
+    
+    u32_t Schema::getMemberIndex(const String& name) {
         if(mType != SchemaType::Struct)
             return -1;
-        for(size_t i = 0; i < mBody.structBody->members.size(); i++) {
-            if(mBody.structBody->members[i].name == name) {
-                return i;
+        const auto& members = mBody.structBody->members;
+        for(u32_t i = 0; i < u32_t(members.size()); i++) {
+            if(members[i].name == name) {
+                return u32_t(i);
             }
         }
         return -1;
@@ -134,10 +135,11 @@ namespace eokas::datapot {
         if(iter != mSchemaMap.end())
             return nullptr;
         
+        u32_t index = u32_t(mSchemas.size());
         Schema*& schema = mSchemas.emplace_back();
         schema = new Schema(type, name);
         
-        mSchemaMap.insert(std::make_pair(name, mSchemas.size() - 1));
+        mSchemaMap.insert(std::make_pair(name, index));
 
         return schema;
     }
@@ -146,21 +148,21 @@ namespace eokas::datapot {
         auto iter = mSchemaMap.find(name);
         if(iter == mSchemaMap.end())
             return nullptr;
-        size_t index = iter->second;
+        u32_t index = iter->second;
         return mSchemas.at(index);
     }
     
-    Schema* SchemaHeap::get(size_t index) {
+    Schema* SchemaHeap::get(u32_t index) {
         return mSchemas.at(index);
     }
     
-    size_t SchemaHeap::count() const {
-        return mSchemas.size();
+    u32_t SchemaHeap::count() const {
+        return u32_t(mSchemas.size());
     }
     
-    size_t SchemaHeap::indexOf(Schema* schema) {
+    u32_t SchemaHeap::indexOf(Schema* schema) {
         if(schema == nullptr)
             return -1;
-        return mSchemaMap[schema->name()];
+        return u32_t(mSchemaMap[schema->name()]);
     }
 }

@@ -51,9 +51,9 @@ namespace eokas::datapot {
         if(magic != MAGIC || version != VERSION)
             return false;
         
-        size_t schemaCount = 0;
+        u32_t schemaCount = 0;
         if(!stream.read(schemaCount)) return false;
-        for(size_t schemaIndex = 0; schemaIndex < schemaCount; schemaIndex++) {
+        for(u32_t schemaIndex = 0; schemaIndex < schemaCount; schemaIndex++) {
             SchemaType type;
             if(!stream.read(type)) return false;
             String name;
@@ -62,17 +62,17 @@ namespace eokas::datapot {
             Schema* schema = mSchemas.add(type, name);
             
             if(type == SchemaType::List) {
-                size_t elementSchemaIndex = -1;
+                u32_t elementSchemaIndex = -1;
                 if(!stream.read(elementSchemaIndex)) return false;
                 Schema* elementSchema = mSchemas.get(elementSchemaIndex);
                 schema->setElement(elementSchema);
             }
             else if(type == SchemaType::Struct) {
-                size_t memberCount = 0;
+                u32_t memberCount = 0;
                 if(!stream.read(memberCount)) return false;
-                for(size_t memberIndex = 0; memberIndex < memberCount; memberIndex ++) {
+                for(u32_t memberIndex = 0; memberIndex < memberCount; memberIndex ++) {
                     String memberName;
-                    size_t memberSchemaIndex = -1;
+                    u32_t memberSchemaIndex = -1;
                     if(!stream.read(memberName)) return false;
                     if(!stream.read(memberSchemaIndex)) return false;
                     Schema* memberSchema = mSchemas.get(memberSchemaIndex);
@@ -82,7 +82,7 @@ namespace eokas::datapot {
         }
         
         auto readValue = [this](BinaryStream& stream, Value& value)->bool {
-            size_t schemaIndex = -1;
+            u32_t schemaIndex = -1;
             u64_t valueU64 = 0;
             if(!stream.read(schemaIndex)) return false;
             if(!stream.read(valueU64)) return false;
@@ -92,9 +92,9 @@ namespace eokas::datapot {
         };
         
         auto readValueList = [this, &readValue](BinaryStream& stream, std::vector<Value>& list)->bool {
-            size_t count = -1;
+            u32_t count = -1;
             if(!stream.read(count)) return false;
-            for(size_t index = 0; index < count; index++) {
+            for(u32_t index = 0; index < count; index++) {
                 Value& value = list.emplace_back();
                 if(!readValue(stream, value))
                     return false;
@@ -103,9 +103,9 @@ namespace eokas::datapot {
         };
         
         auto readValueMap = [this, &readValue](BinaryStream& stream, std::map<String, Value>& map)->bool {
-            size_t count = -1;
+            u32_t count = -1;
             if(!stream.read(count)) return false;
-            for(size_t index = 0; index < count; index++) {
+            for(u32_t index = 0; index < count; index++) {
                 String name;
                 if(!stream.read(name)) return false;
                 Value& value = map[name];
@@ -118,33 +118,33 @@ namespace eokas::datapot {
             return false;
         }
         
-        size_t listCount = 0;
+        u32_t listCount = 0;
         if(!stream.read(listCount)) return false;
-        for(size_t index = 0; index < listCount; index++) {
+        for(u32_t index = 0; index < listCount; index++) {
             List& list = mValues.lists.emplace_back();
             if(!readValueList(stream, list.elements)) return false;
         }
         
-        size_t objectCount = 0;
+        u32_t objectCount = 0;
         if(!stream.read(objectCount)) return false;
-        for(size_t index = 0; index < objectCount; index++) {
+        for(u32_t index = 0; index < objectCount; index++) {
             Object& obj = mValues.objects.emplace_back();
             if(!readValueMap(stream, obj.members)) return false;
         }
         
-        size_t stringCount = 0;
+        u32_t stringCount = 0;
         if(!stream.read(stringCount)) return false;
-        for(size_t index = 0; index < stringCount; index++) {
+        for(u32_t index = 0; index < stringCount; index++) {
             String& str = mValues.strings.emplace_back();
             if(!stream.read(str)) return false;
         }
         
-        size_t rootCount = 0;
+        u32_t rootCount = 0;
         if(!stream.read(rootCount)) return false;
-        for(size_t index = 0; index < rootCount; index++) {
+        for(u32_t index = 0; index < rootCount; index++) {
             String name;
             if(!stream.read(name)) return false;
-            size_t valueIndex = -1;
+            u32_t valueIndex = -1;
             if(!stream.read(valueIndex)) return false;
             mRoot[name] = &mValues.values.at(valueIndex);
         }
@@ -164,7 +164,7 @@ namespace eokas::datapot {
         stream.write(VERSION);
         
         stream.write(mSchemas.count());
-        for(size_t index = 0; index < mSchemas.count(); index++) {
+        for(u32_t index = 0; index < mSchemas.count(); index++) {
             Schema* schema = mSchemas.get(index);
             
             SchemaType type = schema->type();
@@ -178,9 +178,9 @@ namespace eokas::datapot {
                 stream.write(mSchemas.indexOf(elementSchema));
             }
             else if(type == SchemaType::Struct) {
-                size_t memberCount = schema->getMemberCount();
+                u32_t memberCount = schema->getMemberCount();
                 stream.write(memberCount);
-                for(size_t memberIndex = 0; memberIndex < memberCount; memberIndex++) {
+                for(u32_t memberIndex = 0; memberIndex < memberCount; memberIndex++) {
                     auto* member = schema->getMember(memberIndex);
                     stream.write(member->name);
                     stream.write(mSchemas.indexOf(member->schema));
@@ -189,14 +189,14 @@ namespace eokas::datapot {
         }
         
         auto saveValueList = [this](BinaryStream& stream, const std::vector<Value>& list) {
-            stream.write(list.size());
+            stream.write(u32_t(list.size()));
             for(const auto& value : list) {
                 stream.write(mSchemas.indexOf(value.schema));
                 stream.write(value.value.u64);
             }
         };
         auto saveValueMap = [this](BinaryStream& stream, const std::map<String, Value>& map) {
-            stream.write(map.size());
+            stream.write(u32_t(map.size()));
             for(auto& pair : map) {
                 stream.write(pair.first);
                 stream.write(mSchemas.indexOf(pair.second.schema));
@@ -206,24 +206,22 @@ namespace eokas::datapot {
         
         saveValueList(stream, mValues.values);
         
-        stream.write(mValues.lists.size());
-        for(size_t index = 0; index < mValues.lists.size(); index++) {
-            List& list = mValues.lists.at(index);
+        stream.write(u32_t(mValues.lists.size()));
+        for(List& list : mValues.lists) {
             saveValueList(stream, list.elements);
         }
         
-        stream.write(mValues.objects.size());
-        for(size_t index = 0; index < mValues.objects.size(); index++) {
-            Object& obj = mValues.objects.at(index);
+        stream.write(u32_t(mValues.objects.size()));
+        for(Object& obj : mValues.objects) {
             saveValueMap(stream, obj.members);
         }
         
-        stream.write(mValues.strings.size());
+        stream.write(u32_t(mValues.strings.size()));
         for(const String& str : mValues.strings) {
             stream.write(str);
         }
         
-        stream.write(mRoot.size());
+        stream.write(u32_t(mRoot.size()));
         for(auto& pair : mRoot) {
             stream.write(pair.first);
             stream.write(mValues.indexOf(pair.second));
@@ -365,60 +363,60 @@ namespace eokas::datapot {
         mRoot[name] = value;
     }
     
-    Value* Library::get(Value* list, size_t index) {
+    Value* Library::get(Value* list, u32_t index) {
         return mValues.get(list, index);
     }
 
-    bool Library::get(Value* list, size_t index, i32_t& val) {
+    bool Library::get(Value* list, u32_t index, i32_t& val) {
         Value* ptr = mValues.get(list, index);
         return mValues.get(ptr, val);
     }
 
-    bool Library::get(Value* list, size_t index, i64_t& val) {
+    bool Library::get(Value* list, u32_t index, i64_t& val) {
         Value* ptr = mValues.get(list, index);
         return mValues.get(ptr, val);
     }
 
-    bool Library::get(Value* list, size_t index, f64_t& val) {
+    bool Library::get(Value* list, u32_t index, f64_t& val) {
         Value* ptr = mValues.get(list, index);
         return mValues.get(ptr, val);
     }
 
-    bool Library::get(Value* list, size_t index, bool& val) {
+    bool Library::get(Value* list, u32_t index, bool& val) {
         Value* ptr = mValues.get(list, index);
         return mValues.get(ptr, val);
     }
 
-    bool Library::get(Value* list, size_t index, String& val) {
+    bool Library::get(Value* list, u32_t index, String& val) {
         Value* ptr = mValues.get(list, index);
         return mValues.get(ptr, val);
     }
 
-    bool Library::set(Value* list, size_t index, Value* val) {
+    bool Library::set(Value* list, u32_t index, Value* val) {
         return mValues.set(list, index, val);
     }
 
-    bool Library::set(Value* list, size_t index, i32_t val) {
+    bool Library::set(Value* list, u32_t index, i32_t val) {
         Value* value = mValues.make(val);
         return mValues.set(list, index, value);
     }
 
-    bool Library::set(Value* list, size_t index, i64_t val) {
+    bool Library::set(Value* list, u32_t index, i64_t val) {
         Value* value = mValues.make(val);
         return mValues.set(list, index, value);
     }
 
-    bool Library::set(Value* list, size_t index, f64_t val) {
+    bool Library::set(Value* list, u32_t index, f64_t val) {
         Value* value = mValues.make(val);
         return mValues.set(list, index, value);
     }
 
-    bool Library::set(Value* list, size_t index, bool val) {
+    bool Library::set(Value* list, u32_t index, bool val) {
         Value* value = mValues.make(val);
         return mValues.set(list, index, value);
     }
 
-    bool Library::set(Value* list, size_t index, const String& val) {
+    bool Library::set(Value* list, u32_t index, const String& val) {
         Value* value = mValues.make(val);
         return mValues.set(list, index, value);
     }

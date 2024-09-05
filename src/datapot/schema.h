@@ -29,8 +29,7 @@ namespace eokas::datapot {
         struct StructBody {
             std::vector<Member> members = {};
         };
-
-
+        
         Schema(SchemaType type, const String& name);
         virtual ~Schema();
         
@@ -48,9 +47,9 @@ namespace eokas::datapot {
         void setMember(const String& name, Schema* schema);
         void delMember(const String& name);
         Member* getMember(const String& name);
-        Member* getMember(size_t index);
-        size_t getMemberCount();
-        size_t getMemberIndex(const String& name);
+        Member* getMember(u32_t index);
+        u32_t getMemberCount();
+        u32_t getMemberIndex(const String& name);
 
     private:
         SchemaType mType;
@@ -68,12 +67,12 @@ namespace eokas::datapot {
         
         Schema* add(SchemaType type, const String& name);
         Schema* get(const String& name);
-        Schema* get(size_t index);
-        size_t count() const;
-        size_t indexOf(Schema* schema);
+        Schema* get(u32_t index);
+        u32_t count() const;
+        u32_t indexOf(Schema* schema);
 
     private:
-        std::map<String, size_t> mSchemaMap;
+        std::map<String, u32_t> mSchemaMap;
         std::vector<Schema*> mSchemas;
     };
 }

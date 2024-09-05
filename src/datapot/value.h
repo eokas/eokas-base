@@ -7,24 +7,29 @@ namespace eokas::datapot {
     struct Value {
         Schema* schema;
         union {
-            u64_t u64;
             i64_t i64;
+            u64_t u64;
             f64_t f64;
         } value;
         
-        void set(Schema* schema, size_t val) {
-            this->schema = schema;
-            this->value.u64 = static_cast<u64_t>(val);
-        }
-
         void set(Schema* schema, i32_t val) {
             this->schema = schema;
             this->value.i64 = val;
         }
-
+        
+        void set(Schema* schema, u32_t val) {
+            this->schema = schema;
+            this->value.u64 = val;
+        }
+        
         void set(Schema* schema, i64_t val) {
             this->schema = schema;
             this->value.i64 = val;
+        }
+        
+        void set(Schema* schema, u64_t val) {
+            this->schema = schema;
+            this->value.u64 = val;
         }
 
         void set(Schema* schema, f64_t val) {
@@ -36,11 +41,11 @@ namespace eokas::datapot {
     struct List {
         std::vector<Value> elements;
 
-        Value& get(size_t index) {
+        Value& get(u32_t index) {
             return elements.at(index);
         }
 
-        void set(size_t index, const Value& value) {
+        void set(u32_t index, const Value& value) {
             elements.at(index) = value;
         }
 
@@ -82,7 +87,7 @@ namespace eokas::datapot {
         
         std::vector<String> strings;
         
-        size_t indexOf(Value* val);
+        u32_t indexOf(Value* val);
         
         Value* make(i32_t val);
         Value* make(i64_t val);
@@ -91,8 +96,8 @@ namespace eokas::datapot {
         Value* make(const String& val);
         Value* make(Schema* schema);
 
-        Value* get(Value* list, size_t index);
-        bool set(Value* list, size_t index, Value* val);
+        Value* get(Value* list, u32_t index);
+        bool set(Value* list, u32_t index, Value* val);
         bool push(Value* list, Value* val);
         bool pop(Value* list, Value* val);
 
