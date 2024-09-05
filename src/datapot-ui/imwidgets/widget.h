@@ -20,11 +20,11 @@ namespace eokas::datapot {
         ContainerWidget();
         virtual ~ContainerWidget();
         
-        template<typename ChildType, typename... Args>
-        ChildType* addChild(Args&&... args) {
-            ChildType* child = new ChildType(std::forward<Args>(args)...);
-            this->children.push_back(child);
-            return child;
+        template<typename Child, typename... Args>
+        Child* add(Args&&... args) {
+            Widget*& child = this->children.emplace_back();
+            child = new Child(std::forward<Args>(args)...);
+            return (Child*)child;
         }
         
     protected:
@@ -50,8 +50,7 @@ namespace eokas::datapot {
         
         Menu(const String& label, bool enabled = true)
             :label(label)
-            ,enabled(enabled)
-        {}
+            ,enabled(enabled) {}
         
         virtual void render(float deltaTime) override;
     };
@@ -63,14 +62,117 @@ namespace eokas::datapot {
         
         MenuItem(const String label, const std::function<void()>& onClick = {})
             : label(label)
-            , onClick(onClick)
-        {}
+            , onClick(onClick) {}
         
         virtual void render(float deltaTime) override;
     };
     
     class MainWindow : public ContainerWidget {
     public:
+        String name = "Window";
+        bool dockSpace = false;
+        
+        MainWindow(const String& name, bool dockSpace = false)
+            : ContainerWidget()
+            , name(name)
+            , dockSpace(dockSpace) {}
+        
+        virtual void render(float deltaTime) override;
+    };
+    
+    class Window :public ContainerWidget {
+    public:
+        String name = "Window";
+        bool docking = false;
+        
+        Window(const String& name, bool docking = false)
+            : name(name)
+            , docking(docking) { }
+        
+        virtual void render(float deltaTime) override;
+    };
+    
+    class Dialog :public ContainerWidget {
+    public:
+        String name = "Dialog";
+        bool modal = true;
+        
+        Dialog(const String& name, bool modal = true)
+            : name(name)
+            , modal(modal) {
+        }
+        
+        virtual void render(float deltaTime) override;
+        
+        void open();
+        
+    private:
+        bool isOpened = false;
+    };
+    
+    class Text : public Widget {
+    public:
+        String content = "";
+        
+        Text(const String& content)
+            : content(content) { }
+            
+        virtual void render(float deltaTime) override;
+    };
+    
+    class Link : public Widget {
+    public:
+        String label = "";
+        String url = "";
+        
+        Link(const String& label, const String& url)
+            : label(label), url(url) { }
+        
+        virtual void render(float deltaTime) override;
+    };
+    
+    class Button : public Widget {
+    public:
+        String label = "Button";
+        std::function<void()> onClick;
+        
+        Button(const String& label)
+            : label(label) { }
+        
+        virtual void render(float deltaTime) override;
+    };
+    
+    class FieldText : public Widget {
+    public:
+        String label = "";
+        String text = "";
+        
+        FieldText(const String& label, const String& text)
+            : label(label)
+            , text(text) { }
+        
+        virtual void render(float deltaTime) override;
+    };
+    
+    class FieldInput : public Widget {
+    public:
+        String label;
+        StringValue value;
+        
+        FieldInput(const String& label)
+            : label(label) { }
+        
+        virtual void render(float deltaTime) override;
+    };
+    
+    class FieldDirectory : public Widget {
+    public:
+        String label;
+        String value;
+        
+        FieldDirectory(const String& label)
+            : label(label) { }
+            
         virtual void render(float deltaTime) override;
     };
 }

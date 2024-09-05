@@ -514,6 +514,10 @@ namespace eokas {
         return std::strcmp(mData, rhs.mData) != 0;
     }
     
+    const char* String::operator*() const {
+        return this->cstr();
+    }
+    
     String& String::clear() {
         if (mData != nullptr) {
             if (mMetric == 1) {

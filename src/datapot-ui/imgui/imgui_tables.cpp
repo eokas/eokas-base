@@ -1,4 +1,4 @@
-// dear imgui, v1.91.0 WIP
+// dear imgui, v1.91.1 WIP
 // (tables and columns code)
 
 /*
@@ -460,16 +460,27 @@ bool    ImGui::BeginTableEx(const char* name, ImGuiID id, int columns_count, ImG
     temp_data->HostBackupItemWidthStackSize = outer_window->DC.ItemWidthStack.Size;
     inner_window->DC.PrevLineSize = inner_window->DC.CurrLineSize = ImVec2(0.0f, 0.0f);
 
-    // Make left and top borders not overlap our contents by offsetting HostClipRect (#6765)
+    // Make borders not overlap our contents by offsetting HostClipRect (#6765, #7428, #3752)
     // (we normally shouldn't alter HostClipRect as we rely on TableMergeDrawChannels() expanding non-clipped column toward the
     // limits of that rectangle, in order for ImDrawListSplitter::Merge() to merge the draw commands. However since the overlap
     // problem only affect scrolling tables in this case we can get away with doing it without extra cost).
     if (inner_window != outer_window)
     {
+        // FIXME: Because inner_window's Scrollbar doesn't know about border size, since it's not encoded in window->WindowBorderSize,
+        // it already overlaps it and doesn't need an extra offset. Ideally we should be able to pass custom border size with
+        // different x/y values to BeginChild().
         if (flags & ImGuiTableFlags_BordersOuterV)
+        {
             table->HostClipRect.Min.x = ImMin(table->HostClipRect.Min.x + TABLE_BORDER_SIZE, table->HostClipRect.Max.x);
+            if (inner_window->DecoOuterSizeX2 == 0.0f)
+                table->HostClipRect.Max.x = ImMax(table->HostClipRect.Max.x - TABLE_BORDER_SIZE, table->HostClipRect.Min.x);
+        }
         if (flags & ImGuiTableFlags_BordersOuterH)
+        {
             table->HostClipRect.Min.y = ImMin(table->HostClipRect.Min.y + TABLE_BORDER_SIZE, table->HostClipRect.Max.y);
+            if (inner_window->DecoOuterSizeY2 == 0.0f)
+                table->HostClipRect.Max.y = ImMax(table->HostClipRect.Max.y - TABLE_BORDER_SIZE, table->HostClipRect.Min.y);
+        }
     }
 
     // Padding and Spacing
@@ -497,7 +508,7 @@ bool    ImGui::BeginTableEx(const char* name, ImGuiID id, int columns_count, ImG
     table->InnerClipRect = (inner_window == outer_window) ? table->WorkRect : inner_window->ClipRect;
     table->InnerClipRect.ClipWith(table->WorkRect);     // We need this to honor inner_width
     table->InnerClipRect.ClipWithFull(table->HostClipRect);
-    table->InnerClipRect.Max.y = (flags & ImGuiTableFlags_NoHostExtendY) ? ImMin(table->InnerClipRect.Max.y, inner_window->WorkRect.Max.y) : inner_window->ClipRect.Max.y;
+    table->InnerClipRect.Max.y = (flags & ImGuiTableFlags_NoHostExtendY) ? ImMin(table->InnerClipRect.Max.y, inner_window->WorkRect.Max.y) : table->HostClipRect.Max.y;
 
     table->RowPosY1 = table->RowPosY2 = table->WorkRect.Min.y; // This is needed somehow
     table->RowTextBaseline = 0.0f; // This will be cleared again by TableBeginRow()
@@ -1249,7 +1260,7 @@ void ImGui::TableUpdateLayout(ImGuiTable* table)
     if (table->Flags & ImGuiTableFlags_NoClip)
         table->DrawSplitter->SetCurrentChannel(inner_window->DrawList, TABLE_DRAW_CHANNEL_NOCLIP);
     else
-        inner_window->DrawList->PushClipRect(inner_window->ClipRect.Min, inner_window->ClipRect.Max, false);
+        inner_window->DrawList->PushClipRect(inner_window->InnerClipRect.Min, inner_window->InnerClipRect.Max, false);
 }
 
 // Process hit-testing on resizing borders. Actual size change will be applied in EndTable()
@@ -1996,34 +2007,37 @@ void ImGui::TableEndRow(ImGuiTable* table)
     // We need to do that in TableEndRow() instead of TableBeginRow() so the list clipper can mark end of row and
     // get the new cursor position.
     if (unfreeze_rows_request)
+    {
         for (int column_n = 0; column_n < table->ColumnsCount; column_n++)
             table->Columns[column_n].NavLayerCurrent = ImGuiNavLayer_Main;
-    if (unfreeze_rows_actual)
-    {
-        IM_ASSERT(table->IsUnfrozenRows == false);
         const float y0 = ImMax(table->RowPosY2 + 1, window->InnerClipRect.Min.y);
-        table->IsUnfrozenRows = true;
         table_instance->LastFrozenHeight = y0 - table->OuterRect.Min.y;
 
-        // BgClipRect starts as table->InnerClipRect, reduce it now and make BgClipRectForDrawCmd == BgClipRect
-        table->BgClipRect.Min.y = table->Bg2ClipRectForDrawCmd.Min.y = ImMin(y0, window->InnerClipRect.Max.y);
-        table->BgClipRect.Max.y = table->Bg2ClipRectForDrawCmd.Max.y = window->InnerClipRect.Max.y;
-        table->Bg2DrawChannelCurrent = table->Bg2DrawChannelUnfrozen;
-        IM_ASSERT(table->Bg2ClipRectForDrawCmd.Min.y <= table->Bg2ClipRectForDrawCmd.Max.y);
-
-        float row_height = table->RowPosY2 - table->RowPosY1;
-        table->RowPosY2 = window->DC.CursorPos.y = table->WorkRect.Min.y + table->RowPosY2 - table->OuterRect.Min.y;
-        table->RowPosY1 = table->RowPosY2 - row_height;
-        for (int column_n = 0; column_n < table->ColumnsCount; column_n++)
+        if (unfreeze_rows_actual)
         {
-            ImGuiTableColumn* column = &table->Columns[column_n];
-            column->DrawChannelCurrent = column->DrawChannelUnfrozen;
-            column->ClipRect.Min.y = table->Bg2ClipRectForDrawCmd.Min.y;
-        }
+            IM_ASSERT(table->IsUnfrozenRows == false);
+            table->IsUnfrozenRows = true;
 
-        // Update cliprect ahead of TableBeginCell() so clipper can access to new ClipRect->Min.y
-        SetWindowClipRectBeforeSetChannel(window, table->Columns[0].ClipRect);
-        table->DrawSplitter->SetCurrentChannel(window->DrawList, table->Columns[0].DrawChannelCurrent);
+            // BgClipRect starts as table->InnerClipRect, reduce it now and make BgClipRectForDrawCmd == BgClipRect
+            table->BgClipRect.Min.y = table->Bg2ClipRectForDrawCmd.Min.y = ImMin(y0, window->InnerClipRect.Max.y);
+            table->BgClipRect.Max.y = table->Bg2ClipRectForDrawCmd.Max.y = window->InnerClipRect.Max.y;
+            table->Bg2DrawChannelCurrent = table->Bg2DrawChannelUnfrozen;
+            IM_ASSERT(table->Bg2ClipRectForDrawCmd.Min.y <= table->Bg2ClipRectForDrawCmd.Max.y);
+
+            float row_height = table->RowPosY2 - table->RowPosY1;
+            table->RowPosY2 = window->DC.CursorPos.y = table->WorkRect.Min.y + table->RowPosY2 - table->OuterRect.Min.y;
+            table->RowPosY1 = table->RowPosY2 - row_height;
+            for (int column_n = 0; column_n < table->ColumnsCount; column_n++)
+            {
+                ImGuiTableColumn* column = &table->Columns[column_n];
+                column->DrawChannelCurrent = column->DrawChannelUnfrozen;
+                column->ClipRect.Min.y = table->Bg2ClipRectForDrawCmd.Min.y;
+            }
+
+            // Update cliprect ahead of TableBeginCell() so clipper can access to new ClipRect->Min.y
+            SetWindowClipRectBeforeSetChannel(window, table->Columns[0].ClipRect);
+            table->DrawSplitter->SetCurrentChannel(window->DrawList, table->Columns[0].DrawChannelCurrent);
+        }
     }
 
     if (!(table->RowFlags & ImGuiTableRowFlags_Headers))
@@ -2740,7 +2754,7 @@ void ImGui::TableDrawBorders(ImGuiTable* table)
         const ImU32 outer_col = table->BorderColorStrong;
         if ((table->Flags & ImGuiTableFlags_BordersOuter) == ImGuiTableFlags_BordersOuter)
         {
-            inner_drawlist->AddRect(outer_border.Min, outer_border.Max + ImVec2(1, 1), outer_col, 0.0f, 0, border_size);
+            inner_drawlist->AddRect(outer_border.Min, outer_border.Max, outer_col, 0.0f, 0, border_size);
         }
         else if (table->Flags & ImGuiTableFlags_BordersOuterV)
         {
@@ -4425,12 +4439,12 @@ void ImGui::EndColumns()
     NavUpdateCurrentWindowIsScrollPushableX();
 }
 
-void ImGui::Columns(int columns_count, const char* id, bool border)
+void ImGui::Columns(int columns_count, const char* id, bool borders)
 {
     ImGuiWindow* window = GetCurrentWindow();
     IM_ASSERT(columns_count >= 1);
 
-    ImGuiOldColumnFlags flags = (border ? 0 : ImGuiOldColumnFlags_NoBorder);
+    ImGuiOldColumnFlags flags = (borders ? 0 : ImGuiOldColumnFlags_NoBorder);
     //flags |= ImGuiOldColumnFlags_NoPreserveWidths; // NB: Legacy behavior
     ImGuiOldColumns* columns = window->DC.CurrentColumns;
     if (columns != NULL && columns->Count == columns_count && columns->Flags == flags)

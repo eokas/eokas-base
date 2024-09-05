@@ -1,7 +1,7 @@
 #pragma once
 
-#include "./models.h"
-#include "./controllers.h"
+#include "./logic.h"
+#include "./logic.h"
 #include "./views.h"
 using namespace eokas::datapot;
 
