@@ -3,6 +3,17 @@
 #include "base/main.h"
 
 namespace eokas::datapot {
+    class Widget;
+    
+    template<typename ChildBase>
+    class ContainerWidget;
+    
+    class MainMenuBar;
+    class MenuBar;
+    class Menu;
+    class MenuItem;
+    
+    
     class Widget {
     public:
         bool visible = true;
@@ -15,35 +26,45 @@ namespace eokas::datapot {
         virtual void render(float deltaTime);
     };
     
+    template<typename ChildBase>
     class ContainerWidget : public Widget {
     public:
-        ContainerWidget();
-        virtual ~ContainerWidget();
+        ContainerWidget() = default;
+        
+        virtual ~ContainerWidget() override {
+            _DeleteList(children);
+        }
         
         template<typename Child, typename... Args>
         Child* add(Args&&... args) {
-            Widget*& child = this->children.emplace_back();
+            ChildBase*& child = this->children.emplace_back();
             child = new Child(std::forward<Args>(args)...);
             return (Child*)child;
         }
         
     protected:
-        std::vector<Widget*> children = {};
+        std::vector<ChildBase*> children = {};
         
-        void renderChildren(float deltaTime);
+        void renderChildren(float deltaTime) {
+            for(Widget* child : children) {
+                if(child->visible) {
+                    child->render(deltaTime);
+                }
+            }
+        }
     };
     
-    class MainMenuBar : public ContainerWidget {
+    class MainMenuBar : public ContainerWidget<Menu> {
     public:
         virtual void render(float deltaTime) override;
     };
     
-    class MenuBar : public ContainerWidget {
+    class MenuBar : public ContainerWidget<Menu> {
     public:
         virtual void render(float deltaTime) override;
     };
     
-    class Menu : public ContainerWidget {
+    class Menu : public ContainerWidget<MenuItem> {
     public:
         String label = "";
         bool enabled = true;
@@ -67,7 +88,7 @@ namespace eokas::datapot {
         virtual void render(float deltaTime) override;
     };
     
-    class MainWindow : public ContainerWidget {
+    class MainWindow : public ContainerWidget<Widget> {
     public:
         String name = "Window";
         bool dockSpace = false;
@@ -80,7 +101,7 @@ namespace eokas::datapot {
         virtual void render(float deltaTime) override;
     };
     
-    class Window :public ContainerWidget {
+    class Window :public ContainerWidget<Widget> {
     public:
         String name = "Window";
         bool docking = false;
@@ -95,7 +116,7 @@ namespace eokas::datapot {
         bool isOpened = true;
     };
     
-    class Dialog :public ContainerWidget {
+    class Dialog :public ContainerWidget<Widget> {
     public:
         String name = "Dialog";
         bool modal = true;
@@ -177,6 +198,14 @@ namespace eokas::datapot {
         FieldDirectory(const String& label)
             : label(label) { }
             
+        virtual void render(float deltaTime) override;
+    };
+    
+    class TreeNode : public ContainerWidget<TreeNode> {
+    public:
+        String label = "TreeNode";
+        bool selected = false;
+        
         virtual void render(float deltaTime) override;
     };
 }

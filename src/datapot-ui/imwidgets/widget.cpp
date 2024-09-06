@@ -14,20 +14,6 @@ namespace eokas::datapot {
     
     void Widget::render(float deltaTime) { }
     
-    ContainerWidget::ContainerWidget() { }
-    
-    ContainerWidget::~ContainerWidget() {
-        _DeleteList(children);
-    }
-    
-    void ContainerWidget::renderChildren(float deltaTime) {
-        for(Widget* child : children) {
-            if(child->visible) {
-                child->render(deltaTime);
-            }
-        }
-    }
-    
     void MainMenuBar::render(float deltaTime) {
         if (ImGui::BeginMainMenuBar()) {
             this->renderChildren(deltaTime);
@@ -169,5 +155,31 @@ namespace eokas::datapot {
             OpenDirectoryDialog(this->value, "");
         }
         ImGui::Columns();
+    }
+    
+    void TreeNode::render(float deltaTime) {
+        ImGuiTreeNodeFlags tree_node_flags =
+            ImGuiTreeNodeFlags_SpanAvailWidth |
+            ImGuiTreeNodeFlags_OpenOnArrow |
+            ImGuiTreeNodeFlags_OpenOnDoubleClick |
+                ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
+        
+        if (this->children.empty())
+            tree_node_flags |= ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_Leaf;
+        if (this->selected)
+            tree_node_flags |= ImGuiTreeNodeFlags_Selected;
+        
+        // ImGui::SetNextItemSelectionUserData((ImGuiSelectionUserData)(intptr_t)node);
+        // ImGui::SetNextItemStorageID((ImGuiID)node->UID);
+        
+        if (ImGui::TreeNodeEx(*label, tree_node_flags))
+        {
+            this->renderChildren(deltaTime);
+            ImGui::TreePop();
+        }
+        else if (ImGui::IsItemToggledOpen())
+        {
+            // TreeCloseAndUnselectChildNodes(node, selection);
+        }
     }
 }
