@@ -42,9 +42,15 @@ file(GLOB EOKAS_SOURCE_FILES
         "${EOKAS_TARGET_DIR}/app/*.cpp"
 )
 
-set(EOKAS_LIBRARY_FILES
-    "base" "native" "datapot" "vulkan-1" "glfw3" "freetype"
-)
+if(APPLE)
+    set(EOKAS_LIBRARY_FILES
+        "base" "native" "datapot" "glfw3" "freetype"
+    )
+else()
+    set(EOKAS_LIBRARY_FILES
+            "base" "native" "datapot" "vulkan-1" "glfw3" "freetype"
+    )
+endif()
 
 message("EOKAS_HEADER_DIRS = ${EOKAS_HEADER_DIRS}")
 message("EOKAS_LIBRARY_DIRS = ${EOKAS_LIBRARY_DIRS}")
