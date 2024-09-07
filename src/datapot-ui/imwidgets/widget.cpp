@@ -1,6 +1,7 @@
 #include "./widget.h"
 #include "imgui/imgui.h"
 #include "native/utils.h"
+#include <cstring>
 
 namespace eokas::datapot {
     UIWidget::UIWidget() { }
@@ -170,7 +171,8 @@ namespace eokas::datapot {
     void UIFieldInput::render(float deltaTime) {
         char buffer[255] = {0};
         String valueStr = value.string();
-        memcpy_s(buffer, 255, valueStr.cstr(), valueStr.length());
+        u32_t len = valueStr.length() < 255 ? valueStr.length() : 255;
+        memcpy(buffer, valueStr.cstr(), len);
         
         ImGui::Columns(2, *group);
         ImGui::TextUnformatted(*label);
