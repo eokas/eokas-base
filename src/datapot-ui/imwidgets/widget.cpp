@@ -3,45 +3,45 @@
 #include "native/utils.h"
 
 namespace eokas::datapot {
-    Widget::Widget() { }
+    UIWidget::UIWidget() { }
     
-    Widget::~Widget() {
+    UIWidget::~UIWidget() {
     }
     
-    void Widget::init() { }
+    void UIWidget::init() { }
     
-    void Widget::quit() { }
+    void UIWidget::quit() { }
     
-    void Widget::render(float deltaTime) { }
+    void UIWidget::render(float deltaTime) { }
     
-    void MainMenuBar::render(float deltaTime) {
+    void UIMainMenuBar::render(float deltaTime) {
         if (ImGui::BeginMainMenuBar()) {
             this->renderChildren(deltaTime);
             ImGui::EndMainMenuBar();
         }
     }
     
-    void MenuBar::render(float deltaTime) {
+    void UIMenuBar::render(float deltaTime) {
         if (ImGui::BeginMenuBar()) {
             this->renderChildren(deltaTime);
             ImGui::EndMenuBar();
         }
     }
     
-    void Menu::render(float deltaTime) {
+    void UIMenu::render(float deltaTime) {
         if(ImGui::BeginMenu(this->label.cstr(), this->enabled)) {
             this->renderChildren(deltaTime);
             ImGui::EndMenu();
         }
     }
     
-    void MenuItem::render(float deltaTime) {
+    void UIMenuItem::render(float deltaTime) {
         if(ImGui::MenuItem(this->label.cstr())) {
-            this->onClick();
+            if(this->onClick) this->onClick();
         }
     }
 
-    void MainWindow::render(float deltaTime) {
+    void UIMainWindow::render(float deltaTime) {
         ImGuiIO& io = ImGui::GetIO();
         
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
@@ -64,7 +64,7 @@ namespace eokas::datapot {
         ImGui::End();
     }
     
-    void Window::render(float deltaTime) {
+    void UIWindow::render(float deltaTime) {
         static ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse;
         
         static ImGuiDockNodeFlags dockspace_flags = ~ImGuiDockNodeFlags_PassthruCentralNode;
@@ -77,7 +77,18 @@ namespace eokas::datapot {
         ImGui::End();
     }
     
-    void Dialog::render(float deltaTime) {
+    void UIView::render(float deltaTime) {
+        ImGuiChildFlags childFlags = 0;
+        if(this->flags & Flags_Borders) childFlags |= ImGuiChildFlags_Borders;
+        if(this->flags & Flags_ResizeX) childFlags |= ImGuiChildFlags_ResizeX;
+        if(this->flags & Flags_ResizeY) childFlags |= ImGuiChildFlags_ResizeY;
+        
+        ImGui::BeginChild(*name, ImVec2(size.x, size.y), childFlags);
+        this->renderChildren(deltaTime);
+        ImGui::EndChild();
+    }
+    
+    void UIDialog::render(float deltaTime) {
         static ImGuiWindowFlags window_flags =
             ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoMove;
@@ -101,52 +112,77 @@ namespace eokas::datapot {
         }
     }
     
-    void Dialog::show() {
+    void UIDialog::show() {
         this->visible = true;
         this->bOpenPopup = true;
     }
     
-    void Dialog::hide() {
+    void UIDialog::hide() {
         this->visible = false;
         this->bOpenPopup = false;
     }
     
-    void Text::render(float deltaTime) {
-        ImGui::Text(*content);
-    }
-    
-    void Link::render(float deltaTime) {
-        ImGui::TextLinkOpenURL(*label, *url);
-    }
-    
-    void Button::render(float deltaTime) {
-        if(ImGui::Button(this->label.cstr())) {
-            this->onClick();
+    void UILayout::render(float deltaTime) {
+        if(this->type == Type::Horizontal) {
+            std::vector<UIWidget*> visibles;
+            for(auto child : children) {
+                if(child->visible) {
+                    visibles.push_back(child);
+                }
+            }
+            
+            for(size_t i = 0; i < visibles.size(); i++){
+                if(i > 0) {
+                    ImGui::SameLine();
+                }
+                visibles[i]->render(deltaTime);
+            }
+        }
+        else {
+            this->renderChildren(deltaTime);
         }
     }
     
-    void FieldText::render(float deltaTime) {
-        ImGui::Columns(2, "##field");
+    void UIText::render(float deltaTime) {
+        ImGui::Text(*content);
+    }
+    
+    void UILink::render(float deltaTime) {
+        ImGui::TextLinkOpenURL(*label, *url);
+    }
+    
+    void UIButton::render(float deltaTime) {
+        auto size = ImGui::GetContentRegionAvail();
+        ImGui::SetNextItemWidth(size.x);
+        if(ImGui::Button(this->label.cstr())) {
+            if(this->onClick) this->onClick();
+        }
+    }
+    
+    void UIFieldText::render(float deltaTime) {
+        ImGui::Columns(2, *group);
         ImGui::TextUnformatted(*label);
         ImGui::NextColumn();
-        ImGui::TextUnformatted(*text);
+        ImGui::TextUnformatted(*value);
         ImGui::Columns();
     }
     
-    void FieldInput::render(float deltaTime) {
-        static char buffer[255] = { 0 };
+    void UIFieldInput::render(float deltaTime) {
+        char buffer[255] = {0};
+        String valueStr = value.string();
+        memcpy_s(buffer, 255, valueStr.cstr(), valueStr.length());
         
-        ImGui::Columns(2, "##field");
+        ImGui::Columns(2, *group);
         ImGui::TextUnformatted(*label);
         ImGui::NextColumn();
-        ImGui::InputText(" ", buffer, sizeof(buffer));
+        ImGui::InputText(*inputName, buffer, sizeof(buffer));
         ImGui::Columns();
         
         value = buffer;
     }
     
-    void FieldDirectory::render(float deltaTime) {
-        ImGui::Columns(2, "##field");
+    void UIFieldDirectory::render(float deltaTime) {
+        ImGui::Columns(2, *group);
         ImGui::TextUnformatted(*label);
         ImGui::NextColumn();
         ImGui::Text(*value);
@@ -157,7 +193,14 @@ namespace eokas::datapot {
         ImGui::Columns();
     }
     
-    void TreeNode::render(float deltaTime) {
+    void UIListView::render(float deltaTime) {
+        if(ImGui::BeginListBox(*label, ImVec2(size.x, size.y))) {
+            this->renderChildren(deltaTime);
+            ImGui::EndListBox();
+        }
+    }
+    
+    void UITreeNode::render(float deltaTime) {
         ImGuiTreeNodeFlags tree_node_flags =
             ImGuiTreeNodeFlags_SpanAvailWidth |
             ImGuiTreeNodeFlags_OpenOnArrow |

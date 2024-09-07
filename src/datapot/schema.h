@@ -7,6 +7,7 @@
 namespace eokas::datapot {
 
     enum class SchemaType {
+        None,
         Int,
         Float,
         Bool,
@@ -66,10 +67,10 @@ namespace eokas::datapot {
         virtual ~SchemaHeap();
         
         Schema* add(SchemaType type, const String& name);
-        Schema* get(const String& name);
-        Schema* get(u32_t index);
+        Schema* get(const String& name) const;
+        Schema* get(u32_t index) const;
         u32_t count() const;
-        u32_t indexOf(Schema* schema);
+        u32_t indexOf(const String& name) const;
 
     private:
         std::map<String, u32_t> mSchemaMap;

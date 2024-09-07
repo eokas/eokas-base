@@ -53,7 +53,11 @@
 #define APP_USE_VULKAN_DEBUG_REPORT
 #endif
 
+#if defined(_DEBUG) || defined(DEBUG)
+#define SHOW_IMGUI_AND_IMPLOT_DEMO 1
+#else
 #define SHOW_IMGUI_AND_IMPLOT_DEMO 0
+#endif
 
 // Data
 static VkAllocationCallbacks*   g_Allocator = nullptr;

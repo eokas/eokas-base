@@ -21,7 +21,10 @@ namespace eokas::datapot {
         bool save(BinaryStream& stream);
         
         Schema* addSchema(SchemaType type, const String& name);
-        Schema* getSchama(const String& name);
+        Schema* getSchema(const String& name) const;
+        Schema* getSchema(u32_t index) const;
+        u32_t getSchemaCount() const;
+        u32_t getSchemaIndex(const String& name) const;
 
         Value* make(Schema* schema);
         Value* make(i32_t val);

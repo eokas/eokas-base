@@ -174,7 +174,7 @@ namespace eokas::datapot {
             
             if(type == SchemaType::List) {
                 Schema* elementSchema = schema->getElement();
-                stream.write(mSchemas.indexOf(elementSchema));
+                stream.write(mSchemas.indexOf(elementSchema->name()));
             }
             else if(type == SchemaType::Struct) {
                 u32_t memberCount = schema->getMemberCount();
@@ -182,7 +182,7 @@ namespace eokas::datapot {
                 for(u32_t memberIndex = 0; memberIndex < memberCount; memberIndex++) {
                     auto* member = schema->getMember(memberIndex);
                     stream.write(member->name);
-                    stream.write(mSchemas.indexOf(member->schema));
+                    stream.write(mSchemas.indexOf(member->schema->name()));
                 }
             }
         }
@@ -190,7 +190,7 @@ namespace eokas::datapot {
         auto saveValueList = [this](BinaryStream& stream, const std::vector<Value>& list) {
             stream.write(u32_t(list.size()));
             for(const auto& value : list) {
-                stream.write(mSchemas.indexOf(value.schema));
+                stream.write(mSchemas.indexOf(value.schema->name()));
                 stream.write(value.value.u64);
             }
         };
@@ -198,7 +198,7 @@ namespace eokas::datapot {
             stream.write(u32_t(map.size()));
             for(auto& pair : map) {
                 stream.write(pair.first);
-                stream.write(mSchemas.indexOf(pair.second.schema));
+                stream.write(mSchemas.indexOf(pair.second.schema->name()));
                 stream.write(pair.second.value.u64);
             }
         };
@@ -233,8 +233,20 @@ namespace eokas::datapot {
         return mSchemas.add(type, name);
     }
     
-    Schema* Library::getSchama(const String& name) {
+    Schema* Library::getSchema(const String& name) const {
         return mSchemas.get(name);
+    }
+    
+    Schema* Library::getSchema(u32_t index) const {
+        return mSchemas.get(index);
+    }
+    
+    u32_t Library::getSchemaCount() const {
+        return mSchemas.count();
+    }
+    
+    u32_t Library::getSchemaIndex(const String& name) const {
+        return mSchemas.indexOf(name);
     }
 
     Value* Library::make(Schema* schema) {

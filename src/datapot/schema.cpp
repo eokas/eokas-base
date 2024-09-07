@@ -144,7 +144,7 @@ namespace eokas::datapot {
         return schema;
     }
 
-    Schema* SchemaHeap::get(const String& name) {
+    Schema* SchemaHeap::get(const String& name) const {
         auto iter = mSchemaMap.find(name);
         if(iter == mSchemaMap.end())
             return nullptr;
@@ -152,7 +152,9 @@ namespace eokas::datapot {
         return mSchemas.at(index);
     }
     
-    Schema* SchemaHeap::get(u32_t index) {
+    Schema* SchemaHeap::get(u32_t index) const {
+        if(size_t(index) >= mSchemas.size())
+            return nullptr;
         return mSchemas.at(index);
     }
     
@@ -160,9 +162,10 @@ namespace eokas::datapot {
         return u32_t(mSchemas.size());
     }
     
-    u32_t SchemaHeap::indexOf(Schema* schema) {
-        if(schema == nullptr)
+    u32_t SchemaHeap::indexOf(const String& name) const {
+        auto iter = mSchemaMap.find(name);
+        if(iter == mSchemaMap.end())
             return -1;
-        return u32_t(mSchemaMap[schema->name()]);
+        return u32_t(iter->second);
     }
 }

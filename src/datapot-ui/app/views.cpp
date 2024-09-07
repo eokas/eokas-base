@@ -1,32 +1,39 @@
 #include "./views.h"
 #include "./logic.h"
+#include "datapot/library.h"
 
 namespace eokas::datapot {
     MyMainMenuBar::MyMainMenuBar()
     {
-        auto file = this->add<Menu>("File");
-        actionFileNew = file->add<MenuItem>("New Library ...");
-        actionFileNew->onClick = std::bind(&Logic::actionFileNew, &Logic::instance());
-        actionFileOpen = file->add<MenuItem>("Open Library ...");
-        actionFileOpen->onClick = std::bind(&Logic::actionFileOpen, &Logic::instance());
-        actionFileSave = file->add<MenuItem>("Save ...");
-        actionFileSave->onClick = std::bind(&Logic::actionFileSave, &Logic::instance());
+        auto file = this->add<UIMenu>("File");
+        actionFileNew = file->add<UIMenuItem>("New Library ...");
+        actionFileNew->onClick = []() {
+            if(Logic::instance().actionFileNew) Logic::instance().actionFileNew();
+        };
+        actionFileOpen = file->add<UIMenuItem>("Open Library ...");
+        actionFileOpen->onClick = [](){
+            Logic::instance().openLibrary();
+        };
+        actionFileSave = file->add<UIMenuItem>("Save ...");
+        actionFileSave->onClick = [](){
+            if(Logic::instance().actionFileSave) Logic::instance().actionFileSave();
+        };
         
-        auto edit = this->add<Menu>("Edit");
+        auto edit = this->add<UIMenu>("Edit");
         
-        auto about = this->add<Menu>("About");
+        auto about = this->add<UIMenu>("About");
     }
     
     MyCreateLibraryDialog::MyCreateLibraryDialog()
-        : Dialog("CreateLibrary", true) {
-        fieldName = this->add<FieldInput>("Library Name");
-        fieldHome = this->add<FieldDirectory>("Library Home");
-        button = this->add<Button>("Create");
+        : UIDialog("CreateLibrary", true) {
+        fieldName = this->add<UIFieldInput>("CreateLibrary.LibraryInfo", "Library Name");
+        fieldHome = this->add<UIFieldDirectory>("CreateLibrary.LibraryInfo", "Library Home");
+        button = this->add<UIButton>("Create");
         button->onClick = [this]() {
             String name = fieldName->value;
             String home = fieldHome->value;
             if (!name.isEmpty() && !home.isEmpty()) {
-                const Result& result = Logic::instance().createLibrary(name, home);
+                Result result = Logic::instance().createLibrary(name, home);
                 if(result.ok) {
                     this->hide();
                 }
@@ -34,18 +41,79 @@ namespace eokas::datapot {
         };
     }
     
+    MyCreateSchemaDialog::MyCreateSchemaDialog()
+        : UIDialog("CreateSchema", true) {
+        fieldName = this->add<UIFieldInput>("CreateSchema.SchemaInfo", "Schema Name");
+        fieldType = this->add<UIFieldInput>("CreateSchema.SchemaInfo", "Schema Type");
+        button = this->add<UIButton>("Create");
+        button->onClick = [this](){
+            String name = fieldName->value;
+            String type = fieldType->value;
+            if(!name.isEmpty() && !type.isEmpty()) {
+                Result result = Logic::instance().createSchema(type, name);
+                if(result.ok) {
+                    this->hide();
+                }
+            }
+        };
+    }
+    
+    MySchemaListView::MySchemaListView()
+        : UIView("SchemaList", Vector2(300, 0), Flags_Borders | Flags_ResizeX) {
+        this->reloadSchemaList();
+    }
+    
+    void MySchemaListView::reloadSchemaList() {
+        this->clear();
+        
+        auto library = Logic::instance().library;
+        if(library != nullptr) {
+            for (u32_t index = 0; index < library->getSchemaCount(); index++) {
+                Schema* schema = library->getSchema(index);
+                auto button = this->add<UIButton>(schema->name());
+                button->onClick = [schema](){
+                    Logic::instance().selectSchema(schema);
+                };
+            }
+        }
+    }
+    
+    MySchemaPropertiesView::MySchemaPropertiesView()
+        : UIView("SchemaProperties", Vector2(0, 0), Flags_Borders | Flags_ResizeX | Flags_ResizeY) {
+        
+    }
+    
+    void MySchemaPropertiesView::reloadSchemaProperties() {
+        this->clear();
+        
+        Schema* schema = Logic::instance().schema;
+        if(schema != nullptr) {
+            this->add<UIText>("Schema Properties");
+            this->add<UIFieldText>("SchemaProperties", "Name", schema->name());
+            this->add<UIFieldText>("SchemaProperties", "Type", Logic::stringifySchemaType(schema->type()));
+        }
+    }
+    
     MySchemaBrowserWindow::MySchemaBrowserWindow()
-        : Window("Schemas", true) {
+        : UIWindow("Schemas", true) {
+        newSchema = this->add<UIButton>("New Schema");
+        newSchema->onClick = [](){
+            if(Logic::instance().actionNewSchema) Logic::instance().actionNewSchema();
+        };
+        
+        auto horizontal = this->add<UILayout>(UILayout::Horizontal);
+        schemaList = horizontal->add<MySchemaListView>();
+        schemaProperties = horizontal->add<MySchemaPropertiesView>();
     }
     
     MyObjectBrowserWindow::MyObjectBrowserWindow()
-        : Window("Objects", true){
+        : UIWindow("Objects", true){
         
     }
     
     MyToastDialog::MyToastDialog()
-        : Dialog("", false) {
-        text = this->add<Text>("");
+        : UIDialog("", false) {
+        text = this->add<UIText>("");
     }
     
     void MyToastDialog::open(const eokas::String& content) {
@@ -54,12 +122,35 @@ namespace eokas::datapot {
     }
     
     MyMainWindow::MyMainWindow()
-        : MainWindow("datapot", true)
+        : UIMainWindow("datapot", true)
     {
         mainMenuBar = this->add<MyMainMenuBar>();
         schemaBrowser = this->add<MySchemaBrowserWindow>();
         objectBrowser = this->add<MyObjectBrowserWindow>();
         createLibrary = this->add<MyCreateLibraryDialog>();
+        createSchema = this->add<MyCreateSchemaDialog>();
         toast = this->add<MyToastDialog>();
+        
+        Logic::instance().onError = [this](const Result& error) {
+            toast->open(error.message);
+        };
+        Logic::instance().actionFileNew = [this]() {
+            createLibrary->show();
+        };
+        Logic::instance().onCreateLibrary = [this]() {
+            schemaBrowser->schemaList->reloadSchemaList();
+        };
+        Logic::instance().onOpenLibrary = [this]() {
+            schemaBrowser->schemaList->reloadSchemaList();
+        };
+        Logic::instance().actionNewSchema = [this]() {
+            createSchema->show();
+        };
+        Logic::instance().onCreateSchema = [this]() {
+            schemaBrowser->schemaList->reloadSchemaList();
+        };
+        Logic::instance().onSelectSchema = [this]() {
+            schemaBrowser->schemaProperties->reloadSchemaProperties();
+        };
     }
 }
