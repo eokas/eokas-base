@@ -34,21 +34,37 @@ file(GLOB EOKAS_HEADER_FILES
 )
 
 file(GLOB EOKAS_SOURCE_FILES
-        "${EOKAS_TARGET_DIR}/*.cpp"
         "${EOKAS_TARGET_DIR}/imgui/*.cpp"
+        "${EOKAS_TARGET_DIR}/imgui/${EOKAS_OS_NAME}/*.cpp"
+        "${EOKAS_TARGET_DIR}/imgui/${EOKAS_OS_NAME}/*.mm"
         "${EOKAS_TARGET_DIR}/implot/*.cpp"
         "${EOKAS_TARGET_DIR}/imwidgets/*.cpp"
         "${EOKAS_TARGET_DIR}/utils/*.cpp"
         "${EOKAS_TARGET_DIR}/app/*.cpp"
 )
 
+set(EOKAS_LIBRARY_FILES
+    "base" "native" "datapot" "glfw3" "freetype"
+)
+
 if(APPLE)
-    set(EOKAS_LIBRARY_FILES
-        "base" "native" "datapot" "glfw3" "freetype"
+    list(APPEND EOKAS_SOURCE_FILES
+            "${EOKAS_TARGET_DIR}/main.mm"
+    )
+    list(APPEND EOKAS_LIBRARY_FILES
+            "-framework Metal"
+            "-framework MetalKit"
+            "-framework Cocoa"
+            "-framework IOKit"
+            "-framework CoreVideo"
+            "-framework QuartzCore"
     )
 else()
-    set(EOKAS_LIBRARY_FILES
-            "base" "native" "datapot" "vulkan-1" "glfw3" "freetype"
+    list(APPEND EOKAS_SOURCE_FILES
+            "${EOKAS_TARGET_DIR}/main.cpp"
+    )
+    list(APPEND EOKAS_LIBRARY_FILES
+            "vulkan-1"
     )
 endif()
 
