@@ -14,6 +14,7 @@ set(EOKAS_HEADER_DIRS
         "${EOKAS_SOURCE_DIR}"
         "${EOKAS_TARGET_DIR}"
         "${EOKAS_TARGET_DIR}/imgui"
+        "${EOKAS_TARGET_DIR}/imgui/${EOKAS_OS_NAME}"
         "${EOKAS_TARGET_DIR}/implot"
 )
 

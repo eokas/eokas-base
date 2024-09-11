@@ -20,6 +20,14 @@
 #import <Metal/Metal.h>
 #import <QuartzCore/QuartzCore.h>
 
+#include "app/app.h"
+
+#if defined(_DEBUG) || defined(DEBUG)
+#define SHOW_IMGUI_AND_IMPLOT_DEMO 1
+#else
+#define SHOW_IMGUI_AND_IMPLOT_DEMO 0
+#endif
+
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
@@ -96,6 +104,9 @@ int main(int, char**)
     bool show_another_window = false;
     float clear_color[4] = {0.45f, 0.55f, 0.60f, 1.00f};
 
+    ImApp app;
+    app.init();
+
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -126,6 +137,7 @@ int main(int, char**)
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
+#if SHOW_IMGUI_AND_IMPLOT_DEMO
             // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
             if (show_demo_window)
                 ImGui::ShowDemoWindow(&show_demo_window);
@@ -162,6 +174,12 @@ int main(int, char**)
                     show_another_window = false;
                 ImGui::End();
             }
+#endif
+
+            if (width > 0 && height > 0)
+            {
+                app.tick();
+            }
 
             // Rendering
             ImGui::Render();
@@ -181,6 +199,8 @@ int main(int, char**)
             [commandBuffer commit];
         }
     }
+
+    app.quit();
 
     // Cleanup
     ImGui_ImplMetal_Shutdown();
