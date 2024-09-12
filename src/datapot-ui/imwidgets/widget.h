@@ -117,6 +117,25 @@ namespace eokas::datapot {
         virtual void render(float deltaTime) override;
     };
     
+    class UIDialog :public UIContainer<UIWidget> {
+    public:
+        String name = "Dialog";
+        bool modal = true;
+        
+        UIDialog(const String& name, bool modal = true)
+            : name(name)
+            , modal(modal) {
+        }
+        
+        virtual void render(float deltaTime) override;
+        
+        void show();
+        void hide();
+        
+    private:
+        bool bOpenPopup = false;
+    };
+    
     class UIView :public UIContainer<UIWidget> {
     public:
         using Flags = u32_t;
@@ -137,25 +156,6 @@ namespace eokas::datapot {
         virtual void render(float deltaTime) override;
     };
     
-    class UIDialog :public UIContainer<UIWidget> {
-    public:
-        String name = "Dialog";
-        bool modal = true;
-        
-        UIDialog(const String& name, bool modal = true)
-            : name(name)
-            , modal(modal) {
-        }
-        
-        virtual void render(float deltaTime) override;
-        
-        void show();
-        void hide();
-        
-    private:
-        bool bOpenPopup = false;
-    };
-    
     class UILayout :public UIContainer<UIWidget> {
     public:
         enum Type {
@@ -165,6 +165,11 @@ namespace eokas::datapot {
         
         UILayout(Type type) : type(type) {}
         
+        virtual void render(float deltaTime) override;
+    };
+    
+    class UISeparator : public UIWidget {
+    public:
         virtual void render(float deltaTime) override;
     };
     
@@ -232,6 +237,11 @@ namespace eokas::datapot {
         String inputName;
     };
     
+    class UIFieldCombo : public UIWidget {
+    public:
+        virtual void render(float deltaTime) override;
+    };
+    
     class UIFieldDirectory : public UIWidget {
     public:
         String group;
@@ -267,6 +277,38 @@ namespace eokas::datapot {
         bool selected = false;
         
         virtual void render(float deltaTime) override;
+    };
+    
+    class UITable : public UIContainer<UIWidget> {
+    public:
+        enum TableFlags_ {
+            TableFlags_None,
+        };
+        using TableFlags = u32_t;
+        
+        enum ColumnFlags_ {
+            ColumnFlags_None,
+        };
+        using ColumnFlags = u32_t;
+        
+        struct Column {
+            String label = "";
+            ColumnFlags flags = ColumnFlags_None;
+        };
+        
+        String name;
+        TableFlags flags;
+        
+        
+        UITable(const String& name, TableFlags flags = TableFlags_None)
+            : name(name), flags(flags) {}
+        
+        virtual void render(float deltaTime) override;
+        
+        void setColumn(const String& label, ColumnFlags flags);
+        
+    private:
+        std::vector<Column> mColumns = {};
     };
 }
 

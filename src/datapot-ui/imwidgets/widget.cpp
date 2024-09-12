@@ -78,17 +78,6 @@ namespace eokas::datapot {
         ImGui::End();
     }
     
-    void UIView::render(float deltaTime) {
-        ImGuiChildFlags childFlags = 0;
-        if(this->flags & Flags_Borders) childFlags |= ImGuiChildFlags_Borders;
-        if(this->flags & Flags_ResizeX) childFlags |= ImGuiChildFlags_ResizeX;
-        if(this->flags & Flags_ResizeY) childFlags |= ImGuiChildFlags_ResizeY;
-        
-        ImGui::BeginChild(*name, ImVec2(size.x, size.y), childFlags);
-        this->renderChildren(deltaTime);
-        ImGui::EndChild();
-    }
-    
     void UIDialog::render(float deltaTime) {
         static ImGuiWindowFlags window_flags =
             ImGuiWindowFlags_NoCollapse |
@@ -123,6 +112,17 @@ namespace eokas::datapot {
         this->bOpenPopup = false;
     }
     
+    void UIView::render(float deltaTime) {
+        ImGuiChildFlags childFlags = 0;
+        if(this->flags & Flags_Borders) childFlags |= ImGuiChildFlags_Borders;
+        if(this->flags & Flags_ResizeX) childFlags |= ImGuiChildFlags_ResizeX;
+        if(this->flags & Flags_ResizeY) childFlags |= ImGuiChildFlags_ResizeY;
+        
+        ImGui::BeginChild(*name, ImVec2(size.x, size.y), childFlags);
+        this->renderChildren(deltaTime);
+        ImGui::EndChild();
+    }
+    
     void UILayout::render(float deltaTime) {
         if(this->type == Type::Horizontal) {
             std::vector<UIWidget*> visibles;
@@ -142,6 +142,10 @@ namespace eokas::datapot {
         else {
             this->renderChildren(deltaTime);
         }
+    }
+    
+    void UISeparator::render(float deltaTime) {
+        ImGui::Separator();
     }
     
     void UIText::render(float deltaTime) {
@@ -181,6 +185,10 @@ namespace eokas::datapot {
         ImGui::Columns();
         
         value = buffer;
+    }
+    
+    void UIFieldCombo::render(float deltaTime) {
+        
     }
     
     void UIFieldDirectory::render(float deltaTime) {
@@ -226,5 +234,40 @@ namespace eokas::datapot {
         {
             // TreeCloseAndUnselectChildNodes(node, selection);
         }
+    }
+    
+    void UITable::render(float deltaTime) {
+        if(ImGui::BeginTable(*name, mColumns.size())) {
+            for(auto& col : mColumns) {
+                ImGuiTableColumnFlags column_flags = ImGuiTableColumnFlags_None;
+                ImGui::TableSetupColumn(*col.label, column_flags);
+            }
+            
+            size_t rowCount = this->children.size() % mColumns.size() == 0 ?
+                this->children.size() / mColumns.size() :
+                this->children.size() / mColumns.size() + 1;
+            size_t colCount = mColumns.size();
+            
+            for(size_t row = 0; row < rowCount; row++) {
+                for(size_t col = 0; col < colCount; col++) {
+                    size_t index = row * colCount + col;
+                    if(index >= this->children.size()) {
+                        break;
+                    }
+                    auto child = this->children.at(index);
+                    if(child->visible) {
+                        child->render(deltaTime);
+                    }
+                }
+            }
+            
+            ImGui::EndTable();
+        }
+    }
+    
+    void UITable::setColumn(const String& label, UITable::ColumnFlags flags) {
+        auto& col = mColumns.emplace_back();
+        col.label = label;
+        col.flags = flags;
     }
 }

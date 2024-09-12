@@ -43,8 +43,10 @@ namespace eokas::datapot {
     
     MyCreateSchemaDialog::MyCreateSchemaDialog()
         : UIDialog("CreateSchema", true) {
+        std::vector<String> schemaTypeNames = {"None", "Int", "Float", "Bool", "String", "List", "Struct"};
+        
         fieldName = this->add<UIFieldInput>("CreateSchema.SchemaInfo", "Schema Name");
-        fieldType = this->add<UIFieldInput>("CreateSchema.SchemaInfo", "Schema Type");
+        fieldType = this->add<UIFieldCombo>("CreateSchema.SchemaInfo", "Schema Type");
         button = this->add<UIButton>("Create");
         button->onClick = [this](){
             String name = fieldName->value;
@@ -68,6 +70,9 @@ namespace eokas::datapot {
         
         auto library = Logic::instance().library;
         if(library != nullptr) {
+            this->add<UIText>("Schemas");
+            this->add<UISeparator>();
+            
             for (u32_t index = 0; index < library->getSchemaCount(); index++) {
                 Schema* schema = library->getSchema(index);
                 auto button = this->add<UIButton>(schema->name());
@@ -79,7 +84,7 @@ namespace eokas::datapot {
     }
     
     MySchemaPropertiesView::MySchemaPropertiesView()
-        : UIView("SchemaProperties", Vector2(0, 0), Flags_Borders | Flags_ResizeX | Flags_ResizeY) {
+        : UIView("SchemaProperties", Vector2(0, 500), Flags_Borders | Flags_ResizeY) {
         
     }
     
@@ -88,9 +93,23 @@ namespace eokas::datapot {
         
         Schema* schema = Logic::instance().schema;
         if(schema != nullptr) {
-            this->add<UIText>("Schema Properties");
+            this->add<UIText>("Properties");
+            this->add<UISeparator>();
+            
+            SchemaType schemaType = schema->type();
             this->add<UIFieldText>("SchemaProperties", "Name", schema->name());
-            this->add<UIFieldText>("SchemaProperties", "Type", Logic::stringifySchemaType(schema->type()));
+            this->add<UIFieldText>("SchemaProperties", "Type", Logic::stringifySchemaType(schemaType));
+            if(schemaType == SchemaType::List) {
+                auto elementSchema = schema->getElement();
+                this->add<UIFieldText>("SchemaProperties", "    Element Schema", elementSchema->name());
+            }
+            if(schemaType == SchemaType::Struct) {
+                this->add<UIText>("Members");
+                for(u32_t index = 0; index < schema->getMemberCount(); index++) {
+                    auto member = schema->getMember(index);
+                    this->add<UIFieldText>("SchemaProperties", String("    ")+member->name, member->schema->name());
+                }
+            }
         }
     }
     
