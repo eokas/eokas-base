@@ -26,12 +26,13 @@ namespace eokas::datapot {
     
     MyCreateLibraryDialog::MyCreateLibraryDialog()
         : UIDialog("CreateLibrary", true) {
-        fieldName = this->add<UIFieldInput>("CreateLibrary.LibraryInfo", "Library Name");
-        fieldHome = this->add<UIFieldDirectory>("CreateLibrary.LibraryInfo", "Library Home");
+        properties = this->add<UIPropertiesView>("Library.Create.Info");
+        auto libraryName = properties->addString("Library Name", "");
+        auto libraryHome = properties->addDirectory("Library Home");
         button = this->add<UIButton>("Create");
-        button->onClick = [this]() {
-            String name = fieldName->value;
-            String home = fieldHome->value;
+        button->onClick = [=, this]() {
+            String name = libraryName->value.string().trim();
+            String home = libraryHome->value.string().trim();
             if (!name.isEmpty() && !home.isEmpty()) {
                 Result result = Logic::instance().createLibrary(name, home);
                 if(result.ok) {
@@ -45,17 +46,14 @@ namespace eokas::datapot {
         : UIDialog("CreateSchema", true) {
         std::vector<String> schemaTypeNames = {"None", "Int", "Float", "Bool", "String", "List", "Struct"};
         
-        auto properties = this->add<UIPropertiesView>("Schema.Create.Info");
-        properties->addInput("Schema Name", false, "");
-        properties->addCombo("Schema Type", {"Int", "Float", "Bool", "String", "List", "Struct"}, 0);
-        
-        fieldName = this->add<UIFieldInput>("CreateSchema.SchemaInfo", "Schema Name");
-        fieldType = this->add<UIFieldCombo>("CreateSchema.SchemaInfo", "Schema Type");
+        properties = this->add<UIPropertiesView>("Schema.Create.Info");
+        auto schemaName = properties->addInput("Schema Name", "", false);
+        auto schemaType = properties->addEnum("Schema Type", schemaTypeNames, 0);
         button = this->add<UIButton>("Create");
-        button->onClick = [this](){
-            String name = fieldName->value;
-            String type = fieldType->value;
-            if(!name.isEmpty() && !type.isEmpty()) {
+        button->onClick = [&, this](){
+            String name = schemaName->value.string().trim();
+            auto type = (SchemaType)(int)schemaType->value;
+            if(!name.isEmpty() && type != SchemaType::None) {
                 Result result = Logic::instance().createSchema(type, name);
                 if(result.ok) {
                     this->hide();
@@ -89,7 +87,7 @@ namespace eokas::datapot {
     
     MySchemaPropertiesView::MySchemaPropertiesView()
         : UIView("SchemaProperties", Vector2(0, 500), Flags_Borders | Flags_ResizeY) {
-        
+        properties = nullptr;
     }
     
     void MySchemaPropertiesView::reloadSchemaProperties() {
@@ -97,21 +95,26 @@ namespace eokas::datapot {
         
         Schema* schema = Logic::instance().schema;
         if(schema != nullptr) {
+            SchemaType schemaType = schema->type();
+            std::vector<String> schemaTypeNames = {"None", "Int", "Float", "Bool", "String", "List", "Struct"};
+
             this->add<UIText>("Properties");
             this->add<UISeparator>();
-            
-            SchemaType schemaType = schema->type();
-            this->add<UIFieldText>("SchemaProperties", "Name", schema->name());
-            this->add<UIFieldText>("SchemaProperties", "Type", Logic::stringifySchemaType(schemaType));
+
+            properties = this->add<UIPropertiesView>("Schema.Properties");
+            properties->addString("Name", schema->name());
+            properties->addEnum("Type", schemaTypeNames, (int)schema->type());
+
+            String indent("    ");
             if(schemaType == SchemaType::List) {
                 auto elementSchema = schema->getElement();
-                this->add<UIFieldText>("SchemaProperties", "    Element Schema", elementSchema->name());
+                properties->addString(indent+"Element Schema", elementSchema->name());
             }
             if(schemaType == SchemaType::Struct) {
                 this->add<UIText>("Members");
                 for(u32_t index = 0; index < schema->getMemberCount(); index++) {
                     auto member = schema->getMember(index);
-                    this->add<UIFieldText>("SchemaProperties", String("    ")+member->name, member->schema->name());
+                    properties->addString(indent+member->name, member->schema->name());
                 }
             }
         }
@@ -140,7 +143,7 @@ namespace eokas::datapot {
     }
     
     void MyToastDialog::open(const eokas::String& content) {
-        this->text->content = content;
+        this->text->value = content;
         this->show();
     }
     

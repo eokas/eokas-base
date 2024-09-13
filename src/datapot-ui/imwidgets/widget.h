@@ -57,6 +57,15 @@ namespace eokas::datapot {
             }
         }
     };
+
+    class UIField : public UIWidget {
+    public:
+        StringValue value;
+
+        UIField(const StringValue& value)
+            : value(value)
+        { }
+    };
     
     class UIMainMenuBar : public UIContainer<UIMenu> {
     public:
@@ -173,12 +182,10 @@ namespace eokas::datapot {
         virtual void render(float deltaTime) override;
     };
     
-    class UIText : public UIWidget {
+    class UIText : public UIField {
     public:
-        String content = "";
-        
-        UIText(const String& content)
-            : content(content) { }
+        UIText(const StringValue& content)
+            : UIField(content) { }
             
         virtual void render(float deltaTime) override;
     };
@@ -205,79 +212,34 @@ namespace eokas::datapot {
         virtual void render(float deltaTime) override;
     };
     
-    class UIInput : public UIWidget {
+    class UIInput : public UIField {
     public:
         bool password;
-        StringValue value;
         
-        UIInput(bool password, const StringValue& value)
-            : password(password), value(value) {}
+        UIInput(const StringValue& value, bool password)
+            : UIField(value), password(password) {}
             
         virtual void render(float deltaTime) override;
     };
     
-    class UICombo : public UIWidget {
+    class UIEnum : public UIField {
     public:
         std::vector<String> items;
-        u32_t index;
         
-        UICombo(const std::vector<String>& items, u32_t index)
-            : items(items), index(index) { }
+        UIEnum(const std::vector<String>& items, u32_t index)
+            : UIField(index), items(items) { }
         
         virtual void render(float deltaTime) override;
     };
-    
-    class UIFieldText : public UIWidget {
+
+    class UIDirectorySelector : public UIField {
     public:
-        String group = "";
-        String label = "";
-        String value = "";
-        
-        UIFieldText(const String& group, const String& label, const String& value)
-            : group(group)
-            , label(label)
-            , value(value){ }
-        
+        UIDirectorySelector()
+            : UIField("") { }
+
         virtual void render(float deltaTime) override;
     };
-    
-    class UIFieldInput : public UIWidget {
-    public:
-        String group;
-        String label;
-        StringValue value;
-        
-        UIFieldInput(const String& group, const String& label)
-            : group(group)
-            , label(label)
-            , inputName(String("##")+label) {
-        }
-        
-        virtual void render(float deltaTime) override;
-        
-    private:
-        String inputName;
-    };
-    
-    class UIFieldCombo : public UIWidget {
-    public:
-        virtual void render(float deltaTime) override;
-    };
-    
-    class UIFieldDirectory : public UIWidget {
-    public:
-        String group;
-        String label;
-        String value;
-        
-        UIFieldDirectory(const String& group, const String& label)
-            : group(group)
-            , label(label)
-            , value() { }
-            
-        virtual void render(float deltaTime) override;
-    };
-    
+
     class UIListView : public UIContainer<UIWidget> {
     public:
         String label = "";
@@ -335,32 +297,44 @@ namespace eokas::datapot {
     
     class UIPropertiesView : public UIWidget {
     public:
-        struct PropertyWidget {
+        struct Property {
             String label = "";
-            UIWidget* widget = nullptr;
+            StringValue& value;
+            UIField* widget = nullptr;
+
+            Property(const String& label, UIField* widget)
+                : label(label), value(widget->value), widget(widget)
+            { }
         };
         
         String name;
         
         UIPropertiesView(const String& name)
-            : name(name), mProperties() {}
+            : name(name), mProperties(), mChildren() {}
+
+        virtual ~UIPropertiesView() {
+            _DeleteList(mChildren);
+        }
         
         virtual void render(float deltaTime) override;
         
-        template<typename ValueWidget, typename... Args>
-        ValueWidget* addProperty(const String& label, Args&&... args) {
-            auto& prop = mProperties.emplace_back();
-            prop.label = label;
-            prop.widget = new ValueWidget(std::forward<Args>(args)...);
-            return (ValueWidget*)prop.widget;
+        template<typename FieldWidget, typename... Args>
+        Property* addProperty(const String& label, Args&&... args) {
+            auto* widget = new FieldWidget(std::forward<Args>(args)...);
+            mChildren.push_back(widget);
+
+            auto& prop = mProperties.emplace_back(label, widget);
+            return &prop;
         }
         
-        UIText* addString(const String& label, const String& value);
-        UIInput* addInput(const String& label, bool password, const String& value);
-        UICombo* addCombo(const String& label, const std::vector<String>& list, u32_t index);
+        Property* addString(const String& label, const String& value);
+        Property* addInput(const String& label, const String& value, bool password);
+        Property* addEnum(const String& label, const std::vector<String>& list, u32_t index);
+        Property* addDirectory(const String& label);
         
     private:
-        std::vector<PropertyWidget> mProperties;
+        std::vector<Property> mProperties;
+        std::vector<UIWidget*> mChildren;
     };
 }
 

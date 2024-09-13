@@ -48,8 +48,13 @@ namespace eokas::datapot {
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
         
         static const ImGuiWindowFlags window_flags =
-            ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
-                ImGuiWindowFlags_NoDocking;
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoBringToFrontOnFocus |
+            ImGuiWindowFlags_NoNavFocus |
+            ImGuiWindowFlags_NoDocking;
         
         ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetFrameHeight()));
         ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y - ImGui::GetFrameHeight()));
@@ -149,7 +154,7 @@ namespace eokas::datapot {
     }
     
     void UIText::render(float deltaTime) {
-        ImGui::Text(*content);
+        ImGui::Text(*value.string());
     }
     
     void UILink::render(float deltaTime) {
@@ -174,53 +179,26 @@ namespace eokas::datapot {
 
         value = buffer;
     }
-    
-    void UICombo::render(float deltaTime) {
+
+    void UIEnum::render(float deltaTime) {
         std::vector<const char*> rawItems;
         for(auto& item : items) {
             rawItems.push_back(*item);
         }
-        
-        ImGui::Combo("##", (int*)&index, rawItems.data(), (int)rawItems.size());
+
+        int index = this->value;
+        ImGui::Combo("##", &index, rawItems.data(), (int)rawItems.size());
+        this->value = index;
     }
-    
-    void UIFieldText::render(float deltaTime) {
-        ImGui::Columns(2, *group);
-        ImGui::TextUnformatted(*label);
-        ImGui::NextColumn();
-        ImGui::TextUnformatted(*value);
-        ImGui::Columns();
-    }
-    
-    void UIFieldInput::render(float deltaTime) {
-        char buffer[255] = {0};
-        String valueStr = value.string();
-        u32_t len = valueStr.length() < 255 ? valueStr.length() : 255;
-        memcpy(buffer, valueStr.cstr(), len);
-        
-        ImGui::Columns(2, *group);
-        ImGui::TextUnformatted(*label);
-        ImGui::NextColumn();
-        ImGui::InputText(*inputName, buffer, sizeof(buffer));
-        ImGui::Columns();
-        
-        value = buffer;
-    }
-    
-    void UIFieldCombo::render(float deltaTime) {
-    
-    }
-    
-    void UIFieldDirectory::render(float deltaTime) {
-        ImGui::Columns(2, *group);
-        ImGui::TextUnformatted(*label);
-        ImGui::NextColumn();
-        ImGui::Text(*value);
+
+    void UIDirectorySelector::render(float deltaTime) {
+        ImGui::Text(*value.string());
         ImGui::SameLine();
         if(ImGui::Button(" --- ")) {
-            OpenDirectoryDialog(this->value, "");
+            String selectedPath;
+            OpenDirectoryDialog(selectedPath, "");
+            this->value = selectedPath;
         }
-        ImGui::Columns();
     }
     
     void UIListView::render(float deltaTime) {
@@ -302,15 +280,20 @@ namespace eokas::datapot {
         ImGui::Columns(1);
     }
     
-    u32_t UIPropertiesView::addString(const String& label, const String& value) {
-        return this->addProperty<UIText>(label, value)
+    UIPropertiesView::Property* UIPropertiesView::addString(const String& label, const String& value) {
+        return this->addProperty<UIText>(label, value);
     }
     
-    u32_t UIPropertiesView::addInput(const String& label, bool password, const String& value) {
-        return this->addProperty<UIInput>(label, password,  value);
+    UIPropertiesView::Property* UIPropertiesView::addInput(const String& label, const String& value, bool password) {
+        return this->addProperty<UIInput>(label, value, password);
     }
     
-    u32_t UIPropertiesView::addCombo(const String& label, const std::vector<String>& list, u32_t index) {
-        return this->addProperty<UICombo>(label, list, index);
+    UIPropertiesView::Property* UIPropertiesView::addEnum(const String& label, const std::vector<String>& list, u32_t index) {
+        return this->addProperty<UIEnum>(label, list, index);
     }
+
+    UIPropertiesView::Property* UIPropertiesView::addDirectory(const String& label) {
+        return this->addProperty<UIDirectorySelector>(label);
+    }
+
 }

@@ -88,17 +88,15 @@ namespace eokas::datapot {
         return result(true);
     }
     
-    Result Logic::createSchema(const String& type, const String& name) {
+    Result Logic::createSchema(const SchemaType& type, const String& name) {
         if(this->library == nullptr) {
             return result(false, "Current library is null");
         }
-        
-        SchemaType t = Logic::parseSchemaType(type);
-        if(t == SchemaType::None) {
+        if(type == SchemaType::None) {
             return result(false, "Unknown schema type.");
         }
         
-        auto newSchema = this->library->addSchema(t, name);
+        auto newSchema = this->library->addSchema(type, name);
         if(newSchema == nullptr) {
             return result(false, "Create schema failed.");
         }

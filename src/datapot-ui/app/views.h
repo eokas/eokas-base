@@ -12,16 +12,14 @@ namespace eokas::datapot {
     };
     
     struct MyCreateLibraryDialog :public UIDialog {
-        UIFieldInput* fieldName;
-        UIFieldDirectory* fieldHome;
+        UIPropertiesView* properties;
         UIButton* button;
         
         MyCreateLibraryDialog();
     };
     
     struct MyCreateSchemaDialog : public UIDialog {
-        UIFieldInput* fieldName;
-        UIFieldInput* fieldType;
+        UIPropertiesView* properties;
         UIButton* button;
         
         MyCreateSchemaDialog();
@@ -33,6 +31,8 @@ namespace eokas::datapot {
     };
     
     struct MySchemaPropertiesView : public UIView {
+        UIPropertiesView* properties;
+
         MySchemaPropertiesView();
         void reloadSchemaProperties();
     };
