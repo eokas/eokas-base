@@ -205,6 +205,28 @@ namespace eokas::datapot {
         virtual void render(float deltaTime) override;
     };
     
+    class UIInput : public UIWidget {
+    public:
+        bool password;
+        StringValue value;
+        
+        UIInput(bool password, const StringValue& value)
+            : password(password), value(value) {}
+            
+        virtual void render(float deltaTime) override;
+    };
+    
+    class UICombo : public UIWidget {
+    public:
+        std::vector<String> items;
+        u32_t index;
+        
+        UICombo(const std::vector<String>& items, u32_t index)
+            : items(items), index(index) { }
+        
+        virtual void render(float deltaTime) override;
+    };
+    
     class UIFieldText : public UIWidget {
     public:
         String group = "";
@@ -309,6 +331,36 @@ namespace eokas::datapot {
         
     private:
         std::vector<Column> mColumns = {};
+    };
+    
+    class UIPropertiesView : public UIWidget {
+    public:
+        struct PropertyWidget {
+            String label = "";
+            UIWidget* widget = nullptr;
+        };
+        
+        String name;
+        
+        UIPropertiesView(const String& name)
+            : name(name), mProperties() {}
+        
+        virtual void render(float deltaTime) override;
+        
+        template<typename ValueWidget, typename... Args>
+        ValueWidget* addProperty(const String& label, Args&&... args) {
+            auto& prop = mProperties.emplace_back();
+            prop.label = label;
+            prop.widget = new ValueWidget(std::forward<Args>(args)...);
+            return (ValueWidget*)prop.widget;
+        }
+        
+        UIText* addString(const String& label, const String& value);
+        UIInput* addInput(const String& label, bool password, const String& value);
+        UICombo* addCombo(const String& label, const std::vector<String>& list, u32_t index);
+        
+    private:
+        std::vector<PropertyWidget> mProperties;
     };
 }
 

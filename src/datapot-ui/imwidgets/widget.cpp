@@ -164,6 +164,26 @@ namespace eokas::datapot {
         }
     }
     
+    void UIInput::render(float deltaTime) {
+        char buffer[255] = {0};
+        String valueStr = value.string();
+        u32_t len = valueStr.length() < 255 ? valueStr.length() : 255;
+        memcpy(buffer, valueStr.cstr(), len);
+        
+        ImGui::InputText("##", buffer, sizeof(buffer));
+
+        value = buffer;
+    }
+    
+    void UICombo::render(float deltaTime) {
+        std::vector<const char*> rawItems;
+        for(auto& item : items) {
+            rawItems.push_back(*item);
+        }
+        
+        ImGui::Combo("##", (int*)&index, rawItems.data(), (int)rawItems.size());
+    }
+    
     void UIFieldText::render(float deltaTime) {
         ImGui::Columns(2, *group);
         ImGui::TextUnformatted(*label);
@@ -188,7 +208,7 @@ namespace eokas::datapot {
     }
     
     void UIFieldCombo::render(float deltaTime) {
-        
+    
     }
     
     void UIFieldDirectory::render(float deltaTime) {
@@ -269,5 +289,28 @@ namespace eokas::datapot {
         auto& col = mColumns.emplace_back();
         col.label = label;
         col.flags = flags;
+    }
+    
+    void UIPropertiesView::render(float deltaTime) {
+        ImGui::Columns(2, *name);
+        for(auto& prop : mProperties) {
+            ImGui::TextUnformatted(*prop.label);
+            ImGui::NextColumn();
+            prop.widget->render(deltaTime);
+            ImGui::NextColumn();
+        }
+        ImGui::Columns(1);
+    }
+    
+    u32_t UIPropertiesView::addString(const String& label, const String& value) {
+        return this->addProperty<UIText>(label, value)
+    }
+    
+    u32_t UIPropertiesView::addInput(const String& label, bool password, const String& value) {
+        return this->addProperty<UIInput>(label, password,  value);
+    }
+    
+    u32_t UIPropertiesView::addCombo(const String& label, const std::vector<String>& list, u32_t index) {
+        return this->addProperty<UICombo>(label, list, index);
     }
 }

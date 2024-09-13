@@ -45,6 +45,10 @@ namespace eokas::datapot {
         : UIDialog("CreateSchema", true) {
         std::vector<String> schemaTypeNames = {"None", "Int", "Float", "Bool", "String", "List", "Struct"};
         
+        auto properties = this->add<UIPropertiesView>("Schema.Create.Info");
+        properties->addInput("Schema Name", false, "");
+        properties->addCombo("Schema Type", {"Int", "Float", "Bool", "String", "List", "Struct"}, 0);
+        
         fieldName = this->add<UIFieldInput>("CreateSchema.SchemaInfo", "Schema Name");
         fieldType = this->add<UIFieldCombo>("CreateSchema.SchemaInfo", "Schema Type");
         button = this->add<UIButton>("Create");
