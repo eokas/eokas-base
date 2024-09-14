@@ -4,7 +4,12 @@
 #include <cstring>
 
 namespace eokas::datapot {
-    UIWidget::UIWidget() { }
+    static u64_t gWidgetIndex = 0;
+    
+    UIWidget::UIWidget()
+    {
+        this->name = String::format("##Widget-%llu", gWidgetIndex++);
+    }
     
     UIWidget::~UIWidget() {
     }
@@ -78,7 +83,7 @@ namespace eokas::datapot {
         if (!this->docking)
             window_flags |= ImGuiWindowFlags_NoDocking;
         
-        ImGui::Begin(this->name.cstr(), &visible, window_flags);
+        ImGui::Begin(*name, &visible, window_flags);
         this->renderChildren(deltaTime);
         ImGui::End();
     }
@@ -89,18 +94,18 @@ namespace eokas::datapot {
             ImGuiWindowFlags_NoMove;
         
         if(this->bOpenPopup) {
-            ImGui::OpenPopup(this->name.cstr());
+            ImGui::OpenPopup(*name);
             this->bOpenPopup = false;
         }
         
         if(this->modal) {
-            if (ImGui::BeginPopupModal(this->name.cstr(), &visible, window_flags)) {
+            if (ImGui::BeginPopupModal(*name, &visible, window_flags)) {
                 this->renderChildren(deltaTime);
                 ImGui::EndPopup();
             }
         }
         else {
-            if (ImGui::BeginPopup(this->name.cstr(), window_flags)) {
+            if (ImGui::BeginPopup(*name, window_flags)) {
                 this->renderChildren(deltaTime);
                 ImGui::EndPopup();
             }
@@ -175,7 +180,7 @@ namespace eokas::datapot {
         u32_t len = valueStr.length() < 255 ? valueStr.length() : 255;
         memcpy(buffer, valueStr.cstr(), len);
         
-        ImGui::InputText("##", buffer, sizeof(buffer));
+        ImGui::InputText(*name, buffer, sizeof(buffer));
 
         value = buffer;
     }
@@ -187,7 +192,7 @@ namespace eokas::datapot {
         }
 
         int index = this->value;
-        ImGui::Combo("##", &index, rawItems.data(), (int)rawItems.size());
+        ImGui::Combo(*name, &index, rawItems.data(), (int)rawItems.size());
         this->value = index;
     }
 
@@ -271,10 +276,10 @@ namespace eokas::datapot {
     
     void UIPropertiesView::render(float deltaTime) {
         ImGui::Columns(2, *name);
-        for(auto& prop : mProperties) {
-            ImGui::TextUnformatted(*prop.label);
+        for(auto* prop : mProperties) {
+            ImGui::TextUnformatted(*prop->label);
             ImGui::NextColumn();
-            prop.widget->render(deltaTime);
+            prop->widget->render(deltaTime);
             ImGui::NextColumn();
         }
         ImGui::Columns(1);
@@ -295,5 +300,4 @@ namespace eokas::datapot {
     UIPropertiesView::Property* UIPropertiesView::addDirectory(const String& label) {
         return this->addProperty<UIDirectorySelector>(label);
     }
-
 }

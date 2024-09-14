@@ -20,6 +20,8 @@ namespace eokas::datapot {
     
     struct MyCreateSchemaDialog : public UIDialog {
         UIPropertiesView* properties;
+        UIPropertiesView::Property* schemaName;
+        UIPropertiesView::Property* schemaType;
         UIButton* button;
         
         MyCreateSchemaDialog();

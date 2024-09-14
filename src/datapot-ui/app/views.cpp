@@ -3,8 +3,7 @@
 #include "datapot/library.h"
 
 namespace eokas::datapot {
-    MyMainMenuBar::MyMainMenuBar()
-    {
+    MyMainMenuBar::MyMainMenuBar() {
         auto file = this->add<UIMenu>("File");
         actionFileNew = file->add<UIMenuItem>("New Library ...");
         actionFileNew->onClick = []() {
@@ -25,12 +24,14 @@ namespace eokas::datapot {
     }
     
     MyCreateLibraryDialog::MyCreateLibraryDialog()
-        : UIDialog("CreateLibrary", true) {
-        properties = this->add<UIPropertiesView>("Library.Create.Info");
+        : UIDialog(true) {
+        this->name = "Create Library";
+        
+        properties = this->add<UIPropertiesView>();
         auto libraryName = properties->addString("Library Name", "");
         auto libraryHome = properties->addDirectory("Library Home");
         button = this->add<UIButton>("Create");
-        button->onClick = [=, this]() {
+        button->onClick = [=]() {
             String name = libraryName->value.string().trim();
             String home = libraryHome->value.string().trim();
             if (!name.isEmpty() && !home.isEmpty()) {
@@ -43,14 +44,16 @@ namespace eokas::datapot {
     }
     
     MyCreateSchemaDialog::MyCreateSchemaDialog()
-        : UIDialog("CreateSchema", true) {
+        : UIDialog(true) {
+        this->name = "Create Schema";
+        
         std::vector<String> schemaTypeNames = {"None", "Int", "Float", "Bool", "String", "List", "Struct"};
         
-        properties = this->add<UIPropertiesView>("Schema.Create.Info");
-        auto schemaName = properties->addInput("Schema Name", "", false);
-        auto schemaType = properties->addEnum("Schema Type", schemaTypeNames, 0);
+        properties = this->add<UIPropertiesView>();
+        schemaName = properties->addInput("Schema Name", "", false);
+        schemaType = properties->addEnum("Schema Type", schemaTypeNames, 0);
         button = this->add<UIButton>("Create");
-        button->onClick = [&, this](){
+        button->onClick = [this](){
             String name = schemaName->value.string().trim();
             auto type = (SchemaType)(int)schemaType->value;
             if(!name.isEmpty() && type != SchemaType::None) {
@@ -63,7 +66,7 @@ namespace eokas::datapot {
     }
     
     MySchemaListView::MySchemaListView()
-        : UIView("SchemaList", Vector2(300, 0), Flags_Borders | Flags_ResizeX) {
+        : UIView(Vector2(300, 0), Flags_Borders | Flags_ResizeX) {
         this->reloadSchemaList();
     }
     
@@ -86,7 +89,7 @@ namespace eokas::datapot {
     }
     
     MySchemaPropertiesView::MySchemaPropertiesView()
-        : UIView("SchemaProperties", Vector2(0, 500), Flags_Borders | Flags_ResizeY) {
+        : UIView(Vector2(0, 500), Flags_Borders | Flags_ResizeY) {
         properties = nullptr;
     }
     
@@ -101,7 +104,7 @@ namespace eokas::datapot {
             this->add<UIText>("Properties");
             this->add<UISeparator>();
 
-            properties = this->add<UIPropertiesView>("Schema.Properties");
+            properties = this->add<UIPropertiesView>();
             properties->addString("Name", schema->name());
             properties->addEnum("Type", schemaTypeNames, (int)schema->type());
 
@@ -121,7 +124,9 @@ namespace eokas::datapot {
     }
     
     MySchemaBrowserWindow::MySchemaBrowserWindow()
-        : UIWindow("Schemas", true) {
+        : UIWindow(true) {
+        name = "Schemas";
+        
         newSchema = this->add<UIButton>("New Schema");
         newSchema->onClick = [](){
             if(Logic::instance().actionNewSchema) Logic::instance().actionNewSchema();
@@ -133,12 +138,12 @@ namespace eokas::datapot {
     }
     
     MyObjectBrowserWindow::MyObjectBrowserWindow()
-        : UIWindow("Objects", true){
-        
+        : UIWindow(true){
+        name = "Objects";
     }
     
     MyToastDialog::MyToastDialog()
-        : UIDialog("", false) {
+        : UIDialog(false) {
         text = this->add<UIText>("");
     }
     
@@ -148,8 +153,10 @@ namespace eokas::datapot {
     }
     
     MyMainWindow::MyMainWindow()
-        : UIMainWindow("datapot", true)
+        : UIMainWindow(true)
     {
+        this->name = "DataPot";
+        
         mainMenuBar = this->add<MyMainMenuBar>();
         schemaBrowser = this->add<MySchemaBrowserWindow>();
         objectBrowser = this->add<MyObjectBrowserWindow>();

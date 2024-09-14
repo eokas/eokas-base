@@ -16,6 +16,7 @@ namespace eokas::datapot {
     
     class UIWidget {
     public:
+        String name = "";
         bool visible = true;
         
         UIWidget();
@@ -103,37 +104,30 @@ namespace eokas::datapot {
     
     class UIMainWindow : public UIContainer<UIWidget> {
     public:
-        String name = "Window";
         bool dockSpace = false;
         
-        UIMainWindow(const String& name, bool dockSpace = false)
-            : UIContainer()
-            , name(name)
-            , dockSpace(dockSpace) {}
+        UIMainWindow(bool dockSpace = false)
+            : dockSpace(dockSpace) {}
         
         virtual void render(float deltaTime) override;
     };
     
     class UIWindow :public UIContainer<UIWidget> {
     public:
-        String name = "Window";
         bool docking = false;
         
-        UIWindow(const String& name, bool docking = false)
-            : name(name)
-            , docking(docking) { }
+        UIWindow(bool docking = false)
+            : docking(docking) { }
         
         virtual void render(float deltaTime) override;
     };
     
     class UIDialog :public UIContainer<UIWidget> {
     public:
-        String name = "Dialog";
         bool modal = true;
         
-        UIDialog(const String& name, bool modal = true)
-            : name(name)
-            , modal(modal) {
+        UIDialog(bool modal = true)
+            : modal(modal) {
         }
         
         virtual void render(float deltaTime) override;
@@ -155,12 +149,11 @@ namespace eokas::datapot {
             Flags_ResizeY = 1 << 2,
         };
         
-        String name;
         Vector2 size;
         Flags flags;
         
-        UIView(const String& name, const Vector2& size, Flags flags = Flags_None)
-            : name(name), size(size), flags(flags) {};
+        UIView(const Vector2& size, Flags flags = Flags_None)
+            : size(size), flags(flags) {};
         
         virtual void render(float deltaTime) override;
     };
@@ -307,12 +300,11 @@ namespace eokas::datapot {
             { }
         };
         
-        String name;
-        
-        UIPropertiesView(const String& name)
-            : name(name), mProperties(), mChildren() {}
+        UIPropertiesView()
+            : mProperties(), mChildren() {}
 
         virtual ~UIPropertiesView() {
+            _DeleteList(mProperties);
             _DeleteList(mChildren);
         }
         
@@ -323,8 +315,9 @@ namespace eokas::datapot {
             auto* widget = new FieldWidget(std::forward<Args>(args)...);
             mChildren.push_back(widget);
 
-            auto& prop = mProperties.emplace_back(label, widget);
-            return &prop;
+            auto* prop = new Property(label, widget);
+            mProperties.push_back(prop);
+            return prop;
         }
         
         Property* addString(const String& label, const String& value);
@@ -333,7 +326,7 @@ namespace eokas::datapot {
         Property* addDirectory(const String& label);
         
     private:
-        std::vector<Property> mProperties;
+        std::vector<Property*> mProperties;
         std::vector<UIWidget*> mChildren;
     };
 }
