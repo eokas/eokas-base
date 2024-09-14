@@ -207,10 +207,17 @@ namespace eokas::datapot {
     
     class UIInput : public UIField {
     public:
-        bool password;
+        enum Flags_ {
+            Flags_None = 0,
+            Flags_Password = 1 << 0,
+            Flags_ReadOnly = 1 << 1
+        };
+        using Flags = u32_t;
+
+        Flags flags;
         
-        UIInput(const StringValue& value, bool password)
-            : UIField(value), password(password) {}
+        UIInput(const StringValue& value, Flags flags = Flags_None)
+            : UIField(value), flags(flags) {}
             
         virtual void render(float deltaTime) override;
     };
@@ -321,7 +328,7 @@ namespace eokas::datapot {
         }
         
         Property* addString(const String& label, const String& value);
-        Property* addInput(const String& label, const String& value, bool password);
+        Property* addInput(const String& label, const String& value, UIInput::Flags flags = UIInput::Flags_None);
         Property* addEnum(const String& label, const std::vector<String>& list, u32_t index);
         Property* addDirectory(const String& label);
         

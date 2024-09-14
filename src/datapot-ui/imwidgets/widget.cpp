@@ -90,8 +90,7 @@ namespace eokas::datapot {
     
     void UIDialog::render(float deltaTime) {
         static ImGuiWindowFlags window_flags =
-            ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoMove;
+            ImGuiWindowFlags_NoCollapse;
         
         if(this->bOpenPopup) {
             ImGui::OpenPopup(*name);
@@ -159,7 +158,7 @@ namespace eokas::datapot {
     }
     
     void UIText::render(float deltaTime) {
-        ImGui::Text(*value.string());
+        ImGui::Text("%s", *value.string());
     }
     
     void UILink::render(float deltaTime) {
@@ -167,8 +166,6 @@ namespace eokas::datapot {
     }
     
     void UIButton::render(float deltaTime) {
-        auto size = ImGui::GetContentRegionAvail();
-        ImGui::SetNextItemWidth(size.x);
         if(ImGui::Button(this->label.cstr())) {
             if(this->onClick) this->onClick();
         }
@@ -179,8 +176,14 @@ namespace eokas::datapot {
         String valueStr = value.string();
         u32_t len = valueStr.length() < 255 ? valueStr.length() : 255;
         memcpy(buffer, valueStr.cstr(), len);
-        
-        ImGui::InputText(*name, buffer, sizeof(buffer));
+
+        ImGuiInputTextFlags input_flags = ImGuiInputTextFlags_None;
+        if(flags & Flags_Password) input_flags |= ImGuiInputTextFlags_Password;
+        if(flags & Flags_ReadOnly) input_flags |= ImGuiInputTextFlags_ReadOnly;
+
+        ImVec2 size = ImGui::GetContentRegionAvail();
+        ImGui::SetNextItemWidth(size.x);
+        ImGui::InputText(*name, buffer, sizeof(buffer), input_flags);
 
         value = buffer;
     }
@@ -191,15 +194,30 @@ namespace eokas::datapot {
             rawItems.push_back(*item);
         }
 
+        ImVec2 size = ImGui::GetContentRegionAvail();
+        ImGui::SetNextItemWidth(size.x);
+
         int index = this->value;
         ImGui::Combo(*name, &index, rawItems.data(), (int)rawItems.size());
         this->value = index;
     }
 
     void UIDirectorySelector::render(float deltaTime) {
-        ImGui::Text(*value.string());
-        ImGui::SameLine();
-        if(ImGui::Button(" --- ")) {
+        ImVec2 layoutSize = ImGui::GetContentRegionAvail();
+        ImVec2 buttonSize = ImGui::CalcTextSize("---");
+        float buttonX = layoutSize.x - buttonSize.x;
+
+        ImVec2 spacing = ImGui::GetStyle().ItemSpacing;
+        float textWidth = layoutSize.x - buttonSize.x - spacing.x;
+
+        ImGui::BeginDisabled();
+        String valueStr = value.string();
+        ImGui::SetNextItemWidth(textWidth);
+        ImGui::InputText(*name, (char*)valueStr.cstr(), valueStr.length(), ImGuiInputTextFlags_ReadOnly);
+        ImGui::EndDisabled();
+
+        ImGui::SameLine(buttonX);
+        if(ImGui::Button("---")) {
             String selectedPath;
             OpenDirectoryDialog(selectedPath, "");
             this->value = selectedPath;
@@ -289,8 +307,8 @@ namespace eokas::datapot {
         return this->addProperty<UIText>(label, value);
     }
     
-    UIPropertiesView::Property* UIPropertiesView::addInput(const String& label, const String& value, bool password) {
-        return this->addProperty<UIInput>(label, value, password);
+    UIPropertiesView::Property* UIPropertiesView::addInput(const String& label, const String& value, UIInput::Flags flags) {
+        return this->addProperty<UIInput>(label, value, flags);
     }
     
     UIPropertiesView::Property* UIPropertiesView::addEnum(const String& label, const std::vector<String>& list, u32_t index) {

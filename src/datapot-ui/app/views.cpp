@@ -28,7 +28,7 @@ namespace eokas::datapot {
         this->name = "Create Library";
         
         properties = this->add<UIPropertiesView>();
-        auto libraryName = properties->addString("Library Name", "");
+        auto libraryName = properties->addInput("Library Name", "");
         auto libraryHome = properties->addDirectory("Library Home");
         button = this->add<UIButton>("Create");
         button->onClick = [=]() {
