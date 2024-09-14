@@ -45,7 +45,7 @@ namespace eokas::datapot {
         Result selectSchema(Schema* schema);
         std::function<void()> onSelectSchema;
         
-        Result createSchema(const String& type, const String& name);
+        Result createSchema(const SchemaType& type, const String& name);
         std::function<void()> onCreateSchema;
     };
 }
