@@ -11,20 +11,32 @@ namespace eokas::datapot {
         MyMainMenuBar();
     };
     
-    struct MyCreateLibraryDialog :public UIDialog {
+    struct MyToastDialog :public UIDialog {
+        UIText* text;
+        
+        MyToastDialog();
+        void open(const String& content);
+    };
+    
+    struct MyLibraryCreatorDialog :public UIDialog {
         UIPropertiesView* properties;
         UIButton* button;
         
-        MyCreateLibraryDialog();
+        MyLibraryCreatorDialog();
     };
     
-    struct MyCreateSchemaDialog : public UIDialog {
+    struct MySchemaCreatorDialog : public UIDialog {
         UIPropertiesView* properties;
         UIPropertiesView::Property* schemaName;
         UIPropertiesView::Property* schemaType;
         UIButton* button;
         
-        MyCreateSchemaDialog();
+        MySchemaCreatorDialog();
+    };
+    
+    struct MySchemaSelectorDialog : public UIDialog {
+        MySchemaSelectorDialog();
+        void open();
     };
     
     struct MySchemaListView : public UIView {
@@ -32,8 +44,13 @@ namespace eokas::datapot {
         void reloadSchemaList();
     };
     
+    struct MyMemberCreatorDialog : public UIDialog {
+        MyMemberCreatorDialog(UIPropertiesView* properties);
+    };
+    
     struct MySchemaPropertiesView : public UIView {
         UIPropertiesView* properties;
+        UIPropertiesView* members;
 
         MySchemaPropertiesView();
         void reloadSchemaProperties();
@@ -46,27 +63,22 @@ namespace eokas::datapot {
         
         MySchemaBrowserWindow();
     };
-    
-    
-    
+
     struct MyObjectBrowserWindow :public UIWindow {
         MyObjectBrowserWindow();
     };
     
-    struct MyToastDialog :public UIDialog {
-        UIText* text;
-        
-        MyToastDialog();
-        void open(const String& content);
-    };
-    
     struct MyMainWindow :public UIMainWindow {
         MyMainMenuBar* mainMenuBar;
-        MySchemaBrowserWindow* schemaBrowser;
-        MyObjectBrowserWindow* objectBrowser;
-        MyCreateLibraryDialog* createLibrary;
-        MyCreateSchemaDialog* createSchema;
         MyToastDialog* toast;
+        
+        MyLibraryCreatorDialog* libraryCreator;
+        
+        MySchemaBrowserWindow* schemaBrowser;
+        MySchemaCreatorDialog* schemaCreator;
+        MySchemaSelectorDialog* schemaSelector;
+        
+        MyObjectBrowserWindow* objectBrowser;
         
         MyMainWindow();
     };

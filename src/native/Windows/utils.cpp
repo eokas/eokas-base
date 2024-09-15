@@ -57,7 +57,7 @@ namespace eokas {
         return GetStringFromShellItem(selectedPath, pItem);
     }
     
-    bool OpenDirectoryDialog(String& selectedPath, const String& defaultPath) {
+    bool OpenFolderDialog(String& selectedPath, const String& defaultPath) {
         ComPtr<IFileOpenDialog> pFileDialog = nullptr;
         if(FAILED(CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pFileDialog)))) {
             return false;

@@ -33,7 +33,7 @@ namespace eokas {
         return false;
     }
     
-    bool OpenDirectoryDialog(String& selectedPath, const String& defaultPath) {
+    bool OpenFolderDialog(String& selectedPath, const String& defaultPath) {
         @autoreleasepool {
             NSOpenPanel *panel = [NSOpenPanel openPanel];
             panel.message = @"Open";

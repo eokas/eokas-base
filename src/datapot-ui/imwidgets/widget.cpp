@@ -1,5 +1,5 @@
 #include "./widget.h"
-#include "imgui/imgui.h"
+#include "./imwidgets.h"
 #include "native/utils.h"
 #include <cstring>
 
@@ -97,6 +97,11 @@ namespace eokas::datapot {
             this->bOpenPopup = false;
         }
         
+        ImVec2 parentSize = ImGui::GetWindowSize();
+        ImVec2 windowPos = ImVec2((parentSize.x - size.x) * 0.5f, (parentSize.y - size.y) * 0.5f);
+        ImGui::SetNextWindowPos(windowPos);
+        ImGui::SetNextWindowSize(ImVec2(size.x, size.y));
+        
         if(this->modal) {
             if (ImGui::BeginPopupModal(*name, &visible, window_flags)) {
                 this->renderChildren(deltaTime);
@@ -153,6 +158,12 @@ namespace eokas::datapot {
         }
     }
     
+    void UIGroup::render(float deltaTime) {
+        ImGui::BeginGroup();
+        this->renderChildren(deltaTime);
+        ImGui::EndGroup();
+    }
+    
     void UISeparator::render(float deltaTime) {
         ImGui::Separator();
     }
@@ -172,56 +183,29 @@ namespace eokas::datapot {
     }
     
     void UIInput::render(float deltaTime) {
-        char buffer[255] = {0};
-        String valueStr = value.string();
-        u32_t len = valueStr.length() < 255 ? valueStr.length() : 255;
-        memcpy(buffer, valueStr.cstr(), len);
-
         ImGuiInputTextFlags input_flags = ImGuiInputTextFlags_None;
         if(flags & Flags_Password) input_flags |= ImGuiInputTextFlags_Password;
         if(flags & Flags_ReadOnly) input_flags |= ImGuiInputTextFlags_ReadOnly;
-
-        ImVec2 size = ImGui::GetContentRegionAvail();
-        ImGui::SetNextItemWidth(size.x);
-        ImGui::InputText(*name, buffer, sizeof(buffer), input_flags);
-
-        value = buffer;
+        
+        ImWidgets_Input(name, value, input_flags);
     }
 
     void UIEnum::render(float deltaTime) {
-        std::vector<const char*> rawItems;
-        for(auto& item : items) {
-            rawItems.push_back(*item);
-        }
-
-        ImVec2 size = ImGui::GetContentRegionAvail();
-        ImGui::SetNextItemWidth(size.x);
-
         int index = this->value;
-        ImGui::Combo(*name, &index, rawItems.data(), (int)rawItems.size());
+        ImWidgets_Combo(name, index, items, ImGuiComboFlags_None);
         this->value = index;
     }
+    
+    void UISelector::render(float deltaTime) {
+        ImWidgets_Selector(name, value, onSelect);
+    }
+    
+    void UIFileSelector::render(float deltaTime) {
+        ImWidgets_FileSelector(name, value, filters);
+    }
 
-    void UIDirectorySelector::render(float deltaTime) {
-        ImVec2 layoutSize = ImGui::GetContentRegionAvail();
-        ImVec2 buttonSize = ImGui::CalcTextSize("---");
-        float buttonX = layoutSize.x - buttonSize.x;
-
-        ImVec2 spacing = ImGui::GetStyle().ItemSpacing;
-        float textWidth = layoutSize.x - buttonSize.x - spacing.x;
-
-        ImGui::BeginDisabled();
-        String valueStr = value.string();
-        ImGui::SetNextItemWidth(textWidth);
-        ImGui::InputText(*name, (char*)valueStr.cstr(), valueStr.length(), ImGuiInputTextFlags_ReadOnly);
-        ImGui::EndDisabled();
-
-        ImGui::SameLine(buttonX);
-        if(ImGui::Button("---")) {
-            String selectedPath;
-            OpenDirectoryDialog(selectedPath, "");
-            this->value = selectedPath;
-        }
+    void UIFolderSelector::render(float deltaTime) {
+        ImWidgets_FolderSelector(name, value);
     }
     
     void UIListView::render(float deltaTime) {
@@ -292,15 +276,82 @@ namespace eokas::datapot {
         col.flags = flags;
     }
     
+    UIPropertiesView::~UIPropertiesView() {
+        this->clearProperties();
+    }
+    
     void UIPropertiesView::render(float deltaTime) {
-        ImGui::Columns(2, *name);
-        for(auto* prop : mProperties) {
-            ImGui::TextUnformatted(*prop->label);
-            ImGui::NextColumn();
-            prop->widget->render(deltaTime);
-            ImGui::NextColumn();
+        int columns = this->insertable || this->removable ? 3 : 2;
+        ImGuiTableFlags flags = ImGuiTableFlags_None;
+        
+        if(ImGui::BeginTable(*name, columns, flags)) {
+            ImGui::TableSetupColumn("Name");
+            ImGui::TableSetupColumn("Value");
+            if(columns > 2) {
+                ImGui::TableSetupColumn("Operator", ImGuiTableColumnFlags_WidthFixed, 50);
+            }
+            
+            auto iter = mProperties.begin();
+            while(iter != mProperties.end()) {
+                auto* prop = *iter;
+                
+                ImGui::TableNextRow();
+                
+                ImGui::TableNextColumn();
+                if(prop->labelEditable) {
+                    String editableName = String::format("%s-%d-label", *name, ImGui::TableGetRowIndex());
+                    StringValue editableValue;
+                    ImWidgets_Input(editableName, editableValue, ImGuiInputTextFlags_None);
+                    prop->label = editableValue.string();
+                }
+                else {
+                    ImGui::TextUnformatted(*prop->label);
+                }
+                
+                ImGui::TableNextColumn();
+                if(prop->valueEditable) {
+                    prop->widget->render(deltaTime);
+                }
+                else {
+                    ImGui::BeginDisabled();
+                    prop->widget->render(deltaTime);
+                    ImGui::EndDisabled();
+                }
+                
+                if(columns > 2) {
+                    ImGui::TableNextColumn();
+                    if (this->removable) {
+                        
+                        ImGui::PushID(*String::format("%s-%d-REMOVE", *name, ImGui::TableGetRowIndex()));
+                        if (ImGui::Button("-", ImVec2(30, 0))) {
+                            ImGui::PopID();
+                            iter = this->removeProperty(iter);
+                            continue;
+                        }
+                        ImGui::PopID();
+                    }
+                }
+                
+                ++ iter;
+            }
+            
+            if(this->insertable) {
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                // column 0
+                ImGui::TableNextColumn();
+                // column 1
+                ImGui::TableNextColumn();
+                // column 2
+                ImGui::PushID(*String::format("%s-%d-ADD", *name, ImGui::TableGetRowIndex()));
+                if (ImGui::Button("+", ImVec2(30, 0))) {
+                    if (this->onInsert) this->onInsert();
+                }
+                ImGui::PopID();
+            }
+            
+            ImGui::EndTable();
         }
-        ImGui::Columns(1);
     }
     
     UIPropertiesView::Property* UIPropertiesView::addString(const String& label, const String& value) {
@@ -314,8 +365,26 @@ namespace eokas::datapot {
     UIPropertiesView::Property* UIPropertiesView::addEnum(const String& label, const std::vector<String>& list, u32_t index) {
         return this->addProperty<UIEnum>(label, list, index);
     }
+    
+    UIPropertiesView::Property* UIPropertiesView::addFile(const String& label, const std::map<String, String>& filters) {
+        return this->addProperty<UIFileSelector>(label, filters);
+    }
 
-    UIPropertiesView::Property* UIPropertiesView::addDirectory(const String& label) {
-        return this->addProperty<UIDirectorySelector>(label);
+    UIPropertiesView::Property* UIPropertiesView::addFolder(const String& label) {
+        return this->addProperty<UIFolderSelector>(label);
+    }
+    
+    void UIPropertiesView::clearProperties() {
+        _DeleteList(mProperties);
+        _DeleteList(mChildren);
+    }
+    
+    std::vector<UIPropertiesView::Property*>::iterator UIPropertiesView::removeProperty(std::vector<Property*>::iterator iter) {
+        Property* prop = *iter;
+        auto pos = std::find(mChildren.begin(), mChildren.end(), prop->widget);
+        mChildren.erase(pos);
+        _DeletePointer(prop->widget);
+        _DeletePointer(prop);
+        return mProperties.erase(iter);
     }
 }

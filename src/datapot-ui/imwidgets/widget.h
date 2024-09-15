@@ -124,10 +124,11 @@ namespace eokas::datapot {
     
     class UIDialog :public UIContainer<UIWidget> {
     public:
+        Vector2 size = Vector2(100, 80);
         bool modal = true;
         
-        UIDialog(bool modal = true)
-            : modal(modal) {
+        UIDialog(const Vector2& size, bool modal = true)
+            : size(size), modal(modal) {
         }
         
         virtual void render(float deltaTime) override;
@@ -167,6 +168,11 @@ namespace eokas::datapot {
         
         UILayout(Type type) : type(type) {}
         
+        virtual void render(float deltaTime) override;
+    };
+    
+    class UIGroup : public UIContainer<UIWidget> {
+    public:
         virtual void render(float deltaTime) override;
     };
     
@@ -231,10 +237,30 @@ namespace eokas::datapot {
         
         virtual void render(float deltaTime) override;
     };
-
-    class UIDirectorySelector : public UIField {
+    
+    class UISelector : public UIField {
     public:
-        UIDirectorySelector()
+        std::function<void(StringValue&)> onSelect;
+        
+        UISelector(std::function<void(StringValue&)> onSelect = {})
+            : UIField(""), onSelect(onSelect) { }
+        
+        virtual void render(float deltaTime) override;
+    };
+    
+    class UIFileSelector : public UIField {
+    public:
+        std::map<String, String> filters;
+        
+        UIFileSelector(const std::map<String, String>& filters)
+            : UIField(""), filters(filters) { }
+        
+        virtual void render(float deltaTime) override;
+    };
+
+    class UIFolderSelector : public UIField {
+    public:
+        UIFolderSelector()
             : UIField("") { }
 
         virtual void render(float deltaTime) override;
@@ -301,19 +327,23 @@ namespace eokas::datapot {
             String label = "";
             StringValue& value;
             UIField* widget = nullptr;
-
+            
+            bool labelEditable = false;
+            bool valueEditable = true;
+            
             Property(const String& label, UIField* widget)
                 : label(label), value(widget->value), widget(widget)
             { }
         };
         
+        bool insertable = false;
+        bool removable = false;
+        std::function<void()> onInsert;
+        
         UIPropertiesView()
             : mProperties(), mChildren() {}
 
-        virtual ~UIPropertiesView() {
-            _DeleteList(mProperties);
-            _DeleteList(mChildren);
-        }
+        virtual ~UIPropertiesView();
         
         virtual void render(float deltaTime) override;
         
@@ -330,11 +360,15 @@ namespace eokas::datapot {
         Property* addString(const String& label, const String& value);
         Property* addInput(const String& label, const String& value, UIInput::Flags flags = UIInput::Flags_None);
         Property* addEnum(const String& label, const std::vector<String>& list, u32_t index);
-        Property* addDirectory(const String& label);
+        Property* addFile(const String& label, const std::map<String, String>& filters);
+        Property* addFolder(const String& label);
         
     private:
         std::vector<Property*> mProperties;
         std::vector<UIWidget*> mChildren;
+        
+        void clearProperties();
+        std::vector<Property*>::iterator removeProperty(std::vector<Property*>::iterator iter);
     };
 }
 
