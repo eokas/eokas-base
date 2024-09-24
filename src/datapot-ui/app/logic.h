@@ -35,6 +35,7 @@ namespace eokas::datapot {
         std::function<void()> actionFileSave;
         
         std::function<void()> actionNewSchema;
+        std::function<void()> actionNewObject;
         
         Result createLibrary(const String& name, const String& home);
         std::function<void()> onCreateLibrary;
@@ -47,5 +48,7 @@ namespace eokas::datapot {
         
         Result createSchema(const SchemaType& type, const String& name);
         std::function<void()> onCreateSchema;
+
+
     };
 }

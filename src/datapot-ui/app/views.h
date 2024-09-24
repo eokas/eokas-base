@@ -64,7 +64,21 @@ namespace eokas::datapot {
         MySchemaBrowserWindow();
     };
 
+    struct MyObjectCreatorDialog : public UIDialog {
+        UIPropertiesView* properties;
+
+        MyObjectCreatorDialog();
+    };
+
+    struct MyObjectListView : public UIView {
+        MyObjectListView();
+        void reloadObjects();
+    };
+
     struct MyObjectBrowserWindow :public UIWindow {
+        UIButton* newObject;
+        MyObjectListView* objectList;
+
         MyObjectBrowserWindow();
     };
     
@@ -79,6 +93,7 @@ namespace eokas::datapot {
         MySchemaSelectorDialog* schemaSelector;
         
         MyObjectBrowserWindow* objectBrowser;
+        MyObjectCreatorDialog* objectCreator;
         
         MyMainWindow();
     };
