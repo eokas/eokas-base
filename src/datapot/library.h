@@ -26,6 +26,8 @@ namespace eokas::datapot {
         u32_t getSchemaCount() const;
         u32_t getSchemaIndex(const String& name) const;
 
+        void getRootNames(std::vector<String>& names) const;
+
         Value* make(Schema* schema);
         Value* make(i32_t val);
         Value* make(i64_t val);

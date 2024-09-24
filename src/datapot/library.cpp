@@ -249,6 +249,12 @@ namespace eokas::datapot {
         return mSchemas.indexOf(name);
     }
 
+    void Library::getRootNames(std::vector<String>& names) const {
+        for(auto& pair : mRoot) {
+            names.push_back(pair.first);
+        }
+    }
+
     Value* Library::make(Schema* schema) {
         return mValues.make(schema);
     }
