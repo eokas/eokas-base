@@ -1,7 +1,7 @@
 #pragma once
 
 #include "./logic.h"
-#include "./views.h"
+#include "./views-main.h"
 using namespace eokas::datapot;
 
 struct ImApp
