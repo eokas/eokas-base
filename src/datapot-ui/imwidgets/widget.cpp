@@ -208,10 +208,65 @@ namespace eokas::datapot {
         ImWidgets_FolderSelector(name, value);
     }
     
-    void UIListView::render(float deltaTime) {
-        if(ImGui::BeginListBox(*label, ImVec2(size.x, size.y))) {
-            this->renderChildren(deltaTime);
-            ImGui::EndListBox();
+    void UICheckBox::render(float deltaTime) {
+        this->changed = false;
+        
+        bool lastChecked = this->checked;
+        
+        ImGui::PushID(*name);
+        ImGui::Checkbox(*label, &checked);
+        ImGui::PopID();
+        
+        if(this->checked != lastChecked) {
+            this->changed = true;
+            if(this->onChange) {
+                this->onChange();
+            }
+        }
+    }
+    
+    void UICheckButton::render(float deltaTime) {
+        this->changed = false;
+        
+        ImU32 color = ImGui::GetColorU32(this->checked ? ImGuiCol_ButtonActive : ImGuiCol_Button);
+        
+        ImGui::PushStyleColor(ImGuiCol_Button, color);
+        ImGui::PushID(*name);
+        if(ImGui::Button(*label)) {
+            this->checked = !this->checked;
+            this->changed = true;
+            if(this->onChange) {
+                this->onChange();
+            }
+        }
+        ImGui::PopID();
+        ImGui::PopStyleColor();
+    }
+    
+    void UICheckList::render(float deltaTime) {
+        ImGui::BeginGroup();
+        this->renderChildren(deltaTime);
+        ImGui::EndGroup();
+        
+        if(!this->multiCheck) {
+            size_t checkedIndex = -1;
+            {
+                for (size_t index = 0; index < this->children.size(); index++) {
+                    auto child = this->children[index];
+                    if (child->changed && child->checked) {
+                        checkedIndex = index;
+                        break;
+                    }
+                }   
+            }
+            if(checkedIndex >= 0 && checkedIndex < this->children.size()) {
+                for (size_t index = 0; index < this->children.size(); index++) {
+                    auto child = this->children[index];
+                    if(index != checkedIndex) {
+                        child->checked = false;
+                    }
+                }
+            }
         }
     }
     

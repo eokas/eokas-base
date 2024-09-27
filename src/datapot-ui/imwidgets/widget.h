@@ -112,7 +112,7 @@ namespace eokas::datapot {
         virtual void render(float deltaTime) override;
     };
     
-    class UIWindow :public UIContainer<UIWidget> {
+    class UIWindow : public UIContainer<UIWidget> {
     public:
         bool docking = false;
         
@@ -122,7 +122,7 @@ namespace eokas::datapot {
         virtual void render(float deltaTime) override;
     };
     
-    class UIDialog :public UIContainer<UIWidget> {
+    class UIDialog : public UIContainer<UIWidget> {
     public:
         Vector2 size = Vector2(100, 80);
         bool modal = true;
@@ -140,7 +140,7 @@ namespace eokas::datapot {
         bool bOpenPopup = false;
     };
     
-    class UIView :public UIContainer<UIWidget> {
+    class UIView : public UIContainer<UIWidget> {
     public:
         using Flags = u32_t;
         enum Flags_ {
@@ -159,7 +159,7 @@ namespace eokas::datapot {
         virtual void render(float deltaTime) override;
     };
     
-    class UILayout :public UIContainer<UIWidget> {
+    class UILayout : public UIContainer<UIWidget> {
     public:
         enum Type {
             Horizontal, Vertical
@@ -265,20 +265,43 @@ namespace eokas::datapot {
 
         virtual void render(float deltaTime) override;
     };
-
-    class UIListView : public UIContainer<UIWidget> {
+    
+    class UICheckable : public UIWidget {
+    public:
+        bool checked = false;
+        bool changed = false;
+        std::function<void()> onChange = {};
+    };
+    
+    class UICheckBox : public UICheckable {
     public:
         String label = "";
-        Vector2 size = Vector2::ZERO;
         
-        UIListView(const String& label, const Vector2& size)
-            : label(label)
-            , size(size) { }
+        UICheckBox(const String& label)
+            : label(label) { }
+            
+        virtual void render(float deltaTime) override;
+    };
+    
+    class UICheckButton : public UICheckable {
+    public:
+        String label = "";
+        
+        UICheckButton(const String& label)
+            : label(label) { }
+            
+        virtual void render(float deltaTime) override;
+    };
+
+    class UICheckList : public UIContainer<UICheckable> {
+    public:
+        bool multiCheck = false;
+        
+        UICheckList(bool multiCheck = false)
+            : multiCheck(multiCheck)
+        { }
         
         virtual void render(float deltaTime) override;
-        
-        float width;
-        float height;
     };
     
     class UITreeNode : public UIContainer<UITreeNode> {
