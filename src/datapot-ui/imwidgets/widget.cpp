@@ -231,6 +231,9 @@ namespace eokas::datapot {
         ImU32 color = ImGui::GetColorU32(this->checked ? ImGuiCol_ButtonActive : ImGuiCol_Button);
         
         ImGui::PushStyleColor(ImGuiCol_Button, color);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, color);
+        
         ImGui::PushID(*name);
         if(ImGui::Button(*label)) {
             this->checked = !this->checked;
@@ -240,7 +243,46 @@ namespace eokas::datapot {
             }
         }
         ImGui::PopID();
-        ImGui::PopStyleColor();
+        
+        ImGui::PopStyleColor(3);
+    }
+    
+    void UISwitcher::render(float deltaTime) {
+        this->changed = false;
+        
+        ImU32 colorOn = ImGui::GetColorU32(this->checked ? ImGuiCol_ButtonActive : ImGuiCol_Button);
+        ImU32 colorOff = ImGui::GetColorU32(this->checked ? ImGuiCol_Button : ImGuiCol_ButtonActive);
+        
+        ImVec2 spacing = ImGui::GetStyle().ItemSpacing;
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, spacing.y));
+        
+        ImGui::PushID(*name);
+        ImGui::PushStyleColor(ImGuiCol_Button, colorOn);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorOn);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorOn);
+        if(ImGui::Button("On")) {
+            this->checked = !this->checked;
+            this->changed = true;
+            if(this->onChange) {
+                this->onChange();
+            }
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Button, colorOff);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorOff);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorOff);
+        if(ImGui::Button("Off")) {
+            this->checked = !this->checked;
+            this->changed = true;
+            if(this->onChange) {
+                this->onChange();
+            }
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::PopID();
+        
+        ImGui::PopStyleVar();
     }
     
     void UICheckList::render(float deltaTime) {

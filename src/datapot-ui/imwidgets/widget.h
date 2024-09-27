@@ -292,6 +292,11 @@ namespace eokas::datapot {
             
         virtual void render(float deltaTime) override;
     };
+    
+    class UISwitcher : public UICheckable {
+    public:
+        virtual void render(float deltaTime) override;
+    };
 
     class UICheckList : public UIContainer<UICheckable> {
     public:
