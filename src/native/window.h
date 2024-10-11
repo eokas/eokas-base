@@ -19,6 +19,8 @@ using WindowHandle = void*;
 
 namespace eokas
 {
+    struct WindowDesc;
+    
     class Window
     {
     public:
@@ -36,14 +38,14 @@ namespace eokas
         bool isFullScreen() const;
         void setFullScree(bool val);
         
-        const Rect& getRect();
+        const Rect& getRect() const;
         void setRect(const Rect& rect);
         
         void minimize();
         void maximize();
         
     private:
-        struct WindowDesc* mDesc;
+        WindowDesc* mDesc;
     };
 }
 

@@ -4,10 +4,10 @@
 namespace eokas
 {
     struct WindowDesc {
-        WindowHandle handle;
-        String title;
-        Rect rect;
-        bool fullScreen;
+        WindowHandle handle = nullptr;
+        String title = "";
+        Rect rect = {};
+        bool fullScreen = false;
     };
     
     LRESULT CALLBACK OnWindowEvent(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -33,7 +33,7 @@ namespace eokas
     }
     
     Window::Window()
-        : mDesc(new WindowDesc) {
+        : mDesc(new WindowDesc()) {
         
     }
     
@@ -81,7 +81,7 @@ namespace eokas
         }
     }
     
-    WindowHandle Window::getHandle() const {
+    const WindowHandle& Window::getHandle() const {
         return mDesc->handle;
     }
     
@@ -116,7 +116,7 @@ namespace eokas
         return mDesc->rect;
     }
     
-    void Window::setREct(const Rect& rect) {
+    void Window::setRect(const Rect& rect) {
         mDesc->rect = rect;
         if(mDesc->handle != nullptr) {
             SetWindowPos(mDesc->handle, nullptr, rect.x, rect.y, rect.width, rect.height, SWP_FRAMECHANGED);

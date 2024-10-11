@@ -11,9 +11,8 @@ set(EOKAS_HEADER_DIRS
 )
 
 set(EOKAS_LIBRARY_DIRS
-        "${EOKAS_PROJECT_DIR}/deps/lib/${EOKAS_OS_NAME}/${CMAKE_BUILD_TYPE}"
-)
 
+)
 
 file(GLOB EOKAS_HEADER_FILES
         "${EOKAS_TARGET_DIR}/*.h"
@@ -22,11 +21,24 @@ file(GLOB EOKAS_HEADER_FILES
 file(GLOB EOKAS_SOURCE_FILES
         "${EOKAS_TARGET_DIR}/*.cpp"
         "${EOKAS_TARGET_DIR}/${EOKAS_OS_NAME}/*.cpp"
+        "${EOKAS_TARGET_DIR}/${EOKAS_OS_NAME}/*.mm"
 )
 
 set(EOKAS_LIBRARY_FILES
     "base"
 )
+
+if(WIN32)
+
+elseif(APPLE)
+
+elseif(UNIX AND NOT APPLE)
+
+elseif(IOS)
+
+elseif(ANDROID)
+
+endif()
 
 message("EOKAS_HEADER_DIRS = ${EOKAS_HEADER_DIRS}")
 message("EOKAS_LIBRARY_DIRS = ${EOKAS_LIBRARY_DIRS}")
