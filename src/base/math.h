@@ -456,22 +456,33 @@ namespace eokas {
     */
     class Bounds2 {
     public:
-        Bounds2(const Vector2& center, const Vector2& extent);
+        Vector2 min;
+        Vector2 max;
+        
+        Bounds2();
         Bounds2(const Bounds2& other);
         ~Bounds2();
-    
-    public:
+        
+        Bounds2& operator=(const Bounds2& other);
+        
         f32_t width() const;
+        void width(f32_t val);
+        
         f32_t height() const;
+        void height(f32_t val);
+        
+        Vector2 size() const;
+        void size(const Vector2& val);
+        
         Vector2 center() const;
+        void center(const Vector2& val);
+        
         Vector2 extent() const;
+        void extent(const Vector2& val);
+        
         bool contains(const Vector2& p) const;
         Bounds2& expand(const Vector2& p);
         Bounds2& expand(const Bounds2& b);
-    
-    public:
-        Vector2 min;
-        Vector2 max;
     };
     
     /**
@@ -479,23 +490,36 @@ namespace eokas {
     */
     class Bounds3 {
     public:
-        Bounds3(const Vector3& center, const Vector3& extent);
+        Vector3 min;
+        Vector3 max;
+        
+        Bounds3();
         Bounds3(const Bounds3& other);
         ~Bounds3();
-    
-    public:
+        
+        Bounds3& operator=(const Bounds3& other);
+        
         f32_t width() const;
+        void width(f32_t val);
+        
         f32_t height() const;
+        void height(f32_t val);
+        
         f32_t depth() const;
+        void depth(f32_t val);
+        
+        Vector3 size() const;
+        void size(const Vector3& val);
+        
         Vector3 center() const;
+        void center(const Vector3& val);
+        
         Vector3 extent() const;
+        void extent(const Vector3& val);
+        
         bool contains(const Vector3& p) const;
         Bounds3& expand(const Vector3& p);
         Bounds3& expand(const Bounds3& b);
-    
-    public:
-        Vector3 min;
-        Vector3 max;
     };
     
     /**
