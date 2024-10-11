@@ -1686,8 +1686,8 @@ namespace eokas {
     == Bounds2
     ============================================================
     */
-    Bounds2::Bounds2(const Vector2& center, const Vector2& extent)
-        : min(center - extent), max(center + extent) {
+    Bounds2::Bounds2()
+        : min(), max() {
     }
     
     Bounds2::Bounds2(const Bounds2& other)
@@ -1697,20 +1697,60 @@ namespace eokas {
     Bounds2::~Bounds2() {
     }
     
+    Bounds2& Bounds2::operator=(const Bounds2& other) {
+        this->min = other.min;
+        this->max = other.max;
+        return *this;
+    }
+    
     f32_t Bounds2::width() const {
         return max.x - min.x;
+    }
+    
+    void Bounds2::width(f32_t val) {
+        f32_t c = (min.x + max.x) * 0.5f;
+        min.x = c - val * 0.5f;
+        max.x = c + val * 0.5f;
     }
     
     f32_t Bounds2::height() const {
         return max.y - min.y;
     }
     
+    void Bounds2::height(f32_t val) {
+        f32_t c = (min.y + max.y) * 0.5f;
+        min.y = c - val * 0.5f;
+        max.y = c + val * 0.5f;
+    }
+    
+    Vector2 Bounds2::size() const {
+        return max - min;
+    }
+    
+    void Bounds2::size(const Vector2& val) {
+        Vector2 c = this->center();
+        min = c - val * 0.5f;
+        max = c + val * 0.5f;
+    }
+    
     Vector2 Bounds2::center() const {
         return (min + max) * 0.5f;
     }
     
+    void Bounds2::center(const Vector2& val) {
+        Vector2 d = val - this->center();
+        min += d;
+        max += d;
+    }
+    
     Vector2 Bounds2::extent() const {
         return (max - min) * 0.5f;
+    }
+    
+    void Bounds2::extent(const Vector2& val) {
+        Vector2 c = this->center();
+        min = c - val;
+        max = c + val;
     }
     
     bool Bounds2::contains(const Vector2& p) const {
@@ -1736,10 +1776,9 @@ namespace eokas {
     == Bounds3
     ============================================================
     */
-    Bounds3::Bounds3(const Vector3& center, const Vector3& extent)
-        : min(center - extent), max(center + extent) {
-    }
-    
+    Bounds3::Bounds3()
+        : min(), max() {}
+        
     Bounds3::Bounds3(const Bounds3& other)
         : min(other.min), max(other.max) {
     }
@@ -1747,24 +1786,64 @@ namespace eokas {
     Bounds3::~Bounds3() {
     }
     
+    Bounds3& Bounds3::operator=(const Bounds3& other) {
+        this->min = other.min;
+        this->max = other.max;
+        return *this;
+    }
+    
     f32_t Bounds3::width() const {
         return max.x - min.x;
+    }
+    
+    void Bounds3::width(f32_t val) {
+        f32_t c = (min.x + max.x) * 0.5f;
+        min.x = c - val * 0.5f;
+        max.x = c + val * 0.5f;
     }
     
     f32_t Bounds3::height() const {
         return max.y - min.y;
     }
     
+    void Bounds3::height(f32_t val) {
+        f32_t c = (min.y + max.y) * 0.5f;
+        min.y = c - val * 0.5f;
+        max.y = c + val * 0.5f;
+    }
+    
     f32_t Bounds3::depth() const {
         return max.z - min.z;
+    }
+    
+    void Bounds3::depth(f32_t val) {
+        f32_t c = (min.z + max.z) * 0.5f;
+        min.z = c - val * 0.5f;
+        max.z = c + val * 0.5f;
+    }
+    
+    Vector3 Bounds3::size() const {
+        return max - min;
     }
     
     Vector3 Bounds3::center() const {
         return (min + max) * 0.5f;
     }
     
+    void Bounds3::center(const Vector3& val) {
+        Vector3 d = val - this->center();
+        min += d;
+        max += d;
+    }
+
     Vector3 Bounds3::extent() const {
         return (max - min) * 0.5f;
+    }
+    
+    void Bounds3::extent(const Vector3& val) {
+        Vector3 c = this->center();
+        min = c - val;
+        max = c + val;
     }
     
     bool Bounds3::contains(const Vector3& p) const {
