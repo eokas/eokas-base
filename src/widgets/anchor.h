@@ -1,0 +1,53 @@
+#ifndef _EOKAS_WIDGETS_ANCHOR_H_
+#define _EOKAS_WIDGETS_ANCHOR_H_
+
+#include "./header.h"
+
+namespace eokas {
+    class Anchor {
+    public:
+        explicit Anchor(Anchor* parent);
+        
+        virtual ~Anchor();
+        
+        const Vector2& offset() const;
+        
+        void offset(const Vector2& val);
+        
+        const Vector2& pivot() const;
+        
+        void pivot(const Vector2& val);
+        
+        const Bounds2 bounds() const;
+        
+        void bounds(const Bounds2& val);
+        
+        Vector2 size() const;
+        
+        void size(const Vector2& val);
+        
+        f32_t left() const;
+        
+        void left(f32_t val);
+        
+        f32_t right() const;
+        
+        void right(f32_t val);
+        
+        f32_t top() const;
+        
+        void top(f32_t val);
+        
+        f32_t bottom() const;
+        
+        void bottom(f32_t val);
+    
+    protected:
+        Anchor* mParent;
+        Vector2 mOffset;
+        Vector2 mPivot;
+        Bounds2 mBounds;
+    };
+}
+
+#endif//_EOKAS_WIDGETS_ANCHOR_H_
