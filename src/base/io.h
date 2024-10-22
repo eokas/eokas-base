@@ -78,6 +78,11 @@ namespace eokas {
         using FileNamePredicate = std::function<bool(const String& name)>;
         
         static FileStream open(const String& path, const String& mode);
+        static bool readText(const String& path, String& content);
+        static bool readData(const String& path, void* data, size_t size);
+        static bool writeText(const String& path, String& content);
+        static bool writeData(const String& path, void* data, size_t size);
+        
         static bool exists(const String& path);
         static bool isFile(const String& path);
         static bool isFolder(const String& path);
