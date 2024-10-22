@@ -26,5 +26,6 @@
 #include "./timer.h"
 #include "./memory.h"
 #include "./os.h"
+#include "./dll.h"
 
 #endif //_EOKAS_BASE_MAIN_H_
