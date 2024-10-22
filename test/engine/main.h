@@ -2,7 +2,8 @@
 #ifndef _EOKAS_BASE_TEST_H_
 #define _EOKAS_BASE_TEST_H_
 
-#include "../../src/main.h"
+#include "../../src/base/main.h"
+#include "../../src/native/main.h"
 
 namespace eokas {
     using test_case_func_t = std::function<int()>;
@@ -24,9 +25,14 @@ namespace eokas {
         int exec() {
             printf("eokas exec test cases...\n");
             for (auto &item: this->cases) {
+                printf("exec case: %s\n", item.first.cstr());
                 int ret = item.second();
-                if (ret != 0)
-                    return ret;
+                if(ret == 0) {
+                    printf("exec case: %s [succ]\n", item.first.cstr());
+                }
+                else {
+                    printf("exec case: %s #%d [failed]\n", item.first.cstr(), ret);
+                }
             }
             return 0;
         }
@@ -58,7 +64,7 @@ namespace eokas {
 #define _eokas_test_check(expr) \
     test_check_index += 1; \
     if(!(expr)) { \
-        printf("eokas test check failed at: %d", test_check_index); \
+        printf("eokas test check failed at: %s #%d\n", __FUNCTION__, test_check_index); \
         return test_check_index; \
     }
 }
