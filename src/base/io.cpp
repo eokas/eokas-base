@@ -139,6 +139,45 @@ namespace eokas {
         return FileStream(handle);
     }
     
+    bool File::readText(const String& path, String& content) {
+        FileStream stream(path, "r");
+        if(!stream.isOpen())
+            return false;
+        size_t size = stream.size();
+        content = String(' ', size);
+        stream.read((void*)content.cstr(), size);
+        stream.close();
+        return true;
+    }
+    
+    bool File::readData(const String& path, void* data, size_t size) {
+        FileStream stream(path, "rb");
+        if(!stream.isOpen())
+            return false;
+        size = min(size, stream.size());
+        stream.read(data, size);
+        stream.close();
+        return true;
+    }
+    
+    bool File::writeText(const String& path, String& content) {
+        FileStream stream(path, "w");
+        if(!stream.isOpen())
+            return false;
+        stream.write((void*)content.cstr(), content.length());
+        stream.close();
+        return true;
+    }
+    
+    bool File::writeData(const String& path, void* data, size_t size) {
+        FileStream stream(path, "wb");
+        if(!stream.isOpen())
+            return false;
+        stream.write(data, size);
+        stream.close();
+        return true;
+    }
+    
     bool File::exists(const String& path)
     {
     #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
