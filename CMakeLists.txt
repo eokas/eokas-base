@@ -9,7 +9,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED FALSE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ")
 
+if(WIN32)
+    # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
+endif()
 
 include("eokas.cmake")
 include("eokas-base.cmake")
 include("eokas-native.cmake")
+include("eokas-datapot.cmake")
+include("eokas-datapot-ui.cmake")
+include("eokas-app.cmake")
