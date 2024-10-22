@@ -440,6 +440,7 @@ namespace eokas {
      * */
     class Rect {
     public:
+        Rect();
         Rect(f32_t x, f32_t y, f32_t w, f32_t h);
         Rect(const Vector2& pos, const Vector2& size);
         bool contains(const Vector2& point);

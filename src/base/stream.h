@@ -82,7 +82,7 @@ namespace eokas {
         u16_t size = 0;
         if (!this->read(size))
             return false;
-        value = String('\0', (size_t) size);
+        value = String(' ', (size_t) size);
         size_t rlen = base.read((void*) value.cstr(), size);
         return rlen == size;
     }

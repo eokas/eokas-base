@@ -103,6 +103,7 @@ public:
   bool operator<=(const String& rhs) const;
   bool operator==(const String& rhs) const;
   bool operator!=(const String& rhs) const;
+  const char* operator*() const;
 
 public:
   String& clear();

@@ -514,6 +514,10 @@ namespace eokas {
         return std::strcmp(mData, rhs.mData) != 0;
     }
     
+    const char* String::operator*() const {
+        return this->cstr();
+    }
+    
     String& String::clear() {
         if (mData != nullptr) {
             if (mMetric == 1) {
@@ -886,12 +890,12 @@ namespace eokas {
             return "";
         
         const char* beg = mData;
-        const char* end = mData + this->length() - 1;
+        const char* end = mData + this->length();
         if (left) {
             while (isspace(*beg))beg++;
         }
         if (right) {
-            while (isspace(*end))end--;
+            while (isspace(*(end-1))) end--;
         }
         return this->substr(beg - mData, end - beg);
     }
