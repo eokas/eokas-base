@@ -7,119 +7,14 @@ namespace eokas {
         : HomValue(HomType::Array), value(val) {
     }
     
-    HomValueRef& HomArray::operator[](size_t index) {
+    HomValueRef HomArray::get(size_t index) {
+        if (index > this->value.size())
+            return nullptr;
         return this->value[index];
-    }
-    
-    f64_t HomArray::getNumber(size_t index, f64_t defaultValue) {
-        f64_t val = defaultValue;
-        this->get(index, val);
-        return val;
-    }
-    
-    bool HomArray::getBoolean(size_t index, bool defaultValue) {
-        bool val = defaultValue;
-        this->get(index, val);
-        return val;
-    }
-    
-    String HomArray::getString(size_t index, const String& defaultValue) {
-        String val = defaultValue;
-        this->get(index, val);
-        return val;
-    }
-    
-    HomValueArray HomArray::getArray(size_t index, const HomValueArray& defaultValue) {
-        HomValueArray val = defaultValue;
-        this->get(index, val);
-        return val;
-    }
-    
-    HomValueMap HomArray::getObject(size_t index, const HomValueMap& defaultValue) {
-        HomValueMap val = defaultValue;
-        this->get(index, val);
-        return val;
-    }
-    
-    bool HomArray::get(size_t index, HomValueRef& val) {
-        if (index > this->value.size())
-            return false;
-        val = this->value[index];
-        return true;
-    }
-    
-    bool HomArray::get(size_t index, HomType type, HomValueRef& val) {
-        if (index > this->value.size())
-            return false;
-        auto& ref = this->value[index];
-        if (ref == nullptr || ref->type != type)
-            return false;
-        val = ref;
-        return true;
-    }
-    
-    bool HomArray::get(size_t index, f64_t& val) {
-        HomValueRef ref;
-        if (!this->get(index, HomType::Number, ref))
-            return false;
-        val = HomNumber::pick(ref);
-        return true;
-    }
-    
-    bool HomArray::get(size_t index, bool& val) {
-        HomValueRef ref;
-        if (!this->get(index, HomType::Boolean, ref))
-            return false;
-        val = HomBoolean::pick(ref);
-        return true;
-    }
-    
-    bool HomArray::get(size_t index, String& val) {
-        HomValueRef ref;
-        if (!this->get(index, HomType::String, ref))
-            return false;
-        val = HomString::pick(ref);
-        return true;
-    }
-    
-    bool HomArray::get(size_t index, HomValueArray& val) {
-        HomValueRef ref;
-        if (!this->get(index, HomType::Array, ref))
-            return false;
-        val = HomArray::pick(ref);
-        return true;
-    }
-    
-    bool HomArray::get(size_t index, HomValueMap& val) {
-        HomValueRef ref;
-        if (!this->get(index, HomType::Object, ref))
-            return false;
-        val = HomObject::pick(ref);
-        return true;
     }
     
     void HomArray::set(size_t index, HomValueRef val) {
         this->value[index] = val;
-    }
-    
-    void HomArray::set(size_t index, f64_t val) {
-        this->value[index] = HomNumber::make(val);
-    }
-    
-    void HomArray::set(size_t index, bool val) {
-        this->value[index] = HomBoolean::make(val);
-    }
-    
-    void HomArray::set(size_t index, const String& val) {
-        this->value[index] = HomString::make(val);
-    }
-    
-    void HomArray::set(size_t index, const HomValueArray& val) {
-        this->value[index] = HomArray::make(val);
-    }
-    
-    void HomArray::set(size_t index, const HomValueMap& val) {
-        this->value[index] = HomObject::make(val);
     }
     
     HomArray& HomArray::add(HomValueRef val) {
@@ -127,171 +22,152 @@ namespace eokas {
         return *this;
     }
     
-    HomArray& HomArray::add(f64_t val) {
-        this->value.push_back(HomNumber::make(val));
-        return *this;
-    }
-    
-    HomArray& HomArray::add(bool val) {
-        this->value.push_back(HomBoolean::make(val));
-        return *this;
-    }
-    
-    HomArray& HomArray::add(const String& val) {
-        this->value.push_back(HomString::make(val));
-        return *this;
-    }
-    
-    HomArray& HomArray::add(const HomValueArray& val) {
-        this->value.push_back(HomArray::make(val));
-        return *this;
-    }
-    
-    HomArray& HomArray::add(const HomValueMap& val) {
-        this->value.push_back(HomObject::make(val));
-        return *this;
-    }
-    
-    HomValueRef HomArray::make(const HomValueArray& value) {
-        return HomValueRef(new HomArray(value));
-    }
-    
-    HomValueArray HomArray::pick(const HomValueRef& value) {
-        auto ptr = (HomArray*) value.get();
-        return ptr != nullptr ? ptr->value : HomValueArray();
-    }
-    
     HomObject::HomObject(const HomValueMap& value)
         : HomValue(HomType::Object), value(std::move(value)) {
     }
     
-    HomValueRef& HomObject::operator[](const String& key) {
+    HomValueRef& HomObject::get(const eokas::String& key) {
         return this->value[key];
-    }
-    
-    HomValueRef& HomObject::getValue(const eokas::String& key) {
-        return this->value[key];
-    }
-    
-    f64_t HomObject::getNumber(const String& key, f64_t defaultValue) {
-        f64_t val = defaultValue;
-        this->get(key, val);
-        return val;
-    }
-    
-    bool HomObject::getBoolean(const String& key, bool defaultValue) {
-        bool val = defaultValue;
-        this->get(key, val);
-        return val;
-    }
-    
-    String HomObject::getString(const String& key, const String& defaultValue) {
-        String val = defaultValue;
-        this->get(key, val);
-        return val;
-    }
-    
-    HomValueArray HomObject::getArray(const String& key, const HomValueArray& defaultValue) {
-        HomValueArray val = defaultValue;
-        this->get(key, val);
-        return val;
-    }
-    
-    HomValueMap HomObject::getObject(const String& key, const HomValueMap& defaultValue) {
-        HomValueMap val = defaultValue;
-        this->get(key, val);
-        return val;
-    }
-    
-    bool HomObject::get(const String& key, HomValueRef& val) {
-        auto iter = this->value.find(key);
-        if (iter == this->value.end())
-            return false;
-        val = iter->second;
-        return true;
-    }
-    
-    bool HomObject::get(const String& key, HomType type, HomValueRef& val) {
-        auto iter = this->value.find(key);
-        if (iter == this->value.end())
-            return false;
-        if (iter->second == nullptr || iter->second->type != type)
-            return false;
-        val = iter->second;
-        return true;
-    }
-    
-    bool HomObject::get(const String& key, f64_t& val) {
-        HomValueRef ref;
-        if (!this->get(key, HomType::Number, ref))
-            return false;
-        val = HomNumber::pick(ref);
-        return true;
-    }
-    
-    bool HomObject::get(const String& key, bool& val) {
-        HomValueRef ref;
-        if (!this->get(key, HomType::Boolean, ref))
-            return false;
-        val = HomBoolean::pick(ref);
-        return true;
-    }
-    
-    bool HomObject::get(const String& key, String& val) {
-        HomValueRef ref;
-        if (!this->get(key, HomType::String, ref))
-            return false;
-        val = HomString::pick(ref);
-        return true;
-    }
-    
-    bool HomObject::get(const String& key, HomValueArray& val) {
-        HomValueRef ref;
-        if (!this->get(key, HomType::Array, ref))
-            return false;
-        val = HomArray::pick(ref);
-        return true;
-    }
-    
-    bool HomObject::get(const String& key, HomValueMap& val) {
-        HomValueRef ref;
-        if (!this->get(key, HomType::Object, ref))
-            return false;
-        val = HomObject::pick(ref);
-        return true;
     }
     
     void HomObject::set(const String& key, HomValueRef val) {
         this->value[key] = std::move(val);
     }
     
-    void HomObject::set(const String& key, f64_t val) {
-        this->value[key] = HomNumber::make(val);
+    HOM::HOM()
+        : mValue(nullptr) {}
+
+    HOM::HOM(HomValueRef val)
+        : mValue(std::move(val)) {
     }
     
-    void HomObject::set(const String& key, bool val) {
-        this->value[key] = HomBoolean::make(val);
+    HOM::HOM(HomType type) {
+        if(type == HomType::Null) {
+            mValue = std::make_shared<HomNull>();
+        }
+        else if(type == HomType::Number) {
+            mValue = std::make_shared<HomNumber>();
+        }
+        else if(type == HomType::Boolean) {
+            mValue = std::make_shared<HomBoolean>();
+        }
+        else if(type == HomType::String) {
+            mValue = std::make_shared<HomString>();
+        }
+        else if(type == HomType::Object) {
+            mValue = std::make_shared<HomObject>();
+        }
+        else if(type == HomType::Array) {
+            mValue = std::make_shared<HomArray>();
+        }
+    }
+
+    HOM::HOM(f64_t val)
+        : mValue(std::make_shared<HomNumber>(val)) { }
+    
+    HOM::HOM(bool val)
+        : mValue(std::make_shared<HomBoolean>(val)) { }
+        
+    HOM::HOM(const String& val)
+        : mValue(std::make_shared<HomString>(val)) { }
+        
+    HOM::~HOM() {
     }
     
-    void HomObject::set(const String& key, const String& val) {
-        this->value[key] = HomString::make(val);
+    HomType HOM::type() const {
+        return mValue != nullptr ? mValue->type : HomType::Null;
     }
     
-    void HomObject::set(const String& key, const HomValueArray& val) {
-        this->value[key] = HomArray::make(val);
+    bool HOM::isNull() const {
+        return mValue != nullptr && mValue->type == HomType::Null;
     }
     
-    void HomObject::set(const String& key, const HomValueMap& val) {
-        this->value[key] = HomObject::make(val);
+    bool HOM::isNumber() const {
+        return mValue != nullptr && mValue->type == HomType::Number;
     }
     
-    HomValueRef HomObject::make(const HomValueMap& value) {
-        return HomValueRef(new HomObject(value));
+    bool HOM::isBoolean() const {
+        return mValue != nullptr && mValue->type == HomType::Boolean;
     }
     
-    HomValueMap HomObject::pick(const HomValueRef& value) {
-        auto ptr = (HomObject*) value.get();
-        return ptr != nullptr ? ptr->value : HomValueMap();
+    bool HOM::isString() const {
+        return mValue != nullptr && mValue->type == HomType::String;
     }
     
+    bool HOM::isObject() const {
+        return mValue != nullptr && mValue->type == HomType::Object;
+    }
+    
+    bool HOM::isArray() const {
+        return mValue != nullptr && mValue->type == HomType::Array;
+    }
+    
+    f64_t HOM::asNumber() const {
+        return mValue != nullptr && mValue->type == HomType::Number
+            ? ((HomNumber*)mValue.get())->value
+            : 0;
+    }
+    
+    bool HOM::asBoolean() const {
+        return mValue != nullptr && mValue->type == HomType::Boolean &&
+        ((HomBoolean*) mValue.get())->value;
+    }
+    
+    String HOM::asString() const {
+        return mValue != nullptr && mValue->type == HomType::String
+            ? ((HomString*)mValue.get())->value
+            : "";
+    }
+    
+    HOM HOM::get(size_t index) {
+        if(mValue == nullptr || mValue->type != HomType::Array)
+            return HOM{HomType::Null};
+        return HOM{((HomArray*)mValue.get())->get(index)};
+    }
+    
+    void HOM::set(size_t index, const HOM& val) {
+        if(mValue == nullptr || mValue->type != HomType::Array)
+            return;
+        ((HomArray*)mValue.get())->set(index, val.mValue);
+    }
+    
+    void HOM::add(const HOM& val) {
+        if(mValue == nullptr || mValue->type != HomType::Array)
+            return;
+        ((HomArray*)mValue.get())->add(val.mValue);
+    }
+    
+    void HOM::foreach(const std::function<void(const HOM&)>& func) const {
+        if(!func)
+            return;
+        if(mValue == nullptr || mValue->type != HomType::Array)
+            return;
+        HomValueArray& list = ((HomArray*)mValue.get())->value;
+        for(auto& val : list) {
+            func(val);
+        }
+    }
+    
+    HOM HOM::get(const String& key) {
+        if(mValue == nullptr || mValue->type != HomType::Object)
+            return HOM{};
+        return HOM{((HomObject*)mValue.get())->get(key)};
+    }
+    
+    void HOM::set(const String& key, const HOM& val) {
+        if(mValue == nullptr || mValue->type != HomType::Object)
+            return;
+        ((HomObject*)mValue.get())->set(key, val.mValue);
+    }
+    
+    void HOM::foreach(const std::function<void(const String& key, const HOM& val)>& func) const {
+        if(!func)
+            return;
+        if(mValue == nullptr || mValue->type != HomType::Object)
+            return;
+        HomValueMap& map = ((HomObject*)mValue.get())->value;
+        for(auto& pair : map) {
+            func(pair.first, pair.second);
+        }
+    }
 }
