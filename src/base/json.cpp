@@ -287,16 +287,6 @@ namespace eokas {
             return '\0';
         }
         
-        void skipComment() {
-            char current = mSource.at(mPosition);
-            if (current == '/') {
-            
-            } else if (current == '#') // php # comment
-            {
-                this->skipToEndOfLine();
-            }
-        }
-        
         void skipToEndOfLine() {
             char c = this->nextChar();
             while (c != '\0') {
