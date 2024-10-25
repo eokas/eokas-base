@@ -6,8 +6,8 @@
 
 namespace eokas {
     struct JSON {
-        static String stringify(const HOM& json);
-        static HOM parse(const String& source);
+        static String stringify(const HomNode& json);
+        static HomNode parse(const String& source);
     };
 }
 
