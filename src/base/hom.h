@@ -17,100 +17,70 @@ namespace eokas {
         Null, Number, Boolean, String, Array, Object,
     };
     
-    struct HomValue {
-        HomType type;
-        
-        explicit HomValue(HomType type)
-            : type(type) {
-        }
-    };
-    
-    using HomValueRef = std::shared_ptr<HomValue>;
-    using HomValueArray = std::vector<HomValueRef>;
-    using HomValueMap = std::map<String, HomValueRef>;
-    
-    struct HomNull : public HomValue {
-        explicit HomNull()
-            : HomValue(HomType::Null) {
-        }
-    };
-    
-    struct HomNumber : public HomValue {
-        f64_t value;
-        
-        explicit HomNumber(f64_t value = 0)
-            : HomValue(HomType::Number), value(value) {
-        }
-    };
-    
-    struct HomBoolean : public HomValue {
-        bool value;
-        
-        explicit HomBoolean(bool value = false)
-            : HomValue(HomType::Boolean), value(value) {
-        }
-    };
-    
-    struct HomString : public HomValue {
-        String value;
-        
-        explicit HomString(const String& value = "")
-            : HomValue(HomType::String), value(std::move(value)) {
-        }
-    };
-    
-    struct HomArray : public HomValue {
-        HomValueArray value;
-        
-        explicit HomArray(const HomValueArray& val = {});
-        
-        HomValueRef get(size_t index);
-        void set(size_t index, HomValueRef val);
-        HomArray& add(HomValueRef val);
-    };
-    
-    struct HomObject : public HomValue {
-        HomValueMap value;
-        
-        explicit HomObject(const HomValueMap& value = {});
-        
-        HomValueRef& get(const String& key);
-        void set(const String& key, HomValueRef val);
-    };
-    
-    class HOM {
+    class HomNode {
     public:
-        HOM();
-        HOM(HomValueRef val);
-        HOM(HomType type);
-        HOM(f64_t val);
-        HOM(bool val);
-        HOM(const String& val);
-        virtual ~HOM();
+        HomNode(HomType type = HomType::Null);
+        HomNode(f64_t val);
+        HomNode(bool val);
+        HomNode(const String& val);
+        HomNode(const HomNode& other);
+
+        HomNode& operator=(const HomNode& other);
         
         HomType type() const;
         bool isNull() const;
         bool isNumber() const;
         bool isBoolean() const;
         bool isString() const;
-        bool isObject() const;
         bool isArray() const;
+        bool isObject() const;
+        
         
         f64_t asNumber() const;
         bool asBoolean() const;
         String asString() const;
         
-        HOM get(size_t index);
-        void set(size_t index, const HOM& val);
-        void add(const HOM& val);
-        void foreach(const std::function<void(const HOM& val)>& func) const;
+        HomNode get(size_t index);
+        void set(size_t index, const HomNode& val);
+        void add(const HomNode& val);
+        void foreach(const std::function<void(const HomNode& val)>& func) const;
         
-        HOM get(const String& key);
-        void set(const String& key, const HOM& val);
-        void foreach(const std::function<void(const String& key, const HOM& val)>& func) const;
+        HomNode get(const String& key);
+        void set(const String& key, const HomNode& val);
+        void foreach(const std::function<void(const String& key, const HomNode& val)>& func) const;
     
     private:
-        HomValueRef mValue;
+        struct HomValue {
+            virtual ~HomValue() = default;
+        };
+        
+        struct HomNumber :public HomValue {
+            f64_t number;
+            HomNumber(f64_t val) :number(val) {}
+        };
+        
+        struct HomBoolean :public HomValue {
+            bool boolean;
+            HomBoolean(bool val) :boolean(val) {}
+        };
+        
+        struct HomString :public HomValue {
+            String string;
+            HomString(const String& val) :string(val) {}
+        };
+        
+        struct HomArray :public HomValue {
+            std::vector<HomNode> array;
+            HomArray() :array() {}
+        };
+        
+        struct HomObject :public HomValue {
+            std::map<String, HomNode> object;
+            HomObject() :object() {}
+        };
+        
+        HomType mType;
+        std::shared_ptr<HomValue> mValue;
     };
     
 }
