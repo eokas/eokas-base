@@ -19,7 +19,6 @@ set(EOKAS_HEADER_DIRS
 )
 
 set(EOKAS_LIBRARY_DIRS
-        "${EOKAS_PROJECT_DIR}/deps/vulkan/lib/${EOKAS_OS_NAME}"
         "${EOKAS_PROJECT_DIR}/deps/glfw/lib/${EOKAS_OS_NAME}"
         "${EOKAS_PROJECT_DIR}/deps/FreeType2/lib/${EOKAS_OS_NAME}"
 )
@@ -61,11 +60,13 @@ if(APPLE)
             "-framework QuartzCore"
     )
 else()
-    list(APPEND EOKAS_SOURCE_FILES
-            "${EOKAS_TARGET_DIR}/main.cpp"
-    )
+    list(APPEND EOKAS_LIBRARY_DIR
+            "${EOKAS_PROJECT_DIR}/deps/vulkan/lib/${EOKAS_OS_NAME}")
     list(APPEND EOKAS_LIBRARY_FILES
             "vulkan-1"
+    )
+    list(APPEND EOKAS_SOURCE_FILES
+            "${EOKAS_TARGET_DIR}/main.cpp"
     )
 endif()
 

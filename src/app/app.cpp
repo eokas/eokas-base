@@ -4,9 +4,15 @@
 namespace eokas {
     bool App::init() {
         String configJson;
-        if(!File::readText("../config/config.json", configJson))
+        if(!File::readText("./app.json", configJson))
             return false;
-        std::shared_ptr<HomValue> json = JSON::parse(configJson);
+        HomNode json = JSON::parse(configJson);
+        HomNode window = json.get("Window");
+        bool fullScreen = window.get("fullscreen").asBoolean();
+        f64_t width = window.get("width").asNumber();
+        f64_t height = window.get("height").asNumber();
+        
+        
         
         mModules.init();
         return true;

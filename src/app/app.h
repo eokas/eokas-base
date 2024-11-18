@@ -13,9 +13,11 @@ namespace eokas
         bool init();
         void quit();
         void tick(float deltaTime);
-
+        
         ModuleManager& modules();
 
+        virtual void* window() const = 0;
+        
     private:
         ModuleManager mModules;
     };

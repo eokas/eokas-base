@@ -32,6 +32,12 @@ namespace eokas {
         void quit();
         void tick(float deltaTime);
         
+        template<typename T>
+        T* getModule(const String& moduleName) {
+            Module* module = this->getModule(moduleName);
+            return dynamic_cast<T*>(module);
+        }
+        
         Module* getModule(const String& moduleName);
         Module* loadModule(const String& moduleName);
         void unloadModule(const String& moduleName);
