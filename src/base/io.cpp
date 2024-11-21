@@ -154,7 +154,7 @@ namespace eokas {
         FileStream stream(path, "rb");
         if(!stream.isOpen())
             return false;
-        size = std::min(size, stream.size());
+        size = size <= stream.size() ? size : stream.size();
         stream.read(data, size);
         stream.close();
         return true;
