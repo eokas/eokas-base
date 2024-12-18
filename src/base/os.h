@@ -11,6 +11,7 @@ namespace eokas {
         static String getDeviceName();
         static String getDeviceModel();
         static u32_t getCpuCount();
+        static String getCpuArch();
         static String getEnv(const String& name);
         static bool setEnv(const String& name, const String& value);
         static String getCurrentUser();
