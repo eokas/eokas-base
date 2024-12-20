@@ -4,11 +4,11 @@
 
 namespace eokas {
     
-    struct JsonLexer {
+    struct JsonParser {
         String mSource;
         size_t mPosition;
         
-        explicit JsonLexer(const String& source)
+        explicit JsonParser(const String& source)
             : mSource(source), mPosition(0) {
         }
         
@@ -21,7 +21,7 @@ namespace eokas {
                 case '\'':
                 case '"': {
                     auto str = this->nextString(c);
-                    return HomString::pick(str);
+                    return str.asString();
                 }
                 default:
                     if (_ascil_is_alpha_(c)) {
@@ -33,7 +33,7 @@ namespace eokas {
             return "";
         }
         
-        HomValueRef nextValue() {
+        HomNode nextValue() {
             char c = this->nextChar();
             switch (c) {
                 case '[':
@@ -50,52 +50,52 @@ namespace eokas {
                         size_t start = mPosition;
                         auto identifier = this->nextIdentifier(c);
                         if (identifier == "true")
-                            return HomBoolean::make(true);
+                            return HomNode{true};
                         else if (identifier == "false")
-                            return HomBoolean::make(false);
+                            return HomNode{false};
                         else if (identifier == "null")
-                            return HomNull::make();
+                            return HomNode{HomType::Null};
                         mPosition = start;
                     }
-                    return nullptr;
+                    return HomNode{HomType::Null};
             }
         }
         
-        HomValueRef nextArray() {
-            std::vector<HomValueRef> list;
+        HomNode nextArray() {
+            HomNode list(HomType::Array);
             
             int count = 0;
             
             char first = this->nextCleanChar();
             if (first == ']') {
-                return HomArray::make(list);
+                return list;
             } else if (first == '\0') {
                 mPosition -= 1;
             }
             
             while (true) {
-                HomValueRef value = this->nextValue();
-                list.push_back(value);
+                HomNode value = this->nextValue();
+                list.add(value);
                 
                 char c = this->nextCleanChar();
                 switch (c) {
                     case ']':
-                        return HomArray::make(list);
+                        return list;
                     case ',':
                         continue;
                     default:
-                        return nullptr;
+                        return HomNode{};
                 }
             }
         }
         
-        HomValueRef nextObject() {
-            std::map<String, HomValueRef> object;
+        HomNode nextObject() {
+            HomNode object(HomType::Object);
             
             /* Peek to see if this is the empty object. */
             char first = this->nextCleanChar();
             if (first == '}') {
-                return HomObject::make(object);
+                return object;
             } else if (first != '\0') {
                 mPosition--;
             }
@@ -111,26 +111,27 @@ namespace eokas {
                 char separator = this->nextCleanChar();
                 if (separator != ':' && separator != '=') {
                     // error: "Expected ':' after " + name
-                    return nullptr;
+                    return HomNode{};
                 }
                 if (mPosition < mSource.length() && mSource.substr(mPosition, 1).at(0) == '>') {
                     mPosition++;
                 }
-                object[name] = this->nextValue();
+                HomNode val = this->nextValue();
+                object.set(name, val);
                 
                 switch (this->nextCleanChar()) {
                     case '}':
-                        return HomObject::make(object);
+                        return object;
                     case ';':
                     case ',':
                         continue;
                     default: // error: Unterminated object
-                        return nullptr;
+                        return HomNode{};
                 }
             }
         }
         
-        HomValueRef nextNumber(char first) {
+        HomNode nextNumber(char first) {
             String str(first);
             if (first != '+' && first != '-') {
                 char c = this->nextChar();
@@ -175,17 +176,17 @@ namespace eokas {
             mPosition -= 1;
             
             auto value = String::stringToValue<f64_t>(str);
-            return HomNumber::make(value);
+            return HomNode{value};
         }
         
-        HomValueRef nextString(char quote) {
+        HomNode nextString(char quote) {
             String str = "";
             
             size_t start = mPosition;
             for (char c = this->nextChar(); c != '\0'; c = this->nextChar()) {
                 if (c == quote) {
                     str += mSource.substr(start, mPosition - start - 1);
-                    return HomString::make(str);
+                    return HomNode{str};
                 }
                 
                 if (c == '\\') {
@@ -196,7 +197,7 @@ namespace eokas {
             }
             
             // error : Unterminated string
-            return HomString::make("");
+            return HomNode{};
         }
         
         String nextIdentifier(char first) {
@@ -287,16 +288,6 @@ namespace eokas {
             return '\0';
         }
         
-        void skipComment() {
-            char current = mSource.at(mPosition);
-            if (current == '/') {
-            
-            } else if (current == '#') // php # comment
-            {
-                this->skipToEndOfLine();
-            }
-        }
-        
         void skipToEndOfLine() {
             char c = this->nextChar();
             while (c != '\0') {
@@ -315,49 +306,44 @@ namespace eokas {
         }
     };
     
-    String JSON::stringify(const HomValueRef& json) {
-        switch (json->type) {
+    String JSON::stringify(const HomNode& json) {
+        switch (json.type()) {
             case HomType::Null: {
                 return "null";
             }
             case HomType::Number: {
-                auto value = HomNumber::pick(json);
-                return String::valueToString(value);
+                return String::valueToString(json.asNumber());
             }
             case HomType::Boolean: {
-                auto value = HomBoolean::pick(json);
-                return String::valueToString(value);
+                return String::valueToString(json.asBoolean());
             }
             case HomType::String: {
-                auto value = HomString::pick(json);
-                return String::format("\"%s\"", value.cstr());
+                return String::format("\"%s\"", json.asString().cstr());
             }
             case HomType::Array: {
                 String str = "[";
                 bool first = true;
-                auto value = HomArray::pick(json);
-                for (const auto& i: value) {
+                json.foreach([&](const HomNode& val)->void {
                     if (first) {
                         str += ", ";
                         first = false;
                     }
-                    str += stringify(i);
-                }
+                    str += stringify(val);
+                });
                 str += "]";
                 return str;
             }
             case HomType::Object: {
                 String str = "{";
                 bool first = true;
-                auto value = HomObject::pick(json);
-                for (const auto& i: value) {
+                json.foreach([&](const String& key, const HomNode& val)->void {
                     if (first) {
                         str += ", ";
                         first = false;
                     }
-                    str += String::format("\"%s\":", i.first.cstr());
-                    str += stringify(i.second);
-                }
+                    str += String::format("\"%s\":", key.cstr());
+                    str += stringify(val);
+                });
                 str += "}";
                 return str;
             }
@@ -365,9 +351,9 @@ namespace eokas {
         return "";
     }
     
-    HomValueRef JSON::parse(const String& source) {
-        JsonLexer lexer(source);
-        return lexer.nextValue();
+    HomNode JSON::parse(const String& source) {
+        JsonParser parser{source};
+        return parser.nextValue();
     }
     
 }

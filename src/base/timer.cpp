@@ -51,44 +51,43 @@ namespace eokas {
 
 namespace eokas {
 
-struct TimerImpl
-{
-	u64_t last;
-};
-
-Timer::Timer()
-	:mImpl(new TimerImpl())
-{
-	this->reset();
-}
-
-Timer::~Timer()
-{
-	delete mImpl;
-}
-
-void Timer::reset()
-{
-	mImpl->last = mach_absolute_time();
-}
-
-i64_t Timer::elapse(bool isReset)
-{
-	u64_t now = mach_absolute_time();
-	u64_t last = mImpl->last;
-	if (isReset)
-	{
-		mImpl->last = now;
-	}
-
-	mach_timebase_info_data_t info;
-	mach_timebase_info(&info);
-	f64_t factor = f64_t(info.numer) / f64_t(info.denom) * 1e-9;
-
-	i64_t result = i64_t((now - last) * factor * 1000000);
-	return result;
-}
-
+    struct TimerImpl
+    {
+        u64_t last;
+    };
+    
+    Timer::Timer()
+        :mImpl(new TimerImpl())
+    {
+        this->reset();
+    }
+    
+    Timer::~Timer()
+    {
+        delete mImpl;
+    }
+    
+    void Timer::reset()
+    {
+        mImpl->last = mach_absolute_time();
+    }
+    
+    i64_t Timer::elapse(bool isReset)
+    {
+        u64_t now = mach_absolute_time();
+        u64_t last = mImpl->last;
+        if (isReset)
+        {
+            mImpl->last = now;
+        }
+    
+        mach_timebase_info_data_t info;
+        mach_timebase_info(&info);
+        f64_t factor = f64_t(info.numer) / f64_t(info.denom) * 1e-9;
+    
+        i64_t result = i64_t((now - last) * factor * 1000000);
+        return result;
+    }
 }
 
 #endif

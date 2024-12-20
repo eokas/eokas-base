@@ -71,6 +71,32 @@ namespace eokas {
 #endif
     }
     
+    String OS::getCpuArch() {
+#if _EOKAS_ARCH == _EOKAS_ARCH_X86
+        return "x86";
+#elif _EOKAS_ARCH == _EOKAS_ARCH_X64
+        return "x64";
+#elif _EOKAS_ARCH == _EOKAS_ARCH_ARM32
+        return "armv7";
+#elif _EOKAS_ARCH == _EOKAS_ARCH_ARM64
+        return "arm64";
+#elif _EOKAS_ARCH == _EOKAS_ARCH_MIPS
+        return "mips";
+#elif _EOKAS_ARCH == _EOKAS_ARCH_SUPERH
+        return "superh";
+#elif _EOKAS_ARCH == _EOKAS_ARCH_POWERPC
+        return "ppc";
+#elif _EOKAS_ARCH == _EOKAS_ARCH_POWERPC64
+        return "ppc64";
+#elif _EOKAS_ARCH == _EOKAS_ARCH_SPARC
+        return "sparc";
+#elif _EOKAS_ARCH == _EOKAS_ARCH_M68K
+        return "m68k";
+else
+        return "unknown";
+#endif
+    }
+    
     String OS::getEnv(const String& name) {
         return std::getenv(name.cstr());
     }

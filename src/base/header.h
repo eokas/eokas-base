@@ -62,12 +62,11 @@
 =================================================================
 */
 
-#define _EOKAS_ARCH_X86 0x00863200
-#define _EOKAS_ARCH_X64 0x00866400
-
-#define _EOKAS_ARCH_ARM32   0x000A3200
-#define _EOKAS_ARCH_ARM64   0x000A6400
-
+#define _EOKAS_ARCH_UNKNOWN     0x0
+#define _EOKAS_ARCH_X86         0x00863200
+#define _EOKAS_ARCH_X64         0x00866400
+#define _EOKAS_ARCH_ARM32       0x000A3200
+#define _EOKAS_ARCH_ARM64       0x000A6400
 #define _EOKAS_ARCH_MIPS        0x00010000
 #define _EOKAS_ARCH_SUPERH      0x00020000
 #define _EOKAS_ARCH_POWERPC     0x00033200
@@ -256,19 +255,13 @@ namespace eokas {
     using WCString = std::wstring;
 #if(_EOKAS_STRINGTYPE == _EOKAS_STRINGTYPE_MBS)
     using StringType = MBString;
-#ifndef _T
-#define _T(cstr) (cstr)
-#endif//_T
 #ifndef _ToStr
-#define _ToStr(token) _T(_TokenToStr(token))
+#define _ToStr(token) (_TokenToStr(token))
 #endif//_ToStr
 #else
     using StringType = WCString;
-#ifndef _T
-#define _T(cstr) (_CombineToken(L, cstr))
-#endif//_T
 #ifndef _ToStr
-#define _ToStr(token) _T(_TokenToStr(token))
+#define _ToStr(token) (_CombineToken(L, _TokenToStr(token)))
 #endif//_ToStr
 #endif//(_EOKAS_STRINGTYPE == _EOKAS_STRINGTYPE_MBS)
     

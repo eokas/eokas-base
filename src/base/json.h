@@ -5,12 +5,10 @@
 #include "./hom.h"
 
 namespace eokas {
-    
     struct JSON {
-        static String stringify(const HomValueRef& json);
-        static HomValueRef parse(const String& source);
+        static String stringify(const HomNode& json);
+        static HomNode parse(const String& source);
     };
-    
 }
 
 #endif//_EOKAS_BASE_JSON_H_
