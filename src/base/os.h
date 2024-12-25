@@ -5,6 +5,12 @@
 #include "./header.h"
 
 namespace eokas {
+    struct MemoryState {
+        u64_t total = 0;
+        u64_t available = 0;
+        u64_t process = 0;
+    };
+    
     struct OS {
         static String getSystemName();
         static String getSystemVersion();
@@ -12,6 +18,7 @@ namespace eokas {
         static String getDeviceModel();
         static u32_t getCpuCount();
         static String getCpuArch();
+        static void getMemoryState(MemoryState& ms);
         static String getEnv(const String& name);
         static bool setEnv(const String& name, const String& value);
         static String getCurrentUser();
