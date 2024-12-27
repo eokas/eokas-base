@@ -159,7 +159,6 @@ namespace eokas::gpu {
         }
         
         Program::Ref compileShader(const std::string& file, ProgramType type, ProgramTarget target, const char* entry) {
-            
             ProgramOptions options;
             options.name = file;
             options.source = Utilities::readTextFile(file);

@@ -1,4 +1,4 @@
-#include "./canvas.h";
+#include "./canvas.h"
 
 namespace eokas {
     UICanvas::UICanvas()
