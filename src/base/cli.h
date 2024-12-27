@@ -6,9 +6,11 @@
 #include "./string.h"
 #include <optional>
 
-namespace eokas::cli {
+namespace eokas::cli
+{
     
-    struct Option {
+    struct Option
+    {
         String name = "";
         String info = "";
         StringValue value = StringValue::falseValue;
@@ -16,7 +18,8 @@ namespace eokas::cli {
         String toString() const;
     };
     
-    struct Command {
+    struct Command
+    {
         using Func = std::function<void(const Command& cmd)>;
         
         String name;

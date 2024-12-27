@@ -5,84 +5,104 @@
 #include "./header.h"
 #include <functional>
 
-namespace eokas {
+namespace eokas
+{
     
     template<typename TObject>
-    class Pool {
+    class Pool
+    {
     public:
         using Container = std::list<TObject*>;
         using Iterator = typename Container::iterator;
     
     public:
         Pool()
-            : mAlive(), mDeath() {
+            : mAlive(), mDeath()
+        {
         }
         
-        ~Pool() {
+        ~Pool()
+        {
             this->destroy();
         }
     
     public:
-        bool empty() const {
+        bool empty() const
+        {
             return mAlive.empty();
         }
         
-        size_t size() const {
+        size_t size() const
+        {
             return mAlive.size();
         }
         
-        Iterator begin() {
+        Iterator begin()
+        {
             return mAlive.begin();
         }
         
-        Iterator end() {
+        Iterator end()
+        {
             return mAlive.end();
         }
         
         template<typename... Args>
-        TObject* acquire(Args... args) {
+        TObject* acquire(Args... args)
+        {
             TObject* ptr = nullptr;
-            if (!mDeath.empty()) {
+            if (!mDeath.empty())
+            {
                 ptr = mDeath.front();
                 mDeath.pop_front();
                 new(ptr)TObject(args...);
-            } else {
+            }
+            else
+            {
                 ptr = new TObject(args...);
                 mAlive.push_back(ptr);
             }
             return ptr;
         }
         
-        void release(TObject* o) {
+        void release(TObject* o)
+        {
             if (o == nullptr)
                 return;
             mDeath.push_back(o);
             mAlive.remove(o);
         }
         
-        void releaseFront() {
+        void releaseFront()
+        {
             TObject* o = mAlive.front();
-            if (o != nullptr) {
+            if (o != nullptr)
+            {
                 mDeath.push_back(0);
             }
             mAlive.pop_front();
         }
         
-        void releaseBack() {
+        void releaseBack()
+        {
             TObject* o = mAlive.back();
-            if (o != nullptr) {
+            if (o != nullptr)
+            {
                 mDeath.push_back(0);
             }
             mAlive.pop_back();
         }
         
-        void releaseAll(std::function<bool(TObject*)> predicate) {
+        void releaseAll(std::function<bool(TObject*)> predicate)
+        {
             if (mAlive.empty())
                 return;
             auto iter = mAlive.begin();
-            while (iter != mAlive.end()) {
+            while (iter != mAlive.end())
+            {
                 TObject* o = *iter;
-                if (o != nullptr && predicate(o)) {
+                if (o != nullptr && predicate(o))
+                {
                     mDeath.push_back(o);
                 }
                 ++iter;
@@ -90,11 +110,13 @@ namespace eokas {
             mAlive.clear();
         }
         
-        void releaseAll() {
+        void releaseAll()
+        {
             if (mAlive.empty())
                 return;
             auto iter = mAlive.begin();
-            while (iter != mAlive.end()) {
+            while (iter != mAlive.end())
+            {
                 TObject* o = *iter;
                 mDeath.push_back(o);
                 ++iter;
@@ -102,12 +124,14 @@ namespace eokas {
             mAlive.clear();
         }
         
-        void destroy() {
+        void destroy()
+        {
             this->releaseAll();
             if (mDeath.empty())
                 return;
             auto iter = mDeath.begin();
-            while (iter != mDeath.end()) {
+            while (iter != mDeath.end())
+            {
                 TObject* o = *iter;
                 _DeletePointer(o);
                 ++iter;
@@ -119,7 +143,6 @@ namespace eokas {
         std::list<TObject*> mAlive;
         std::list<TObject*> mDeath;
     };
-    
 }
 
 #endif//_EOKAS_BASE_ASCIL_H_

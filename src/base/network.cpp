@@ -10,9 +10,11 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-namespace eokas {
+namespace eokas
+{
     
-    void ShowError(DWORD error) {
+    void ShowError(DWORD error)
+    {
         // Retrieve the system error message for windows error-code
         DWORD flag = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
         DWORD lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
@@ -27,10 +29,12 @@ namespace eokas {
         LocalFree(msg);
     }
     
-    struct IOCP {
+    struct IOCP
+    {
         static IOCP instance;
         
-        static DWORD WINAPI thread_func(LPVOID args) {
+        static DWORD WINAPI thread_func(LPVOID args)
+        {
             IOCP* iocp = (IOCP*) args;
             return iocp != nullptr ? iocp->exec_oper() : 0;
         }
@@ -42,10 +46,12 @@ namespace eokas {
         std::mutex mutex;
         
         IOCP()
-            : handle(INVALID_HANDLE_VALUE), threads(), acceptEx(nullptr), getAcceptExSockAddrs(nullptr), mutex() {
+            : handle(INVALID_HANDLE_VALUE), threads(), acceptEx(nullptr), getAcceptExSockAddrs(nullptr), mutex()
+        {
         }
         
-        bool init() {
+        bool init()
+        {
             this->handle = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, 0);
             if (this->handle == INVALID_HANDLE_VALUE)
                 return false;
@@ -54,7 +60,8 @@ namespace eokas {
             ::GetSystemInfo(&systemInfo);
             int cpuCount = systemInfo.dwNumberOfProcessors;
             int threadCount = cpuCount * 2;
-            for (int i = 0; i < threadCount; i++) {
+            for (int i = 0; i < threadCount; i++)
+            {
                 HANDLE thread = ::CreateThread(NULL, 0, thread_func, this, 0, NULL);
                 this->threads.push_back(thread);
             }
@@ -62,51 +69,62 @@ namespace eokas {
             return true;
         }
         
-        void quit() {
-            if (!this->threads.empty()) {
+        void quit()
+        {
+            if (!this->threads.empty())
+            {
                 size_t count = this->threads.size();
                 HANDLE* handles = this->threads.data();
-                while (WaitForMultipleObjects((DWORD) count, handles, TRUE, 0) != WAIT_OBJECT_0) {
+                while (WaitForMultipleObjects((DWORD) count, handles, TRUE, 0) != WAIT_OBJECT_0)
+                {
                     PostQueuedCompletionStatus(this->handle, 0, 0, nullptr);
                 }
                 
-                for (auto iter = this->threads.begin(); iter != this->threads.end(); ++iter) {
+                for (auto iter = this->threads.begin(); iter != this->threads.end(); ++iter)
+                {
                     HANDLE thread = *iter;
-                    if (thread != INVALID_HANDLE_VALUE) {
+                    if (thread != INVALID_HANDLE_VALUE)
+                    {
                         ::CloseHandle(thread);
                     }
                 }
                 this->threads.clear();
             }
             
-            if (this->handle != INVALID_HANDLE_VALUE) {
+            if (this->handle != INVALID_HANDLE_VALUE)
+            {
                 CloseHandle(this->handle);
                 this->handle = INVALID_HANDLE_VALUE;
             }
         }
         
-        bool bind_session(NetworkSession* session) {
+        bool bind_session(NetworkSession* session)
+        {
             HANDLE s = (HANDLE) session->socket.handle();
             HANDLE h = ::CreateIoCompletionPort(s, this->handle, (ULONG_PTR) session, 0);
             return h == this->handle;
         }
         
-        void* load_extfunc(const Socket& socket, GUID& guid) {
+        void* load_extfunc(const Socket& socket, GUID& guid)
+        {
             void* func = nullptr;
             DWORD bytes = 0;
             WSAIoctl(socket.handle(), SIO_GET_EXTENSION_FUNCTION_POINTER, &guid, sizeof(guid), &func, sizeof(func), &bytes, nullptr, nullptr);
             return func;
         }
         
-        bool load_extfuncs(const Socket& socket) {
-            if (this->acceptEx == nullptr) {
+        bool load_extfuncs(const Socket& socket)
+        {
+            if (this->acceptEx == nullptr)
+            {
                 GUID guid = WSAID_ACCEPTEX;
                 this->acceptEx = (LPFN_ACCEPTEX) load_extfunc(socket, guid);
             }
             if (this->acceptEx == nullptr)
                 return false;
             
-            if (this->getAcceptExSockAddrs == nullptr) {
+            if (this->getAcceptExSockAddrs == nullptr)
+            {
                 GUID guid = WSAID_GETACCEPTEXSOCKADDRS;
                 this->getAcceptExSockAddrs = (LPFN_GETACCEPTEXSOCKADDRS) load_extfunc(socket, guid);
             }
@@ -116,7 +134,8 @@ namespace eokas {
             return true;
         }
         
-        bool post_oper(NetworkSession* session, NetworkOperation* oper) {
+        bool post_oper(NetworkSession* session, NetworkOperation* oper)
+        {
             if (session == nullptr || oper == nullptr)
                 return false;
             if (oper->type <= OperationType::None || oper->type >= OperationType::Max)
@@ -126,7 +145,8 @@ namespace eokas {
             oper->wsabuf.buf = oper->data;
             oper->wsabuf.len = oper->size;
             
-            if (oper->type == OperationType::Accept) {
+            if (oper->type == OperationType::Accept)
+            {
                 oper->acceptedSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
                 if (!oper->acceptedSocket.isOpen())
                     return false;
@@ -139,14 +159,18 @@ namespace eokas {
                 
                 DWORD trans = 0;
                 if (TRUE !=
-                    this->acceptEx(session->socket, oper->acceptedSocket, oper->wsabuf.buf, (DWORD) (oper->wsabuf.len - addrLen * 2), (DWORD) addrLen, (DWORD) addrLen, &trans, &oper->overlapped)) {
+                    this->acceptEx(session->socket, oper->acceptedSocket, oper->wsabuf.buf, (DWORD) (oper->wsabuf.len - addrLen * 2), (DWORD) addrLen, (DWORD) addrLen, &trans, &oper->overlapped))
+                {
                     int error = GetLastError();
-                    if (error != ERROR_IO_PENDING) {
+                    if (error != ERROR_IO_PENDING)
+                    {
                         oper->acceptedSocket.close();
                         return false;
                     }
                 }
-            } else if (oper->type == OperationType::Recv) {
+            }
+            else if (oper->type == OperationType::Recv)
+            {
                 DWORD trans = 0;
                 DWORD flags = 0;
                 int ret = WSARecv(session->socket, &oper->wsabuf, 1, &trans, &flags, &oper->overlapped, NULL);
@@ -158,7 +182,9 @@ namespace eokas {
                 
                 if (ret != 0 && err != WSA_IO_PENDING)
                     return false;
-            } else if (oper->type == OperationType::Send) {
+            }
+            else if (oper->type == OperationType::Send)
+            {
                 DWORD trans = 0;
                 DWORD flags = 0;
                 int ret = WSASend(session->socket, &oper->wsabuf, 1, &trans, flags, &oper->overlapped, NULL);
@@ -170,7 +196,9 @@ namespace eokas {
                 
                 if (ret != 0 && err != WSA_IO_PENDING)
                     return false;
-            } else {
+            }
+            else
+            {
                 int trans = oper->size;
                 BOOL result = PostQueuedCompletionStatus(this->handle, trans, (ULONG_PTR) session, &oper->overlapped);
                 if (result == FALSE)
@@ -184,11 +212,13 @@ namespace eokas {
             return true;
         }
         
-        DWORD exec_oper() {
+        DWORD exec_oper()
+        {
             DWORD trans = 0;
             ULONG_PTR completkey;
             LPOVERLAPPED overlapped;
-            for (;;) {
+            for (;;)
+            {
                 BOOL result = GetQueuedCompletionStatus(this->handle, &trans, &completkey, &overlapped, WSA_INFINITE);
                 NetworkSession* session = (NetworkSession*) completkey;
                 NetworkOperation* oper = (NetworkOperation*) overlapped;
@@ -201,19 +231,22 @@ namespace eokas {
                 session->operations.remove(oper);
                 this->mutex.unlock();
                 
-                if (result != TRUE) {
+                if (result != TRUE)
+                {
                     DWORD error = GetLastError();
                     this->handle_error(session, oper, error);
                     continue;
                 }
                 
-                if ((oper->type == OperationType::Recv || oper->type == OperationType::Send) && trans == 0) {
+                if ((oper->type == OperationType::Recv || oper->type == OperationType::Send) && trans == 0)
+                {
                     this->invoke_callback(session, oper, NetworkError::Broken);
                     session->socket.close();
                     return true;
                 }
                 
-                if (oper->type == OperationType::Accept) {
+                if (oper->type == OperationType::Accept)
+                {
                     int addrLen = sizeof(sockaddr_in) + 16;
                     int dataLen = oper->wsabuf.len - addrLen * 2;
                     
@@ -226,7 +259,9 @@ namespace eokas {
                     
                     oper->size = trans;
                     this->invoke_callback(session, oper);
-                } else {
+                }
+                else
+                {
                     oper->size = trans;
                     this->invoke_callback(session, oper);
                 }
@@ -235,27 +270,39 @@ namespace eokas {
             return 0;
         }
         
-        void handle_error(NetworkSession* session, NetworkOperation* oper, int error) {
-            if (error == ERROR_OPERATION_ABORTED) {
-                if (oper->type == OperationType::Accept) {
+        void handle_error(NetworkSession* session, NetworkOperation* oper, int error)
+        {
+            if (error == ERROR_OPERATION_ABORTED)
+            {
+                if (oper->type == OperationType::Accept)
+                {
                     oper->acceptedSocket.close();
                 }
                 this->invoke_callback(session, oper, NetworkError::Aborted);
-            } else if (error == ERROR_NETNAME_DELETED) {
-                if (oper->type == OperationType::Accept) {
+            }
+            else if (error == ERROR_NETNAME_DELETED)
+            {
+                if (oper->type == OperationType::Accept)
+                {
                     oper->acceptedSocket.close();
                     this->invoke_callback(session, oper, NetworkError::Expired);
-                } else {
+                }
+                else
+                {
                     this->invoke_callback(session, oper, NetworkError::Broken);
                 }
-            } else if (error == WAIT_TIMEOUT) {
-                if (!session->socket.alive()) {
+            }
+            else if (error == WAIT_TIMEOUT)
+            {
+                if (!session->socket.alive())
+                {
                     this->invoke_callback(session, oper, NetworkError::Broken);
                 }
             }
         }
         
-        void invoke_callback(NetworkSession* session, NetworkOperation* oper, NetworkError error = NetworkError::None) {
+        void invoke_callback(NetworkSession* session, NetworkOperation* oper, NetworkError error = NetworkError::None)
+        {
             if (session == nullptr || session->callback == nullptr)
                 return;
             session->callback(session, oper, error);
@@ -269,16 +316,19 @@ namespace eokas {
     ==== NetworkSession
     ============================================================
     */
-    bool NetworkSession::open() {
+    bool NetworkSession::open()
+    {
         return this->open(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     }
     
-    bool NetworkSession::open(AddressFamily family, SocketType socktype, ProtocolType protocol) {
+    bool NetworkSession::open(AddressFamily family, SocketType socktype, ProtocolType protocol)
+    {
         Socket s = ::WSASocket(family, socktype, protocol, nullptr, 0, WSA_FLAG_OVERLAPPED);
         return this->open(s);
     }
     
-    bool NetworkSession::open(const Socket& s) {
+    bool NetworkSession::open(const Socket& s)
+    {
         if (!s.isOpen())
             return false;
         this->socket = s;
@@ -287,22 +337,26 @@ namespace eokas {
         return true;
     }
     
-    void NetworkSession::close() {
+    void NetworkSession::close()
+    {
         this->socket.shutdown(Socket::ShutdownMethod::Send);
         this->socket.close();
     }
     
-    bool NetworkSession::listen(const SocketAddress& addr, int maxconn) {
+    bool NetworkSession::listen(const SocketAddress& addr, int maxconn)
+    {
         if (!IOCP::instance.load_extfuncs(this->socket))
             return false;
         return this->socket.bind(addr) && this->socket.listen(maxconn);
     }
     
-    bool NetworkSession::connect(const SocketAddress& addr) {
+    bool NetworkSession::connect(const SocketAddress& addr)
+    {
         return this->socket.connect(addr);
     }
     
-    bool NetworkSession::post(NetworkOperation* oper) {
+    bool NetworkSession::post(NetworkOperation* oper)
+    {
         return IOCP::instance.post_oper(this, oper);
     }
     
@@ -311,25 +365,30 @@ namespace eokas {
     ==== NetworkService
     ============================================================
     */
-    NetworkService::NetworkService() {
+    NetworkService::NetworkService()
+    {
     }
     
-    NetworkService::~NetworkService() {
+    NetworkService::~NetworkService()
+    {
     }
     
-    bool NetworkService::init() {
+    bool NetworkService::init()
+    {
         WSADATA wsaData;
         ZeroMemory(&wsaData, sizeof(wsaData));
         if (::WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
             return false;
-        if (!IOCP::instance.init()) {
+        if (!IOCP::instance.init())
+        {
             ::WSACleanup();
             return false;
         }
         return true;
     }
     
-    void NetworkService::quit() {
+    void NetworkService::quit()
+    {
         IOCP::instance.quit();
         ::WSACleanup();
     }
@@ -344,7 +403,8 @@ namespace eokas {
 #include <errno.h>
 #include <thread>
 
-namespace eokas {
+namespace eokas
+{
 
 #define _EVENT_COUNT 128
 

@@ -5,33 +5,40 @@
 
 #include <windows.h>
 
-namespace eokas {
+namespace eokas
+{
     
-    struct TimerImpl {
+    struct TimerImpl
+    {
         f64_t lastCount;
     };
     
     Timer::Timer()
-        : mImpl(new TimerImpl()) {
+        : mImpl(new TimerImpl())
+    {
         this->reset();
     }
     
-    Timer::~Timer() {
+    Timer::~Timer()
+    {
         delete mImpl;
     }
     
-    void Timer::reset() {
+    void Timer::reset()
+    {
         LARGE_INTEGER counter;
         QueryPerformanceCounter(&counter);
         mImpl->lastCount = (f64_t) (counter.QuadPart);
     }
     
-    i64_t Timer::elapse(bool isReset) {
+    i64_t Timer::elapse(bool isReset)
+    {
         LARGE_INTEGER count;
         QueryPerformanceCounter(&count);
         f64_t curCount = (f64_t) (count.QuadPart);
         f64_t lastCount = mImpl->lastCount;
-        if (isReset) {
+        if (isReset)
+        {
             mImpl->lastCount = curCount;
         }
         
@@ -49,8 +56,8 @@ namespace eokas {
 
 #include <mach/mach_time.h>
 
-namespace eokas {
-
+namespace eokas
+{
     struct TimerImpl
     {
         u64_t last;

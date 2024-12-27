@@ -4,7 +4,8 @@
 
 #include "./header.h"
 
-namespace eokas {
+namespace eokas
+{
     /*
     =================================================================
     == AccessRef
@@ -14,41 +15,50 @@ namespace eokas {
     =================================================================
     */
     template<typename T, bool read = true, bool write = true>
-    class AccessRef {
+    class AccessRef
+    {
     public:
         using ModifyFunc = std::function<void(const T&)>;
         
         AccessRef(T& ref)
-            : mRef(ref) {
+            : mRef(ref)
+        {
         }
         
-        const T& get() const {
+        const T& get() const
+        {
             static_assert(read, "object access cannot be read.");
             return mRef;
         }
         
-        AccessRef<T, read, true>& set(const T& ref) {
+        AccessRef<T, read, true>& set(const T& ref)
+        {
             static_assert(write, "object access cannot be written.");
             mRef = ref;
-            if(mOnModify) {
+            if (mOnModify)
+            {
                 mOnModify(ref);
             }
             return *this;
         }
         
-        operator const T&() const {
+        operator const T&() const
+        {
             return this->get();
         }
         
-        AccessRef<T, read, true>& operator=(const T& ref) {
+        AccessRef<T, read, true>& operator=(const T& ref)
+        {
             return this->set(ref);
         }
         
-        AccessRef<T, read, true>& operator=(const AccessRef<T, true, write>& access) {
+        AccessRef<T, read, true>& operator=(const AccessRef<T, true, write>& access)
+        {
             return this->set(access.mRef);
         }
         
-        void onModify(const ModifyFunc& func) {
+        void onModify(const ModifyFunc& func)
+        {
             this->mOnModify = func;
         }
     
@@ -66,45 +76,55 @@ namespace eokas {
     =================================================================
     */
     template<typename T, bool read = true, bool write = true>
-    class AccessValue {
+    class AccessValue
+    {
     public:
         using ModifyFunc = std::function<void(const T&)>;
         
         AccessValue()
-            : mValue() {
+            : mValue()
+        {
         }
         
         AccessValue(const T& value)
-            : mValue(value) {
+            : mValue(value)
+        {
         }
         
-        const T& get() const {
+        const T& get() const
+        {
             static_assert(read, "access object cannot be read.");
             return mValue;
         }
         
-        AccessValue<T, read, true>& set(const T& value) {
+        AccessValue<T, read, true>& set(const T& value)
+        {
             static_assert(write, "access object cannot be written.");
             mValue = value;
-            if(mOnModify) {
+            if (mOnModify)
+            {
                 mOnModify(value);
             }
             return *this;
         }
         
-        operator const T&() const {
+        operator const T&() const
+        {
             return this->get();
         }
         
-        AccessValue<T, read, true>& operator=(const T& value) {
+        AccessValue<T, read, true>& operator=(const T& value)
+        {
             return this->set(value);
         }
         
-        AccessValue<T, read, true>& operator=(const AccessValue<T, true, write>& object) {
+        AccessValue<T, read, true>& operator=(const AccessValue<T, true, write>& object)
+        {
             return this->set(object.mValue);
         }
         
-        void onModify(const ModifyFunc& func) {
+        void onModify(const ModifyFunc& func)
+        {
             this->mOnModify = func;
         }
     

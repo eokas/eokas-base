@@ -3,7 +3,8 @@
 
 #include "./header.h"
 
-namespace eokas {
+namespace eokas
+{
     /**
         String selectedPath;
         std::map<String, String> filters;

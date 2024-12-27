@@ -4,18 +4,23 @@
 
 #include "header.h"
 
-namespace eokas {
+namespace eokas
+{
     
-    class Timer {
+    class Timer
+    {
         _ForbidCopy(Timer);
+        
         _ForbidAssign(Timer);
     
     public:
         Timer();
+        
         ~Timer();
     
     public:
         void reset();
+        
         i64_t elapse(bool isReset = true);
     
     private:

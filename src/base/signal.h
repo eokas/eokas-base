@@ -4,30 +4,37 @@
 
 #include "./header.h"
 
-namespace eokas {
+namespace eokas
+{
     
-    enum class SignalResult {
+    enum class SignalResult
+    {
         Break, Continue
     };
     
     template<typename SignalMessage>
-    class AbstractSignalHandler : public Interface {
+    class AbstractSignalHandler : public Interface
+    {
     public:
         virtual SignalResult doHandle(SignalMessage message) = 0;
     };
     
     template<typename SignalReceiver, typename SignalMessage>
-    class SignalHandler_Method : public AbstractSignalHandler<SignalMessage> {
+    class SignalHandler_Method : public AbstractSignalHandler<SignalMessage>
+    {
         typedef SignalResult (SignalReceiver::*HandleFunc)(SignalMessage message);
     
     public:
         SignalHandler_Method(SignalReceiver* receiver, HandleFunc handle)
-            : mReceiver(receiver), mHandle(handle) {
+            : mReceiver(receiver), mHandle(handle)
+        {
         }
         
-        SignalResult doHandle(SignalMessage message) {
+        SignalResult doHandle(SignalMessage message)
+        {
             SignalResult result = SignalResult::Continue;
-            if (mReceiver != nullptr) {
+            if (mReceiver != nullptr)
+            {
                 result = (mReceiver->*mHandle)(message);
             }
             return result;
@@ -39,15 +46,19 @@ namespace eokas {
     };
     
     template<typename HandleFunc, typename SignalMessage>
-    class SignalHandler_Functor : public AbstractSignalHandler<SignalMessage> {
+    class SignalHandler_Functor : public AbstractSignalHandler<SignalMessage>
+    {
     public:
         SignalHandler_Functor(HandleFunc handle)
-            : mHandle(handle) {
+            : mHandle(handle)
+        {
         }
         
-        SignalResult doHandle(SignalMessage message) {
+        SignalResult doHandle(SignalMessage message)
+        {
             SignalResult result = SignalResult::Continue;
-            if (mHandle != nullptr) {
+            if (mHandle != nullptr)
+            {
                 result = (*mHandle)(message);
             }
             return result;
@@ -58,23 +69,30 @@ namespace eokas {
     };
     
     template<typename SignalMessage>
-    class Signal {
+    class Signal
+    {
         using HandlerList = std::list<AbstractSignalHandler<SignalMessage>*>;
     
     public:
         Signal()
-            : mHandlers() {
+            : mHandlers()
+        {
         }
         
-        virtual ~Signal() {
+        virtual ~Signal()
+        {
             this->clearHandlers();
         }
         
-        void operator()(SignalMessage message) {
-            if (!mHandlers.empty()) {
+        void operator()(SignalMessage message)
+        {
+            if (!mHandlers.empty())
+            {
                 auto handlerIter = mHandlers.begin();
-                while (handlerIter != mHandlers.end()) {
-                    if (*handlerIter == nullptr) {
+                while (handlerIter != mHandlers.end())
+                {
+                    if (*handlerIter == nullptr)
+                    {
                         handlerIter = mHandlers.erase(handlerIter);
                         continue;
                     }
@@ -88,32 +106,39 @@ namespace eokas {
             }
         }
         
-        bool hasHandler() {
+        bool hasHandler()
+        {
             return !mHandlers.empty();
         }
         
         template<typename SignalReceiver>
-        void attachHandler(SignalReceiver* receiver, SignalResult (SignalReceiver::*handle)(SignalMessage)) {
+        void attachHandler(SignalReceiver* receiver, SignalResult (SignalReceiver::*handle)(SignalMessage))
+        {
             AbstractSignalHandler<SignalMessage>* handler = new SignalHandler_Method<SignalReceiver, SignalMessage>(receiver, handle);
             mHandlers.push_back(handler);
         }
         
         template<typename HandleFunc>
-        void attachHandler(HandleFunc handle) {
+        void attachHandler(HandleFunc handle)
+        {
             AbstractSignalHandler<SignalMessage>* handler = new SignalHandler_Functor<HandleFunc, SignalMessage>(handle);
             mHandlers.push_back(handler);
         }
         
         template<typename SignalReceiver>
-        void detachHandler(SignalReceiver* receiver, SignalResult (SignalReceiver::*handle)(SignalMessage)) {
+        void detachHandler(SignalReceiver* receiver, SignalResult (SignalReceiver::*handle)(SignalMessage))
+        {
             auto handlerIter = mHandlers.begin();
-            while (handlerIter != mHandlers.end()) {
-                if (*handlerIter == nullptr) {
+            while (handlerIter != mHandlers.end())
+            {
+                if (*handlerIter == nullptr)
+                {
                     handlerIter = mHandlers.erase(handlerIter);
                     continue;
                 }
                 SignalHandler_Method<SignalReceiver, SignalMessage>* handler = dynamic_cast<SignalHandler_Method<SignalReceiver, SignalMessage>*>(*handlerIter);
-                if ((handler != nullptr) && (handler->mReceiver == receiver) && (handler->mHandle == handle)) {
+                if ((handler != nullptr) && (handler->mReceiver == receiver) && (handler->mHandle == handle))
+                {
                     delete (*handlerIter);
                     handlerIter = mHandlers.erase(handlerIter);
                     continue;
@@ -124,15 +149,19 @@ namespace eokas {
         }
         
         template<typename HandleFunc>
-        void detachHandler(HandleFunc handle) {
+        void detachHandler(HandleFunc handle)
+        {
             auto handlerIter = mHandlers.begin();
-            while (handlerIter != mHandlers.end()) {
-                if (*handlerIter == nullptr) {
+            while (handlerIter != mHandlers.end())
+            {
+                if (*handlerIter == nullptr)
+                {
                     handlerIter = mHandlers.erase(handlerIter);
                     continue;
                 }
                 SignalHandler_Functor<HandleFunc, SignalMessage>* handler = dynamic_cast<SignalHandler_Functor<HandleFunc, SignalMessage>*>(*handlerIter);
-                if ((handler != nullptr) && (handler->mHandle == handle)) {
+                if ((handler != nullptr) && (handler->mHandle == handle))
+                {
                     delete (*handlerIter);
                     handlerIter = mHandlers.erase(handlerIter);
                     continue;
@@ -142,10 +171,13 @@ namespace eokas {
             }
         }
         
-        void clearHandlers() {
+        void clearHandlers()
+        {
             auto handlerIter = mHandlers.begin();
-            while (handlerIter != mHandlers.end()) {
-                if (*handlerIter != nullptr) {
+            while (handlerIter != mHandlers.end())
+            {
+                if (*handlerIter != nullptr)
+                {
                     delete (*handlerIter);
                     *handlerIter = nullptr;
                 }
