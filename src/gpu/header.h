@@ -3,8 +3,10 @@
 
 #include "base/main.h"
 
-namespace eokas::gpu {
-    enum class Format {
+namespace eokas::gpu
+{
+    enum class Format
+    {
         Unknown,
         R32_UINT,
         R32_FLOAT,
@@ -27,24 +29,29 @@ namespace eokas::gpu {
         ASTC_12x12_HDR
     };
     
-    struct Resource {
+    struct Resource
+    {
         using Ref = std::shared_ptr<Resource>;
         
         virtual void* getNativeResource() const = 0;
     };
     
-    struct RenderTarget :public Resource {
+    struct RenderTarget : public Resource
+    {
         using Ref = std::shared_ptr<RenderTarget>;
     };
     
-    struct DynamicBuffer :public Resource {
+    struct DynamicBuffer : public Resource
+    {
         using Ref = std::shared_ptr<DynamicBuffer>;
         
         virtual void* map() = 0;
+        
         virtual void unmap() = 0;
     };
     
-    struct TextureOptions {
+    struct TextureOptions
+    {
         uint32_t width = 0;
         uint32_t height = 0;
         uint32_t depth = 0;
@@ -52,35 +59,33 @@ namespace eokas::gpu {
         uint32_t mipCount = 1;
     };
     
-    struct Texture :public Resource {
+    struct Texture : public Resource
+    {
         using Ref = std::shared_ptr<Texture>;
         
         virtual const TextureOptions& getOptions() const = 0;
     };
     
-    struct VertexElement {
+    struct VertexElement
+    {
         std::string semanticName = "";
         uint32_t semanticIndex = 0;
         uint32_t offset = 0;
         Format format = Format::Unknown;
     };
     
-    enum class ProgramType {
-        Vertex,
-        Fragment,
-        Compute
+    enum class ProgramType
+    {
+        Vertex, Fragment, Compute
     };
     
-    enum class ProgramTarget {
-        SM_3_0,
-        SM_3_1,
-        SM_4_5,
-        SM_5_0,
-        SM_6_0,
-        SM_6_8
+    enum class ProgramTarget
+    {
+        SM_3_0, SM_3_1, SM_4_5, SM_5_0, SM_6_0, SM_6_8
     };
     
-    struct ProgramOptions {
+    struct ProgramOptions
+    {
         std::string name = "";
         std::string source = "";
         std::string entry = "";
@@ -88,24 +93,32 @@ namespace eokas::gpu {
         ProgramTarget target = ProgramTarget::SM_3_0;
     };
     
-    struct Program {
+    struct Program
+    {
         using Ref = std::shared_ptr<Program>;
         
         virtual const ProgramOptions& getOptions() const = 0;
+        
         virtual uint32_t getTextureCount() const = 0;
     };
     
-    struct PipelineState {
+    struct PipelineState
+    {
         using Ref = std::shared_ptr<PipelineState>;
         
         virtual void begin() = 0;
+        
         virtual void setVertexElements(std::vector<VertexElement>& vElements) = 0;
+        
         virtual void setProgram(ProgramType type, Program::Ref program) = 0;
+        
         virtual void setTexture(uint32_t index, Texture::Ref texture) = 0;
+        
         virtual void end() = 0;
     };
     
-    struct Viewport {
+    struct Viewport
+    {
         float left = 0;
         float right = 1024;
         float top = 0;
@@ -114,52 +127,68 @@ namespace eokas::gpu {
         float back = 1000.0f;
     };
     
-    struct Barrier {
+    struct Barrier
+    {
         Resource::Ref resource = nullptr;
         uint32_t type = 0;
         uint32_t before = 0;
         uint32_t after = 0;
     };
     
-    struct CommandBuffer {
+    struct CommandBuffer
+    {
         using Ref = std::shared_ptr<CommandBuffer>;
         
         virtual void reset(PipelineState::Ref pso) = 0;
+        
         virtual void setRenderTargets(const std::vector<RenderTarget::Ref>& renderTargets) = 0;
-        virtual void clearRenderTarget(RenderTarget::Ref renderTarget, float(&color)[4]) = 0;
+        
+        virtual void clearRenderTarget(RenderTarget::Ref renderTarget, float(& color)[4]) = 0;
+        
         virtual void setViewport(const Viewport& viewport) = 0;
+        
         virtual void setPrimitiveTopology(uint32_t topology) = 0;
+        
         virtual void setVertexBuffer(DynamicBuffer::Ref buffer, uint32_t length, uint32_t stride) = 0;
+        
         virtual void setIndexBuffer(DynamicBuffer::Ref buffer, uint32_t length, Format format) = 0;
-        virtual void drawIndexedInstanced(
-            uint32_t indexCountPerInstance,
-            uint32_t instanceCount,
-            uint32_t startIndexLocation,
-            uint32_t baseVertexLocation,
-            uint32_t startInstanceLocation) = 0;
+        
+        virtual void drawIndexedInstanced(uint32_t indexCountPerInstance, uint32_t instanceCount, uint32_t startIndexLocation, uint32_t baseVertexLocation, uint32_t startInstanceLocation) = 0;
+        
         virtual void fillTexture(Texture::Ref target, const std::vector<uint8_t>& source) = 0;
+        
         virtual void barrier(const std::vector<Barrier>& barriers) = 0;
+        
         virtual void finish() = 0;
     };
     
-    struct Device {
+    struct Device
+    {
         using Ref = std::shared_ptr<Device>;
         
         virtual RenderTarget::Ref getActiveRenderTarget() = 0;
         
         virtual DynamicBuffer::Ref createDynamicBuffer(uint32_t length, uint32_t usage) = 0;
+        
         virtual Texture::Ref createTexture(const TextureOptions& options) = 0;
+        
         virtual Program::Ref createProgram(const ProgramOptions& options) = 0;
+        
         virtual PipelineState::Ref createPipelineState() = 0;
+        
         virtual CommandBuffer::Ref createCommandBuffer(const PipelineState::Ref pso) = 0;
         
         virtual void commitCommandBuffer(const CommandBuffer::Ref commandBuffer) = 0;
+        
         virtual void present() = 0;
+        
         virtual void waitForGPU() = 0;
+        
         virtual void waitForNextFrame() = 0;
     };
     
-    struct GPUFactory {
+    struct GPUFactory
+    {
         static Device::Ref createDevice(void* windowHandle, uint32_t windowWidth, uint32_t windowHeight);
     };
 }

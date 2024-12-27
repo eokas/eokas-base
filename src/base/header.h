@@ -229,7 +229,8 @@
 #include <memory>
 #include <functional>
 
-namespace eokas {
+namespace eokas
+{
     using byte = unsigned char;
     
     using i8_t = int8_t;
@@ -267,28 +268,35 @@ namespace eokas {
     
     using String = class String;
     
-    class Interface {
+    class Interface
+    {
     public:
-        virtual ~Interface() {
+        virtual ~Interface()
+        {
         }
     };
     
-    class Object {
+    class Object
+    {
     public:
-        virtual ~Object() {
+        virtual ~Object()
+        {
         }
         
-        virtual const std::type_info& dataType() {
+        virtual const std::type_info& dataType()
+        {
             return typeid(*this);
         }
         
         template<typename T>
-        bool is() {
+        bool is()
+        {
             return typeid(T).before(this->dataType());
         }
         
         template<typename T>
-        T* as() {
+        T* as()
+        {
             return dynamic_cast<T*>(this);
         }
     };

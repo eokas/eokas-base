@@ -3,7 +3,8 @@
 
 #include "base/main.h"
 
-namespace eokas {
+namespace eokas
+{
 
 }
 

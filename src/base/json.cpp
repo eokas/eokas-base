@@ -2,29 +2,36 @@
 #include "./json.h"
 #include "./ascil.h"
 
-namespace eokas {
+namespace eokas
+{
     
-    struct JsonParser {
+    struct JsonParser
+    {
         String mSource;
         size_t mPosition;
         
         explicit JsonParser(const String& source)
-            : mSource(source), mPosition(0) {
+            : mSource(source), mPosition(0)
+        {
         }
         
-        String nextName() {
+        String nextName()
+        {
             char c = this->nextCleanChar();
-            switch (c) {
+            switch (c)
+            {
                 case '\0': // eof
                     return "";
                 
                 case '\'':
-                case '"': {
+                case '"':
+                {
                     auto str = this->nextString(c);
                     return str.asString();
                 }
                 default:
-                    if (_ascil_is_alpha_(c)) {
+                    if (_ascil_is_alpha_(c))
+                    {
                         auto identifier = this->nextIdentifier(c);
                         return identifier;
                     }
@@ -33,9 +40,11 @@ namespace eokas {
             return "";
         }
         
-        HomNode nextValue() {
+        HomNode nextValue()
+        {
             char c = this->nextChar();
-            switch (c) {
+            switch (c)
+            {
                 case '[':
                     return this->nextArray();
                 case '{':
@@ -44,9 +53,12 @@ namespace eokas {
                 case '\"':
                     return this->nextString(c);
                 default:
-                    if (_ascil_is_number(c) || c == '+' || c == '-') {
+                    if (_ascil_is_number(c) || c == '+' || c == '-')
+                    {
                         return this->nextNumber(c);
-                    } else if (_ascil_is_alpha_(c)) {
+                    }
+                    else if (_ascil_is_alpha_(c))
+                    {
                         size_t start = mPosition;
                         auto identifier = this->nextIdentifier(c);
                         if (identifier == "true")
@@ -61,24 +73,30 @@ namespace eokas {
             }
         }
         
-        HomNode nextArray() {
+        HomNode nextArray()
+        {
             HomNode list(HomType::Array);
             
             int count = 0;
             
             char first = this->nextCleanChar();
-            if (first == ']') {
+            if (first == ']')
+            {
                 return list;
-            } else if (first == '\0') {
+            }
+            else if (first == '\0')
+            {
                 mPosition -= 1;
             }
             
-            while (true) {
+            while (true)
+            {
                 HomNode value = this->nextValue();
                 list.add(value);
                 
                 char c = this->nextCleanChar();
-                switch (c) {
+                switch (c)
+                {
                     case ']':
                         return list;
                     case ',':
@@ -89,18 +107,23 @@ namespace eokas {
             }
         }
         
-        HomNode nextObject() {
+        HomNode nextObject()
+        {
             HomNode object(HomType::Object);
             
             /* Peek to see if this is the empty object. */
             char first = this->nextCleanChar();
-            if (first == '}') {
+            if (first == '}')
+            {
                 return object;
-            } else if (first != '\0') {
+            }
+            else if (first != '\0')
+            {
                 mPosition--;
             }
             
-            while (true) {
+            while (true)
+            {
                 auto name = this->nextName();
                 
                 /*
@@ -109,17 +132,20 @@ namespace eokas {
                  * include them because that's what the original implementation did.
                  */
                 char separator = this->nextCleanChar();
-                if (separator != ':' && separator != '=') {
+                if (separator != ':' && separator != '=')
+                {
                     // error: "Expected ':' after " + name
                     return HomNode{};
                 }
-                if (mPosition < mSource.length() && mSource.substr(mPosition, 1).at(0) == '>') {
+                if (mPosition < mSource.length() && mSource.substr(mPosition, 1).at(0) == '>')
+                {
                     mPosition++;
                 }
                 HomNode val = this->nextValue();
                 object.set(name, val);
                 
-                switch (this->nextCleanChar()) {
+                switch (this->nextCleanChar())
+                {
                     case '}':
                         return object;
                     case ';':
@@ -131,43 +157,57 @@ namespace eokas {
             }
         }
         
-        HomNode nextNumber(char first) {
+        HomNode nextNumber(char first)
+        {
             String str(first);
-            if (first != '+' && first != '-') {
+            if (first != '+' && first != '-')
+            {
                 char c = this->nextChar();
-                if (c == '.') {
+                if (c == '.')
+                {
                     str += c;
                     c = this->nextChar();
-                    while (_ascil_is_number(c)) {
-                        str += c;
-                        c = this->nextChar();
-                    }
-                } else {
-                    c = this->nextChar();
-                    while (_ascil_is_number(c)) {
-                        str += c;
-                        c = this->nextChar();
-                    }
-                    if (c == '.') {
-                        str += c;
-                        c = this->nextChar();
-                    }
-                    while (_ascil_is_number(c)) {
+                    while (_ascil_is_number(c))
+                    {
                         str += c;
                         c = this->nextChar();
                     }
                 }
-            } else {
+                else
+                {
+                    c = this->nextChar();
+                    while (_ascil_is_number(c))
+                    {
+                        str += c;
+                        c = this->nextChar();
+                    }
+                    if (c == '.')
+                    {
+                        str += c;
+                        c = this->nextChar();
+                    }
+                    while (_ascil_is_number(c))
+                    {
+                        str += c;
+                        c = this->nextChar();
+                    }
+                }
+            }
+            else
+            {
                 char c = this->nextChar();
-                while (_ascil_is_number(c)) {
+                while (_ascil_is_number(c))
+                {
                     str += c;
                     c = this->nextChar();
                 }
-                if (c == '.') {
+                if (c == '.')
+                {
                     str += c;
                     c = this->nextChar();
                 }
-                while (_ascil_is_number(c)) {
+                while (_ascil_is_number(c))
+                {
                     str += c;
                     c = this->nextChar();
                 }
@@ -179,17 +219,21 @@ namespace eokas {
             return HomNode{value};
         }
         
-        HomNode nextString(char quote) {
+        HomNode nextString(char quote)
+        {
             String str = "";
             
             size_t start = mPosition;
-            for (char c = this->nextChar(); c != '\0'; c = this->nextChar()) {
-                if (c == quote) {
+            for (char c = this->nextChar(); c != '\0'; c = this->nextChar())
+            {
+                if (c == quote)
+                {
                     str += mSource.substr(start, mPosition - start - 1);
                     return HomNode{str};
                 }
                 
-                if (c == '\\') {
+                if (c == '\\')
+                {
                     str += mSource.substr(start, mPosition - start - 1);
                     str += this->escapeChar();
                     start = mPosition;
@@ -200,10 +244,12 @@ namespace eokas {
             return HomNode{};
         }
         
-        String nextIdentifier(char first) {
+        String nextIdentifier(char first)
+        {
             String str(first);
             char c = this->nextChar();
-            while (_ascil_is_alpha_number(c)) {
+            while (_ascil_is_alpha_number(c))
+            {
                 str += c;
                 c = this->nextChar();
             }
@@ -213,11 +259,15 @@ namespace eokas {
             return str;
         }
         
-        char escapeChar() {
+        char escapeChar()
+        {
             char c = this->nextChar();
-            switch (c) {
-                case 'u': {
-                    if (mPosition + 4 >= mSource.length()) {
+            switch (c)
+            {
+                case 'u':
+                {
+                    if (mPosition + 4 >= mSource.length())
+                    {
                         // error: Unterminated escape sequence
                         return ' ';
                     }
@@ -252,9 +302,12 @@ namespace eokas {
             }
         }
         
-        char nextCleanChar() {
-            for (char c = this->nextChar(); c != '\0'; c = this->nextChar()) {
-                switch (c) {
+        char nextCleanChar()
+        {
+            for (char c = this->nextChar(); c != '\0'; c = this->nextChar())
+            {
+                switch (c)
+                {
                     case ':':
                     case '\t':
                     case '\n':
@@ -263,7 +316,8 @@ namespace eokas {
                     case '#':  // php # comment
                         this->skipToEndOfLine();
                         continue;
-                    case '/': {
+                    case '/':
+                    {
                         char next = this->nextChar();
                         if (next == '*')  // c-style /**/ comment
                         {
@@ -272,11 +326,14 @@ namespace eokas {
                                 return '\0';
                             mPosition = commentEnd + 2;
                             continue;
-                        } else if (next == '/') // cpp style // comment
+                        }
+                        else if (next == '/') // cpp style // comment
                         {
                             this->skipToEndOfLine();
                             continue;
-                        } else {
+                        }
+                        else
+                        {
                             return c;
                         }
                     }
@@ -288,16 +345,19 @@ namespace eokas {
             return '\0';
         }
         
-        void skipToEndOfLine() {
+        void skipToEndOfLine()
+        {
             char c = this->nextChar();
-            while (c != '\0') {
+            while (c != '\0')
+            {
                 if (c == '\r' || c == '\n')
                     break;
                 c = this->nextChar();
             }
         }
         
-        char nextChar() {
+        char nextChar()
+        {
             if (mPosition >= mSource.length())
                 return '\0';
             char c = mSource.at(mPosition);
@@ -306,25 +366,34 @@ namespace eokas {
         }
     };
     
-    String JSON::stringify(const HomNode& json) {
-        switch (json.type()) {
-            case HomType::Null: {
+    String JSON::stringify(const HomNode& json)
+    {
+        switch (json.type())
+        {
+            case HomType::Null:
+            {
                 return "null";
             }
-            case HomType::Number: {
+            case HomType::Number:
+            {
                 return String::valueToString(json.asNumber());
             }
-            case HomType::Boolean: {
+            case HomType::Boolean:
+            {
                 return String::valueToString(json.asBoolean());
             }
-            case HomType::String: {
+            case HomType::String:
+            {
                 return String::format("\"%s\"", json.asString().cstr());
             }
-            case HomType::Array: {
+            case HomType::Array:
+            {
                 String str = "[";
                 bool first = true;
-                json.foreach([&](const HomNode& val)->void {
-                    if (first) {
+                json.foreach([&](const HomNode& val) -> void
+                {
+                    if (first)
+                    {
                         str += ", ";
                         first = false;
                     }
@@ -333,11 +402,14 @@ namespace eokas {
                 str += "]";
                 return str;
             }
-            case HomType::Object: {
+            case HomType::Object:
+            {
                 String str = "{";
                 bool first = true;
-                json.foreach([&](const String& key, const HomNode& val)->void {
-                    if (first) {
+                json.foreach([&](const String& key, const HomNode& val) -> void
+                {
+                    if (first)
+                    {
                         str += ", ";
                         first = false;
                     }
@@ -351,7 +423,8 @@ namespace eokas {
         return "";
     }
     
-    HomNode JSON::parse(const String& source) {
+    HomNode JSON::parse(const String& source)
+    {
         JsonParser parser{source};
         return parser.nextValue();
     }

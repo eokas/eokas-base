@@ -13,7 +13,8 @@
 #include <sys/stat.h>
 #endif
 
-namespace eokas {
+namespace eokas
+{
 
 #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
 
@@ -35,7 +36,8 @@ namespace eokas {
     FileStream::FileStream(FILE* handle)
         :mHandle(handle)
         ,mPath()
-        ,mMode(){
+        ,mMode()
+    {
         
     }
     
@@ -134,25 +136,28 @@ namespace eokas {
     == File System Interface
     =================================================================
     */
-    FileStream File::open(const eokas::String& path, const eokas::String& mode) {
+    FileStream File::open(const eokas::String& path, const eokas::String& mode)
+    {
         FILE* handle = fopen(path.cstr(), mode.cstr());
         return FileStream(handle);
     }
     
-    bool File::readText(const String& path, String& content) {
+    bool File::readText(const String& path, String& content)
+    {
         FileStream stream(path, "r");
-        if(!stream.isOpen())
+        if (!stream.isOpen())
             return false;
         size_t size = stream.size();
         content = String(' ', size);
-        stream.read((void*)content.cstr(), size);
+        stream.read((void*) content.cstr(), size);
         stream.close();
         return true;
     }
     
-    bool File::readData(const String& path, void* data, size_t size) {
+    bool File::readData(const String& path, void* data, size_t size)
+    {
         FileStream stream(path, "rb");
-        if(!stream.isOpen())
+        if (!stream.isOpen())
             return false;
         size = size <= stream.size() ? size : stream.size();
         stream.read(data, size);
@@ -160,18 +165,20 @@ namespace eokas {
         return true;
     }
     
-    bool File::writeText(const String& path, String& content) {
+    bool File::writeText(const String& path, String& content)
+    {
         FileStream stream(path, "w");
-        if(!stream.isOpen())
+        if (!stream.isOpen())
             return false;
-        stream.write((void*)content.cstr(), content.length());
+        stream.write((void*) content.cstr(), content.length());
         stream.close();
         return true;
     }
     
-    bool File::writeData(const String& path, void* data, size_t size) {
+    bool File::writeData(const String& path, void* data, size_t size)
+    {
         FileStream stream(path, "wb");
-        if(!stream.isOpen())
+        if (!stream.isOpen())
             return false;
         stream.write(data, size);
         stream.close();
@@ -354,8 +361,10 @@ namespace eokas {
         return list;
     }
     
-    FileList File::glob(const eokas::String& path, const eokas::String& pattern) {
-        auto predicate = [&](const FileInfo& info)->bool{
+    FileList File::glob(const eokas::String& path, const eokas::String& pattern)
+    {
+        auto predicate = [&](const FileInfo& info) -> bool
+        {
             std::string regex_pattern = std::regex_replace(pattern.cstr(), std::regex(R"(\.)"), R"(\.)");
             regex_pattern = std::regex_replace(regex_pattern, std::regex(R"(\*)"), R"(.*)");
             regex_pattern = std::regex_replace(regex_pattern, std::regex(R"(\?)"), R"(.)");
@@ -363,7 +372,7 @@ namespace eokas {
             return std::regex_match(info.name.cstr(), regex_expr);
         };
         return File::listFileInfos(path, predicate);
-    };
+    }
     
     String File::absolutePath(const String& path)
     {
@@ -434,7 +443,8 @@ namespace eokas {
         return path1 + "/" + path2;
     }
     
-    FileStream Process::open(const eokas::String& command, const eokas::String& mode) {
+    FileStream Process::open(const eokas::String& command, const eokas::String& mode)
+    {
 #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
         FILE* handle = _popen(command.cstr(), mode.cstr());
         return FileStream(handle);
@@ -444,7 +454,8 @@ namespace eokas {
 #endif
     }
     
-    u32_t Process::getPID() {
+    u32_t Process::getPID()
+    {
 #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
         return GetCurrentProcessId();
 #else
@@ -452,7 +463,8 @@ namespace eokas {
 #endif
     }
     
-    String Process::executingPath() {
+    String Process::executingPath()
+    {
 #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
         char buf[MAX_PATH];
         DWORD ret = GetModuleFileNameA(NULL, buf, MAX_PATH);
@@ -469,9 +481,10 @@ namespace eokas {
 #endif
     }
     
-    String Process::workingPath() {
+    String Process::workingPath()
+    {
 #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
-        char buf[MAX_PATH] = { 0 };
+        char buf[MAX_PATH] = {0};
         _getcwd(buf, MAX_PATH);
         return buf;
 #else

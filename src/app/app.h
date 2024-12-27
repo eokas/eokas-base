@@ -11,11 +11,13 @@ namespace eokas
     {
     public:
         bool init();
+        
         void quit();
+        
         void tick(float deltaTime);
-
+        
         ModuleManager& modules();
-
+    
     private:
         ModuleManager mModules;
     };

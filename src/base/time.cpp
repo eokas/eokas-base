@@ -3,7 +3,8 @@
 #include "./string.h"
 #include <limits>
 
-namespace eokas {
+namespace eokas
+{
     /*
     ============================================================================================
     ==== TimeSpan
@@ -15,161 +16,199 @@ namespace eokas {
     const i64_t TimeSpan::US_COUNT_PER_HOUR = 3600000000;
     const i64_t TimeSpan::US_COUNT_PER_DAY = 86400000000;
     
-    TimeSpan TimeSpan::maxValue() {
+    TimeSpan TimeSpan::maxValue()
+    {
         return TimeSpan(LLONG_MAX);
     }
     
-    TimeSpan TimeSpan::minValue() {
+    TimeSpan TimeSpan::minValue()
+    {
         return TimeSpan(LLONG_MIN);
     }
     
     TimeSpan::TimeSpan(i64_t usecs)
-        : mSpan(usecs) {
+        : mSpan(usecs)
+    {
     }
     
     TimeSpan::TimeSpan(i32_t days, i32_t hours, i32_t mins, i32_t secs, i32_t msecs, i32_t usecs)
-        : mSpan(US_COUNT_PER_DAY * days + US_COUNT_PER_HOUR * hours + US_COUNT_PER_MINUTE * mins + US_COUNT_PER_SECOND * secs + US_COUNT_PER_MS * msecs + usecs) {
+        : mSpan(US_COUNT_PER_DAY * days + US_COUNT_PER_HOUR * hours + US_COUNT_PER_MINUTE * mins + US_COUNT_PER_SECOND * secs + US_COUNT_PER_MS * msecs + usecs)
+    {
     }
     
     TimeSpan::TimeSpan(const TimeSpan& other)
-        : mSpan(other.mSpan) {
+        : mSpan(other.mSpan)
+    {
     }
     
-    TimeSpan::~TimeSpan() {
+    TimeSpan::~TimeSpan()
+    {
     }
     
-    TimeSpan& TimeSpan::operator=(const TimeSpan& other) {
+    TimeSpan& TimeSpan::operator=(const TimeSpan& other)
+    {
         mSpan = other.mSpan;
         return *this;
     }
     
-    TimeSpan TimeSpan::operator+(const TimeSpan& other) {
+    TimeSpan TimeSpan::operator+(const TimeSpan& other)
+    {
         return TimeSpan(mSpan + other.mSpan);
     }
     
-    TimeSpan TimeSpan::operator-(const TimeSpan& other) {
+    TimeSpan TimeSpan::operator-(const TimeSpan& other)
+    {
         return TimeSpan(mSpan - other.mSpan);
     }
     
-    TimeSpan& TimeSpan::operator+=(const TimeSpan& other) {
+    TimeSpan& TimeSpan::operator+=(const TimeSpan& other)
+    {
         mSpan += other.mSpan;
         return *this;
     }
     
-    TimeSpan& TimeSpan::operator-=(const TimeSpan& other) {
+    TimeSpan& TimeSpan::operator-=(const TimeSpan& other)
+    {
         mSpan -= other.mSpan;
         return *this;
     }
     
-    bool TimeSpan::operator>(const TimeSpan& other) {
+    bool TimeSpan::operator>(const TimeSpan& other)
+    {
         return mSpan > other.mSpan;
     }
     
-    bool TimeSpan::operator<(const TimeSpan& other) {
+    bool TimeSpan::operator<(const TimeSpan& other)
+    {
         return mSpan < other.mSpan;
     }
     
-    bool TimeSpan::operator>=(const TimeSpan& other) {
+    bool TimeSpan::operator>=(const TimeSpan& other)
+    {
         return mSpan >= other.mSpan;
     }
     
-    bool TimeSpan::operator<=(const TimeSpan& other) {
+    bool TimeSpan::operator<=(const TimeSpan& other)
+    {
         return mSpan <= other.mSpan;
     }
     
-    bool TimeSpan::operator==(const TimeSpan& other) {
+    bool TimeSpan::operator==(const TimeSpan& other)
+    {
         return mSpan == other.mSpan;
     }
     
-    bool TimeSpan::operator!=(const TimeSpan& other) {
+    bool TimeSpan::operator!=(const TimeSpan& other)
+    {
         return mSpan != other.mSpan;
     }
     
-    i64_t TimeSpan::dayPart() const {
+    i64_t TimeSpan::dayPart() const
+    {
         return mSpan / US_COUNT_PER_DAY;
     }
     
-    i64_t TimeSpan::hourPart() const {
+    i64_t TimeSpan::hourPart() const
+    {
         return mSpan % US_COUNT_PER_DAY / US_COUNT_PER_HOUR;
     }
     
-    i64_t TimeSpan::minutePart() const {
+    i64_t TimeSpan::minutePart() const
+    {
         return mSpan % US_COUNT_PER_DAY % US_COUNT_PER_HOUR / US_COUNT_PER_MINUTE;
     }
     
-    i64_t TimeSpan::secondPart() const {
+    i64_t TimeSpan::secondPart() const
+    {
         return mSpan % US_COUNT_PER_DAY % US_COUNT_PER_HOUR % US_COUNT_PER_MINUTE / US_COUNT_PER_SECOND;
     }
     
-    i64_t TimeSpan::millisecondPart() const {
+    i64_t TimeSpan::millisecondPart() const
+    {
         return mSpan % US_COUNT_PER_DAY % US_COUNT_PER_HOUR % US_COUNT_PER_MINUTE % US_COUNT_PER_SECOND / US_COUNT_PER_MS;
     }
     
-    i64_t TimeSpan::microsecondPart() const {
+    i64_t TimeSpan::microsecondPart() const
+    {
         return mSpan % US_COUNT_PER_MS;
     }
     
-    i64_t TimeSpan::totalDays() const {
+    i64_t TimeSpan::totalDays() const
+    {
         i64_t result = mSpan / US_COUNT_PER_DAY;
-        if (mSpan % US_COUNT_PER_DAY > 0) {
+        if (mSpan % US_COUNT_PER_DAY > 0)
+        {
             result += 1;
         }
         return result;
     }
     
-    i64_t TimeSpan::totalHours() const {
+    i64_t TimeSpan::totalHours() const
+    {
         i64_t result = mSpan / US_COUNT_PER_HOUR;
-        if (mSpan % US_COUNT_PER_HOUR > 0) {
+        if (mSpan % US_COUNT_PER_HOUR > 0)
+        {
             result += 1;
         }
         return result;
     }
     
-    i64_t TimeSpan::totalMinutes() const {
+    i64_t TimeSpan::totalMinutes() const
+    {
         i64_t result = mSpan / US_COUNT_PER_MINUTE;
-        if (mSpan % US_COUNT_PER_MINUTE > 0) {
+        if (mSpan % US_COUNT_PER_MINUTE > 0)
+        {
             result += 1;
         }
         return result;
     }
     
-    i64_t TimeSpan::totalSeconds() const {
+    i64_t TimeSpan::totalSeconds() const
+    {
         i64_t result = mSpan / US_COUNT_PER_SECOND;
-        if (mSpan % US_COUNT_PER_SECOND > 0) {
+        if (mSpan % US_COUNT_PER_SECOND > 0)
+        {
             result += 1;
         }
         return result;
     }
     
-    i64_t TimeSpan::totalMilliseconds() const {
+    i64_t TimeSpan::totalMilliseconds() const
+    {
         i64_t result = mSpan / US_COUNT_PER_MS;
-        if (mSpan % US_COUNT_PER_MS > 0) {
+        if (mSpan % US_COUNT_PER_MS > 0)
+        {
             result += 1;
         }
         return result;
     }
     
-    f64_t TimeSpan::exactDays() const {
+    f64_t TimeSpan::exactDays() const
+    {
         f64_t result = mSpan / (US_COUNT_PER_DAY + 0.0);
         return result;
     }
     
-    f64_t TimeSpan::exactHours() const {
+    f64_t TimeSpan::exactHours() const
+    {
         f64_t result = mSpan / (US_COUNT_PER_HOUR + 0.0);
         return result;
     }
     
-    f64_t TimeSpan::exactMinutes() const {
+    f64_t TimeSpan::exactMinutes() const
+    {
         f64_t result = mSpan / (US_COUNT_PER_MINUTE + 0.0);
         return result;
     }
     
-    f64_t TimeSpan::exactSeconds() const {
+    f64_t TimeSpan::exactSeconds() const
+    {
         f64_t result = mSpan / (US_COUNT_PER_SECOND + 0.0);
         return result;
     }
     
-    f64_t TimeSpan::exactMilliseconds() const {
+    f64_t TimeSpan::exactMilliseconds() const
+    {
         f64_t result = mSpan / (US_COUNT_PER_MS + 0.0);
         return result;
     }
@@ -186,16 +225,19 @@ namespace eokas {
 #endif
     
     TimePoint::TimePoint()
-        : mTimeStamp(time(nullptr)) {
+        : mTimeStamp(time(nullptr))
+    {
         mTimeStruct = gmtime(&mTimeStamp);
     }
     
     TimePoint::TimePoint(time_t timeStamp)
-        : mTimeStamp(timeStamp) {
+        : mTimeStamp(timeStamp)
+    {
         mTimeStruct = gmtime(&mTimeStamp);
     }
     
-    TimePoint::TimePoint(int year, int month, int date, int hour, int minute, int sec) {
+    TimePoint::TimePoint(int year, int month, int date, int hour, int minute, int sec)
+    {
         tm utc;
         utc.tm_year = year - 1900;
         utc.tm_mon = month - 1;
@@ -210,109 +252,134 @@ namespace eokas {
     }
     
     TimePoint::TimePoint(const TimePoint& other)
-        : mTimeStamp(other.mTimeStamp) {
+        : mTimeStamp(other.mTimeStamp)
+    {
         mTimeStruct = gmtime(&mTimeStamp);
     }
     
-    TimePoint::~TimePoint() {
+    TimePoint::~TimePoint()
+    {
     }
     
-    TimePoint& TimePoint::operator=(const TimePoint& other) {
+    TimePoint& TimePoint::operator=(const TimePoint& other)
+    {
         mTimeStamp = other.mTimeStamp;
         mTimeStruct = gmtime(&mTimeStamp);
         return *this;
     }
     
-    TimePoint TimePoint::operator+(const TimeSpan& span) {
+    TimePoint TimePoint::operator+(const TimeSpan& span)
+    {
         return TimePoint(time_t(mTimeStamp + span.totalSeconds()));
     }
     
-    TimePoint TimePoint::operator-(const TimeSpan& span) {
+    TimePoint TimePoint::operator-(const TimeSpan& span)
+    {
         return TimePoint(time_t(mTimeStamp - span.totalSeconds()));
     }
     
-    TimePoint& TimePoint::operator+=(const TimeSpan& span) {
+    TimePoint& TimePoint::operator+=(const TimeSpan& span)
+    {
         mTimeStamp += span.totalSeconds();
         mTimeStruct = gmtime(&mTimeStamp);
         return *this;
     }
     
-    TimePoint& TimePoint::operator-=(const TimeSpan& span) {
+    TimePoint& TimePoint::operator-=(const TimeSpan& span)
+    {
         mTimeStamp -= span.totalSeconds();
         mTimeStruct = gmtime(&mTimeStamp);
         return *this;
     }
     
-    TimeSpan TimePoint::operator-(const TimePoint& other) {
+    TimeSpan TimePoint::operator-(const TimePoint& other)
+    {
         return TimeSpan((mTimeStamp - other.mTimeStamp) * TimeSpan::US_COUNT_PER_SECOND);
     }
     
-    bool TimePoint::operator==(const TimePoint& other) {
+    bool TimePoint::operator==(const TimePoint& other)
+    {
         return mTimeStamp == other.mTimeStamp;
     }
     
-    bool TimePoint::operator!=(const TimePoint& other) {
+    bool TimePoint::operator!=(const TimePoint& other)
+    {
         return mTimeStamp != other.mTimeStamp;
     }
     
-    bool TimePoint::operator>(const TimePoint& other) {
+    bool TimePoint::operator>(const TimePoint& other)
+    {
         return mTimeStamp > other.mTimeStamp;
     }
     
-    bool TimePoint::operator<(const TimePoint& other) {
+    bool TimePoint::operator<(const TimePoint& other)
+    {
         return mTimeStamp < other.mTimeStamp;
     }
     
-    bool TimePoint::operator>=(const TimePoint& other) {
+    bool TimePoint::operator>=(const TimePoint& other)
+    {
         return mTimeStamp >= other.mTimeStamp;
     }
     
-    bool TimePoint::operator<=(const TimePoint& other) {
+    bool TimePoint::operator<=(const TimePoint& other)
+    {
         return mTimeStamp <= other.mTimeStamp;
     }
     
-    u64_t TimePoint::timestamp() const {
+    u64_t TimePoint::timestamp() const
+    {
         return (u64_t) mTimeStamp;
     }
     
-    i32_t TimePoint::year() const {
+    i32_t TimePoint::year() const
+    {
         return mTimeStruct->tm_year + 1900;
     }
     
-    i32_t TimePoint::month() const {
+    i32_t TimePoint::month() const
+    {
         return mTimeStruct->tm_mon + 1;
     }
     
-    i32_t TimePoint::date() const {
+    i32_t TimePoint::date() const
+    {
         return mTimeStruct->tm_mday;
     }
     
-    i32_t TimePoint::hour() const {
+    i32_t TimePoint::hour() const
+    {
         return mTimeStruct->tm_hour;
     }
     
-    i32_t TimePoint::minute() const {
+    i32_t TimePoint::minute() const
+    {
         return mTimeStruct->tm_min;
     }
     
-    i32_t TimePoint::second() const {
+    i32_t TimePoint::second() const
+    {
         return mTimeStruct->tm_sec;
     }
     
-    i32_t TimePoint::dayOfWeek() const {
+    i32_t TimePoint::dayOfWeek() const
+    {
         return mTimeStruct->tm_wday;
     }
     
-    i32_t TimePoint::dayofYear() const {
+    i32_t TimePoint::dayofYear() const
+    {
         return mTimeStruct->tm_yday;
     }
     
-    bool TimePoint::isLeapYear() const {
+    bool TimePoint::isLeapYear() const
+    {
         i32_t year = this->year();
         return (year % 4 == 0) || (year % 400 == 0);
     }
     
-    String TimePoint::toString(const String& fmt) {
+    String TimePoint::toString(const String& fmt)
+    {
         String result = fmt;
         
         result = result.replace("YYYY", String::format("%04d", this->year()));

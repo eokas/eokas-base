@@ -1,5 +1,6 @@
 #include "./config.h"
 
-namespace eokas {
+namespace eokas
+{
 
 }
