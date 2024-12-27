@@ -4,7 +4,8 @@
 
 #include "./header.h"
 
-namespace eokas {
+namespace eokas
+{
 
 #define _ascil_in_range(c, a, b)        ((c) >= (a) && (c) <= (b))
 #define _ascil_is_ascil(c)                _ascil_in_range(c, 0x00, 0x7F)
@@ -25,71 +26,88 @@ namespace eokas {
 #define _ascil_is_alpha_(c)                (_ascil_is_alpha(c) || (c) == '_')
 #define _ascil_is_alpha_number_(c)        (_ascil_is_alpha_number(c) || (c) == '_')
     
-    struct Ascil {
+    struct Ascil
+    {
         char value;
         
         Ascil(char c)
-            : value(c) {
+            : value(c)
+        {
         }
         
-        Ascil& operator=(char c) {
+        Ascil& operator=(char c)
+        {
             this->value = c;
             return *this;
         }
         
-        operator char() {
+        operator char()
+        {
             return this->value;
         }
         
-        inline bool inRange(char a, char b) {
+        inline bool inRange(char a, char b)
+        {
             return _ascil_in_range(this->value, a, b);
         }
         
-        inline bool isAscil() {
+        inline bool isAscil()
+        {
             return _ascil_is_ascil(this->value);
         }
         
-        inline bool isControl() {
+        inline bool isControl()
+        {
             return _ascil_is_control(this->value);
         }
         
-        inline bool isSpace() {
+        inline bool isSpace()
+        {
             return _ascil_is_space(this->value);
         }
         
-        inline bool isNumber() {
+        inline bool isNumber()
+        {
             return _ascil_is_number(this->value);
         }
         
-        inline bool isUpper() {
+        inline bool isUpper()
+        {
             return _ascil_is_upper(this->value);
         }
         
-        inline bool isLower() {
+        inline bool isLower()
+        {
             return _ascil_is_lower(this->value);
         }
         
-        inline bool isPunct() {
+        inline bool isPunct()
+        {
             return _ascil_is_punct(this->value);
         }
         
-        inline bool isAlpha() {
+        inline bool isAlpha()
+        {
             return _ascil_is_alpha(this->value);
         }
         
-        inline bool isHex() {
+        inline bool isHex()
+        {
             return _ascil_is_hex(this->value);
         }
         
-        inline bool isAlphaNumber() {
+        inline bool isAlphaNumber()
+        {
             return _ascil_is_alpha_number(this->value);
         }
         
-        inline bool isAlpha_() {
+        inline bool isAlpha_()
+        {
             return _ascil_is_alpha_(this->value);
         }
         
-        inline bool isAlphaNumber_() {
+        inline bool isAlphaNumber_()
+        {
             return _ascil_is_alpha_number_(this->value);
         }
     };

@@ -1,10 +1,12 @@
 #include "app/app.h"
 #include "native/utils.h"
 
-namespace eokas {
-    bool App::init() {
+namespace eokas
+{
+    bool App::init()
+    {
         String configJson;
-        if(!File::readText("../config/config.json", configJson))
+        if (!File::readText("../config/config.json", configJson))
             return false;
         std::shared_ptr<HomValue> json = JSON::parse(configJson);
         
@@ -12,15 +14,18 @@ namespace eokas {
         return true;
     }
     
-    void App::quit() {
+    void App::quit()
+    {
         mModules.quit();
     }
     
-    void App::tick(float deltaTime) {
+    void App::tick(float deltaTime)
+    {
         mModules.quit();
     }
     
-    ModuleManager& App::modules() {
+    ModuleManager& App::modules()
+    {
         return mModules;
     }
 }

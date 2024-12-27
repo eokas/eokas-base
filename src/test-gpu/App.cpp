@@ -34,12 +34,13 @@ int WinMain( _In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LP
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
-    
+
 #if _WIN32
     ::ShowWindow(::GetConsoleWindow(), SW_HIDE);
 #endif
     
-    try {
+    try
+    {
         WNDCLASSEXA wcex;
         wcex.cbSize = sizeof(WNDCLASSEXA);
         wcex.style = CS_GLOBALCLASS;
@@ -49,24 +50,23 @@ int WinMain( _In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LP
         wcex.hInstance = hInstance;
         wcex.hIcon = NULL;
         wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-        wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+        wcex.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);
         wcex.lpszMenuName = NULL;
         wcex.lpszClassName = windowClass;
         wcex.hIconSm = NULL;
         RegisterClassExA(&wcex);
-
-        HWND hWnd = CreateWindowA(windowClass, windowTitle, WS_OVERLAPPEDWINDOW,
-            0, 0, windowWidth, windowHeight, nullptr, nullptr, hInstance, nullptr);
+        
+        HWND hWnd = CreateWindowA(windowClass, windowTitle, WS_OVERLAPPEDWINDOW, 0, 0, windowWidth, windowHeight, nullptr, nullptr, hInstance, nullptr);
         if (!hWnd)
         {
             return FALSE;
         }
         ShowWindow(hWnd, nCmdShow);
         UpdateWindow(hWnd);
-
+        
         eokas::gpu::Graphics graphics;
         graphics.init(hWnd, windowWidth, windowHeight);
-
+        
         MSG msg;
         msg.message = static_cast<UINT>(~WM_QUIT);
         while (msg.message != WM_QUIT)
@@ -81,14 +81,14 @@ int WinMain( _In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LP
                 graphics.tick(0);
             }
         }
-
+        
         graphics.quit();
-
-        return (int)msg.wParam;
+        
+        return (int) msg.wParam;
     }
-    catch (std::exception& e) {
+    catch (std::exception& e)
+    {
         MessageBoxA(NULL, e.what(), NULL, 0);
         return 1;
     }
 }
-

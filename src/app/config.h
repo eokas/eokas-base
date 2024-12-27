@@ -3,8 +3,9 @@
 
 #include "./header.h"
 
-namespace eokas {
-    class
+namespace eokas
+{
+    
 }
 
 #endif//_EOKAS_APP_CONFIG_H_

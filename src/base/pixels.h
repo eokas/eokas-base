@@ -4,9 +4,11 @@
 
 #include "./header.h"
 
-namespace eokas {
+namespace eokas
+{
     
-    enum class PixelFormat {
+    enum class PixelFormat
+    {
         Unknown = 0x0000,
         
         A8_UNORM = 0x0101,
@@ -151,21 +153,32 @@ namespace eokas {
 #define _R16G16B16A16_B(color) ((color)>>16&0xFFFF)
 #define _R16G16B16A16_A(color) ((color)&0xFFFF)
     
-    class Pixelmap {
+    class Pixelmap
+    {
     public:
         Pixelmap();
+        
         Pixelmap(const Pixelmap& pxmp);
+        
         Pixelmap(u32_t width, u32_t height, PixelFormat format, void* data = nullptr);
+        
         Pixelmap(const Pixelmap& pxmp, u32_t x, u32_t y, u32_t w, u32_t h);
+        
         virtual ~Pixelmap();
     
     public:
         u32_t width() const;
+        
         u32_t height() const;
+        
         PixelFormat format() const;
+        
         void* const data() const;
+        
         Pixelmap getArea(u32_t x, u32_t y, u32_t w, u32_t h);
+        
         void setArea(u32_t x, u32_t y, const Pixelmap& pxmp);
+        
         void clear();
     
     private:
@@ -174,7 +187,6 @@ namespace eokas {
         PixelFormat mFormat;
         u8_t* mData;
     };
-    
 }
 
 #endif//_EOKAS_BASE_PIXELS_H_

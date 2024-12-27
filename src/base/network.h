@@ -5,24 +5,28 @@
 #include "./header.h"
 #include "./socket.h"
 
-namespace eokas {
+namespace eokas
+{
 
 #define _BUFFER_SIZE 1024
     
     struct NetworkSession;
     struct NetworkOperation;
     
-    enum class NetworkError {
+    enum class NetworkError
+    {
         None, Expired, Broken, Aborted
     };
     
-    enum class OperationType {
+    enum class OperationType
+    {
         None, Accept, Recv, Send, Max
     };
     
     using NetworkCallback = void (*)(NetworkSession* session, NetworkOperation* oper, NetworkError error);
     
-    struct NetworkOperation {
+    struct NetworkOperation
+    {
 #if _EOKAS_OS == _EOKAS_OS_WIN64 || _EOKAS_OS == _EOKAS_OS_WIN32
         OVERLAPPED overlapped;
         WSABUF wsabuf;
@@ -34,29 +38,38 @@ namespace eokas {
         Socket acceptedSocket;
     };
     
-    struct NetworkSession {
+    struct NetworkSession
+    {
         Socket socket;
         std::list<NetworkOperation*> operations;
         NetworkCallback callback;
         
         bool open();
+        
         bool open(AddressFamily family, SocketType socktype, ProtocolType protocol);
+        
         bool open(const Socket& socket);
+        
         void close();
+        
         bool listen(const SocketAddress& addr, int maxconn);
+        
         bool connect(const SocketAddress& addr);
+        
         bool post(NetworkOperation* oper);
     };
     
-    class NetworkService {
+    class NetworkService
+    {
     public:
         NetworkService();
+        
         ~NetworkService();
         
         bool init();
+        
         void quit();
     };
-    
 }
 
 #endif//_EOKAS_BASE_NETWORK_H_

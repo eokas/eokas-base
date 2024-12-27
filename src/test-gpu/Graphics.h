@@ -26,9 +26,11 @@ using namespace Microsoft::WRL;
 #include "gpu/main.h"
 #include "./Utilities.h"
 
-namespace eokas::gpu {
+namespace eokas::gpu
+{
     
-    class Graphics {
+    class Graphics
+    {
         Device::Ref mDevice;
         Viewport mViewport;
         PipelineState::Ref mPipelineState;
@@ -42,7 +44,8 @@ namespace eokas::gpu {
         Texture::Ref mTexture;
     
     public:
-        void init(HWND windowHandle, int32_t windowWidth, int32_t windowHeight) {
+        void init(HWND windowHandle, int32_t windowWidth, int32_t windowHeight)
+        {
             mDevice = GPUFactory::createDevice(windowHandle, windowWidth, windowHeight);
             
             mViewport.left = 0;
@@ -118,11 +121,13 @@ namespace eokas::gpu {
             mDevice->waitForGPU();
         }
         
-        void quit() {
+        void quit()
+        {
         
         }
         
-        void tick(float delta) {
+        void tick(float delta)
+        {
             // fill command buffer
             {
                 mCommandBuffer->reset(mPipelineState);
@@ -158,7 +163,8 @@ namespace eokas::gpu {
             mDevice->waitForNextFrame();
         }
         
-        Program::Ref compileShader(const std::string& file, ProgramType type, ProgramTarget target, const char* entry) {
+        Program::Ref compileShader(const std::string& file, ProgramType type, ProgramTarget target, const char* entry)
+        {
             
             ProgramOptions options;
             options.name = file;

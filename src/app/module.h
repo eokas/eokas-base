@@ -3,38 +3,50 @@
 
 #include "./header.h"
 
-namespace eokas {
+namespace eokas
+{
     
-    class Module {
+    class Module
+    {
     public:
         Module() = default;
+        
         virtual ~Module() = default;
         
         virtual const String& name() const = 0;
         
         virtual bool init() = 0;
+        
         virtual void quit() = 0;
+        
         virtual void tick(float deltaTime) = 0;
     };
     
     using InstallModuleFunc = Module* (*)();
-    using UninstallModuleFunc = void(*)(Module*);
+    using UninstallModuleFunc = void (*)(Module*);
     
-    struct ModulePlugin {
+    struct ModulePlugin
+    {
         Dll* dll = nullptr;
         InstallModuleFunc install = nullptr;
         UninstallModuleFunc uninstall = nullptr;
     };
     
-    class ModuleManager {
+    class ModuleManager
+    {
     public:
         bool init();
+        
         void quit();
+        
         void tick(float deltaTime);
         
         Module* getModule(const String& moduleName);
+        
         Module* loadModule(const String& moduleName);
+        
         void unloadModule(const String& moduleName);
+        
         void clearModules();
     
     private:
@@ -46,8 +58,11 @@ namespace eokas {
         std::map<String, ModulePlugin> mPlugins = {};
         
         ModulePlugin* getPlugin(const String& pluginName);
+        
         ModulePlugin* loadPlugin(const String& pluginName);
+        
         void unloadPlugin(const String& pluginName);
+        
         void clearPlugins();
     };
 }

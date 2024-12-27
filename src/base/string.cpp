@@ -3,21 +3,28 @@
 #include <cstring>
 #include <algorithm>
 
-namespace eokas {
+namespace eokas
+{
     
-    class StringPool {
+    class StringPool
+    {
     public:
-        static StringPool& instance() {
+        static StringPool& instance()
+        {
             static StringPool sInstance;
             return sInstance;
         }
         
-        ~StringPool() {
-            if (!mStrings.empty()) {
+        ~StringPool()
+        {
+            if (!mStrings.empty())
+            {
                 auto iter = mStrings.begin();
-                while (iter != mStrings.end()) {
+                while (iter != mStrings.end())
+                {
                     char* ptr = (char*) (*iter);
-                    if (ptr != nullptr) {
+                    if (ptr != nullptr)
+                    {
                         delete[]ptr;
                     }
                     ++iter;
@@ -26,11 +33,15 @@ namespace eokas {
             }
         }
         
-        char* get() {
+        char* get()
+        {
             char* ptr = nullptr;
-            if (mStrings.empty()) {
+            if (mStrings.empty())
+            {
                 ptr = new char[_STRING_MIDDLE_LENGTH + 1];
-            } else {
+            }
+            else
+            {
                 ptr = (char*) mStrings.front();
                 mStrings.pop_front();
             }
@@ -38,7 +49,8 @@ namespace eokas {
             return ptr;
         }
         
-        void put(char* ptr) {
+        void put(char* ptr)
+        {
             if (ptr == nullptr)
                 return;
             mStrings.push_back(ptr);
@@ -55,7 +67,8 @@ namespace eokas {
     const String String::trueValue = "true";
     const String String::falseValue = "false";
     
-    char String::measure(size_t len) {
+    char String::measure(size_t len)
+    {
         if (len >= _STRING_MIDDLE_LENGTH)
             return 2;
         if (len >= _STRING_LITTLE_LENGTH)
@@ -63,7 +76,8 @@ namespace eokas {
         return 0;
     }
     
-    size_t String::predict(size_t len) {
+    size_t String::predict(size_t len)
+    {
         if (len >= _STRING_MIDDLE_LENGTH)
             return (size_t) (len * 2);
         if (len >= _STRING_LITTLE_LENGTH)
@@ -100,9 +114,11 @@ namespace eokas {
     U-00200000 - U-03FFFFFF: 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
     U-04000000 - U-7FFFFFFF: 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
     */
-    MBString String::unicodeToUtf8(const WCString& unicodeStr, bool bom) {
+    MBString String::unicodeToUtf8(const WCString& unicodeStr, bool bom)
+    {
         std::stringstream utf8;
-        if (bom) {
+        if (bom)
+        {
             utf8 << "\xef\xbb\xbf"; // utf8 bom is EF BB BF
         }
         
@@ -110,19 +126,26 @@ namespace eokas {
         size_t length = unicodeStr.length();
         size_t count = 0;
         // check and ignore bom in unicodeStr
-        if (length >= 1 && pos[0] == 0xFEFF) {
+        if (length >= 1 && pos[0] == 0xFEFF)
+        {
             count += 1;
             pos += 1;
         }
-        while (count < length) {
-            if (*pos < 0x80) {
+        while (count < length)
+        {
+            if (*pos < 0x80)
+            {
                 char c1 = *pos & 0x7f;
                 utf8 << c1;
-            } else if (*pos < 0x800) {
+            }
+            else if (*pos < 0x800)
+            {
                 char c1 = ((*pos >> 6) & 0x1f) | 0xc0;
                 char c2 = (*pos & 0x3f) | 0x80;
                 utf8 << c1 << c2;
-            } else if (*pos < 0x10000) {
+            }
+            else if (*pos < 0x10000)
+            {
                 char c1 = ((*pos >> 12) & 0x0f) | 0xe0;
                 char c2 = ((*pos >> 6) & 0x3f) | 0x80;
                 char c3 = (*pos & 0x3f) | 0x80;
@@ -164,38 +187,50 @@ namespace eokas {
         return utf8.str();
     }
     
-    WCString String::utf8ToUnicode(const MBString& utf8Str, bool bom) {
+    WCString String::utf8ToUnicode(const MBString& utf8Str, bool bom)
+    {
         std::wstringstream unicode;
-        if (bom) {
+        if (bom)
+        {
             unicode << 0xFEFF; // unicode bom
         }
         const char* pos = utf8Str.c_str();
         size_t length = utf8Str.length();
         size_t count = 0;
         // check and ignore bom in utf8Str
-        if (length >= 3 && int(pos[0]) == 0xEF && int(pos[1]) == 0xBB && int(pos[2]) == 0xBF) {
+        if (length >= 3 && int(pos[0]) == 0xEF && int(pos[1]) == 0xBB && int(pos[2]) == 0xBF)
+        {
             count += 3;
             pos += 3;
         }
-        while (count < length) {
+        while (count < length)
+        {
             wchar_t wc = L'\0';
             u8_t c = *pos;
-            if (c < 0xC0) {
+            if (c < 0xC0)
+            {
                 count += 1;
-                if (count <= length) {
+                if (count <= length)
+                {
                     wc = *pos;
                     pos += 1;
                 }
-            } else if (c < 0xE0) {
+            }
+            else if (c < 0xE0)
+            {
                 count += 2;
-                if (count <= length) {
+                if (count <= length)
+                {
                     wc = (pos[0] & 0x1F) << 6;
                     wc |= (pos[1] & 0x3F);
                     pos += 2;
                 }
-            } else if (c < 0xF0) {
+            }
+            else if (c < 0xF0)
+            {
                 count += 3;
-                if (count <= length) {
+                if (count <= length)
+                {
                     wc = (pos[0] & 0x0F) << 12;
                     wc |= (pos[1] & 0x3F) << 6;
                     wc |= (pos[2] & 0x3F);
@@ -251,7 +286,8 @@ namespace eokas {
     
     static u8_t hexchars[] = "0123456789ABCDEF";
     
-    static int str_htoi_2(const char* s) {
+    static int str_htoi_2(const char* s)
+    {
         int value = 0;
         int c = 0;
         
@@ -268,62 +304,79 @@ namespace eokas {
         return value;
     }
     
-    String String::encodeURL(const String& str) {
+    String String::encodeURL(const String& str)
+    {
         std::stringstream stream;
         const char* ptr = str.cstr();
-        while (*ptr != '\0') {
+        while (*ptr != '\0')
+        {
             char c = *ptr++;
             if (c == ' ')
                 stream << '+';
-            else if (c == '-' || c == '.' || c == '_' || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) {
+            else if (c == '-' || c == '.' || c == '_' || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))
+            {
                 stream << c;
-            } else {
+            }
+            else
+            {
                 stream << '%' << hexchars[c >> 4] << hexchars[c & 15];
             }
         }
         return stream.str();
     }
     
-    String String::decodeURL(const String& str) {
+    String String::decodeURL(const String& str)
+    {
         std::stringstream stream;
         const char* ptr = str.cstr();
-        while (*ptr != '\0') {
-            if (*ptr == '+') {
+        while (*ptr != '\0')
+        {
+            if (*ptr == '+')
+            {
                 stream << ' ';
                 ptr++;
-            } else if (*ptr == '%' && isxdigit((int) *(ptr + 1)) && isxdigit((int) *(ptr + 2))) {
+            }
+            else if (*ptr == '%' && isxdigit((int) *(ptr + 1)) && isxdigit((int) *(ptr + 2)))
+            {
                 stream << (char) str_htoi_2(ptr + 1);
                 ptr += 2;
-            } else {
+            }
+            else
+            {
                 stream << *ptr++;
             }
         }
         return stream.str();
     }
     
-    String String::format(const char* fmt, ...) {
+    String String::format(const char* fmt, ...)
+    {
         String result;
         _FormatVA(result, fmt);
         return result;
     }
     
-    String String::repeat(const String& str, size_t n) {
+    String String::repeat(const String& str, size_t n)
+    {
         if (n == 0) return "";
         std::stringstream stream;
-        for (size_t i = 0; i < n; i++) {
+        for (size_t i = 0; i < n; i++)
+        {
             stream << str.mData;
         }
         return stream.str();
     }
     
-    String String::join(const StringVector& segments, const String& delim) {
+    String String::join(const StringVector& segments, const String& delim)
+    {
         if (segments.empty())
             return "";
         std::stringstream stream;
         auto iter = segments.begin();
         stream << iter->mData;
         ++iter;
-        while (iter != segments.end()) {
+        while (iter != segments.end())
+        {
             stream << delim.mData;
             stream << iter->mData;
             ++iter;
@@ -331,14 +384,16 @@ namespace eokas {
         return stream.str();
     }
     
-    String String::join(const StringMap& segments, const String& conn, const String& delim) {
+    String String::join(const StringMap& segments, const String& conn, const String& delim)
+    {
         if (segments.empty())
             return "";
         std::stringstream stream;
         auto iter = segments.begin();
         stream << iter->first.mData << conn.mData << iter->second.mData;
         ++iter;
-        while (iter != segments.end()) {
+        while (iter != segments.end())
+        {
             stream << delim.mData;
             stream << iter->first.mData << conn.mData << iter->second.mData;
             ++iter;
@@ -347,15 +402,20 @@ namespace eokas {
     }
     
     String::String(char chr, size_t len)
-        : mData(mValue), mSize(0), mCapacity(_STRING_LITTLE_LENGTH), mMetric(0) {
+        : mData(mValue), mSize(0), mCapacity(_STRING_LITTLE_LENGTH), mMetric(0)
+    {
         mValue[0] = '\0';
         len = chr != '\0' ? len : 0;
-        if (len > 0) {
+        if (len > 0)
+        {
             mMetric = String::measure(len);
-            if (mMetric == 1) {
+            if (mMetric == 1)
+            {
                 mData = StringPool::instance().get();
                 mCapacity = _STRING_MIDDLE_LENGTH;
-            } else if (mMetric == 2) {
+            }
+            else if (mMetric == 2)
+            {
                 mCapacity = String::predict(len + 1);
                 mData = new char[mCapacity];
             }
@@ -366,16 +426,22 @@ namespace eokas {
     }
     
     String::String(const char* mbcstr, size_t len)
-        : mData(mValue), mSize(0), mCapacity(_STRING_LITTLE_LENGTH), mMetric(0) {
+        : mData(mValue), mSize(0), mCapacity(_STRING_LITTLE_LENGTH), mMetric(0)
+    {
         mValue[0] = '\0';
-        if (mbcstr != nullptr) {
+        if (mbcstr != nullptr)
+        {
             len = std::min(len, strlen(mbcstr));
-            if (len > 0) {
+            if (len > 0)
+            {
                 mMetric = String::measure(len);
-                if (mMetric == 1) {
+                if (mMetric == 1)
+                {
                     mData = StringPool::instance().get();
                     mCapacity = _STRING_MIDDLE_LENGTH;
-                } else if (mMetric == 2) {
+                }
+                else if (mMetric == 2)
+                {
                     mCapacity = String::predict(len + 1);
                     mData = new char[mCapacity];
                 }
@@ -387,39 +453,48 @@ namespace eokas {
     }
     
     String::String(const MBString& mbstr)
-        : mData(mValue), mSize(0), mCapacity(_STRING_LITTLE_LENGTH), mMetric(0) {
+        : mData(mValue), mSize(0), mCapacity(_STRING_LITTLE_LENGTH), mMetric(0)
+    {
         new(this)String(mbstr.c_str());
     }
     
     String::String(const WCString& wcstr)
-        : mData(mValue), mSize(0), mCapacity(_STRING_LITTLE_LENGTH), mMetric(0) {
+        : mData(mValue), mSize(0), mCapacity(_STRING_LITTLE_LENGTH), mMetric(0)
+    {
         new(this)String(String::unicodeToUtf8(wcstr, false).c_str());
     }
     
     String::String(const String& other)
-        : mData(mValue), mSize(0), mCapacity(_STRING_LITTLE_LENGTH), mMetric(0) {
+        : mData(mValue), mSize(0), mCapacity(_STRING_LITTLE_LENGTH), mMetric(0)
+    {
         new(this)String(other.mData);
     }
     
     String::String(String&& other)
-        : mData(mValue), mSize(other.mSize), mCapacity(other.mCapacity), mMetric(other.mMetric) {
+        : mData(mValue), mSize(other.mSize), mCapacity(other.mCapacity), mMetric(other.mMetric)
+    {
         mValue[0] = '\0';
         size_t len = mSize;
-        if (mMetric == 0) {
+        if (mMetric == 0)
+        {
             memcpy(mData, other.mData, len);
             mData[len] = '\0';
-        } else if (mMetric == 1 || mMetric == 2) {
+        }
+        else if (mMetric == 1 || mMetric == 2)
+        {
             mData = other.mData;
             other.mData = nullptr;
             other.clear();
         }
     }
     
-    String::~String() {
+    String::~String()
+    {
         this->clear();
     }
     
-    String& String::operator=(const String& rhs) {
+    String& String::operator=(const String& rhs)
+    {
         if (this == &rhs)
             return *this;
         this->clear();
@@ -427,9 +502,12 @@ namespace eokas {
         mCapacity = rhs.mCapacity;
         mMetric = rhs.mMetric;
         size_t len = mSize;
-        if (mMetric == 1) {
+        if (mMetric == 1)
+        {
             mData = StringPool::instance().get();
-        } else if (mMetric == 2) {
+        }
+        else if (mMetric == 2)
+        {
             mData = new char[mCapacity];
         }
         memcpy(mData, rhs.mData, len);
@@ -437,7 +515,8 @@ namespace eokas {
         return *this;
     }
     
-    String& String::operator=(String&& rhs) {
+    String& String::operator=(String&& rhs)
+    {
         if (this == &rhs)
             return *this;
         this->clear();
@@ -445,10 +524,13 @@ namespace eokas {
         mCapacity = rhs.mCapacity;
         mMetric = rhs.mMetric;
         size_t len = mSize;
-        if (mMetric == 0) {
+        if (mMetric == 0)
+        {
             memcpy(mData, rhs.mData, len);
             mData[len] = '\0';
-        } else if (mMetric == 1 || mMetric == 2) {
+        }
+        else if (mMetric == 1 || mMetric == 2)
+        {
             mData = rhs.mData;
             rhs.mData = nullptr;
             rhs.clear();
@@ -456,11 +538,13 @@ namespace eokas {
         return *this;
     }
     
-    String& String::operator+=(const String& rhs) {
+    String& String::operator+=(const String& rhs)
+    {
         return this->append(rhs);
     }
     
-    String String::operator+(const String& rhs) const {
+    String String::operator+(const String& rhs) const
+    {
         size_t len1 = mSize;
         if (len1 == 0)
             return rhs;
@@ -473,10 +557,13 @@ namespace eokas {
         char metric = String::measure(len1 + len2);
         size_t capacity = _STRING_LITTLE_LENGTH;
         char* ptr = result.mData;
-        if (metric == 1) {
+        if (metric == 1)
+        {
             capacity = _STRING_MIDDLE_LENGTH;
             ptr = StringPool::instance().get();
-        } else if (metric == 2) {
+        }
+        else if (metric == 2)
+        {
             capacity = String::predict(len1 + len2 + 1);
             ptr = new char[capacity];
         }
@@ -490,39 +577,51 @@ namespace eokas {
         return result;
     }
     
-    bool String::operator>(const String& rhs) const {
+    bool String::operator>(const String& rhs) const
+    {
         return std::strcmp(mData, rhs.mData) > 0;
     }
     
-    bool String::operator<(const String& rhs) const {
+    bool String::operator<(const String& rhs) const
+    {
         return std::strcmp(mData, rhs.mData) < 0;
     }
     
-    bool String::operator>=(const String& rhs) const {
+    bool String::operator>=(const String& rhs) const
+    {
         return std::strcmp(mData, rhs.mData) >= 0;
     }
     
-    bool String::operator<=(const String& rhs) const {
+    bool String::operator<=(const String& rhs) const
+    {
         return std::strcmp(mData, rhs.mData) <= 0;
     }
     
-    bool String::operator==(const String& rhs) const {
+    bool String::operator==(const String& rhs) const
+    {
         return std::strcmp(mData, rhs.mData) == 0;
     }
     
-    bool String::operator!=(const String& rhs) const {
+    bool String::operator!=(const String& rhs) const
+    {
         return std::strcmp(mData, rhs.mData) != 0;
     }
     
-    const char* String::operator*() const {
+    const char* String::operator*() const
+    {
         return this->cstr();
     }
     
-    String& String::clear() {
-        if (mData != nullptr) {
-            if (mMetric == 1) {
+    String& String::clear()
+    {
+        if (mData != nullptr)
+        {
+            if (mMetric == 1)
+            {
                 StringPool::instance().put(mData);
-            } else if (mMetric == 2) {
+            }
+            else if (mMetric == 2)
+            {
                 delete[]mData;
             }
             mData = nullptr;
@@ -536,7 +635,8 @@ namespace eokas {
         return *this;
     }
     
-    String& String::append(const String& str) {
+    String& String::append(const String& str)
+    {
         if (this == &str || str.isEmpty())
             return *this;
         
@@ -545,15 +645,22 @@ namespace eokas {
         
         size_t capacity = mCapacity;
         char metric = String::measure(len1 + len2);
-        if (metric == mMetric) {
-            if (metric == 0 || metric == 1) {
+        if (metric == mMetric)
+        {
+            if (metric == 0 || metric == 1)
+            {
                 memcpy(mData + len1, str.mData, len2);
                 mData[len1 + len2] = '\0';
-            } else if (metric == 2) {
-                if (capacity >= len1 + len2 + 1) {
+            }
+            else if (metric == 2)
+            {
+                if (capacity >= len1 + len2 + 1)
+                {
                     memcpy(mData + len1, str.mData, len2);
                     mData[len1 + len2] = '\0';
-                } else {
+                }
+                else
+                {
                     capacity = String::predict(len1 + len2 + 1);
                     char* ptr = new char[capacity];
                     
@@ -565,8 +672,11 @@ namespace eokas {
                     mData = ptr;
                 }
             }
-        } else {
-            if (metric == 1) {
+        }
+        else
+        {
+            if (metric == 1)
+            {
                 capacity = _STRING_MIDDLE_LENGTH;
                 char* ptr = StringPool::instance().get();
                 
@@ -575,7 +685,9 @@ namespace eokas {
                 ptr[len1 + len2] = '\0';
                 
                 mData = ptr;
-            } else if (metric == 2) {
+            }
+            else if (metric == 2)
+            {
                 capacity = String::predict(len1 + len2 + 1);
                 char* ptr = new char[capacity];
                 
@@ -583,7 +695,8 @@ namespace eokas {
                 memcpy(ptr + len1, str.mData, len2);
                 ptr[len1 + len2] = '\0';
                 
-                if (mMetric == 1) {
+                if (mMetric == 1)
+                {
                     StringPool::instance().put(mData);
                 }
                 mData = ptr;
@@ -595,7 +708,8 @@ namespace eokas {
         return *this;
     }
     
-    String& String::insert(size_t pos, const String& str) {
+    String& String::insert(size_t pos, const String& str)
+    {
         if (this == &str || str.isEmpty())
             return *this;
         
@@ -606,17 +720,24 @@ namespace eokas {
         
         size_t capacity = mCapacity;
         char metric = String::measure(len1 + len2);
-        if (metric == mMetric) {
-            if (metric == 0 || metric == 1) {
+        if (metric == mMetric)
+        {
+            if (metric == 0 || metric == 1)
+            {
                 memcpy(mData + pos + len2, mData + pos, len1 - pos);
                 memcpy(mData + pos, str.mData, len2);
                 mData[len1 + len2] = '\0';
-            } else if (metric == 2) {
-                if (capacity >= len1 + len2 + 1) {
+            }
+            else if (metric == 2)
+            {
+                if (capacity >= len1 + len2 + 1)
+                {
                     memcpy(mData + pos + len2, mData + pos, len1 - pos);
                     memcpy(mData + pos, str.mData, len2);
                     mData[len1 + len2] = '\0';
-                } else {
+                }
+                else
+                {
                     capacity = String::predict(len1 + len2 + 1);
                     char* ptr = new char[capacity];
                     
@@ -629,8 +750,11 @@ namespace eokas {
                     mData = ptr;
                 }
             }
-        } else {
-            if (metric == 1) {
+        }
+        else
+        {
+            if (metric == 1)
+            {
                 capacity = _STRING_MIDDLE_LENGTH;
                 char* ptr = StringPool::instance().get();
                 
@@ -640,7 +764,9 @@ namespace eokas {
                 ptr[len1 + len2] = '\0';
                 
                 mData = ptr;
-            } else if (metric == 2) {
+            }
+            else if (metric == 2)
+            {
                 capacity = String::predict(len1 + len2 + 1);
                 char* ptr = new char[capacity];
                 
@@ -649,7 +775,8 @@ namespace eokas {
                 memcpy(ptr + pos + len2, mData + pos, len1 - pos);
                 ptr[len1 + len2] = '\0';
                 
-                if (mMetric == 1) {
+                if (mMetric == 1)
+                {
                     StringPool::instance().put(mData);
                 }
                 mData = ptr;
@@ -661,7 +788,8 @@ namespace eokas {
         return *this;
     }
     
-    String& String::remove(size_t pos, size_t len) {
+    String& String::remove(size_t pos, size_t len)
+    {
         if (pos > mSize) pos = mSize;
         if (pos + len > mSize) len = mSize - pos;
         if (len == 0)
@@ -671,26 +799,35 @@ namespace eokas {
         
         size_t nlen = mSize - len;
         char metric = String::measure(nlen);
-        if (metric == mMetric) {
+        if (metric == mMetric)
+        {
             memcpy(mData + pos, mData + pos + len, mSize - pos - len);
             mData[nlen] = '\0';
             mSize = nlen;
-        } else {
-            if (metric == 0) {
+        }
+        else
+        {
+            if (metric == 0)
+            {
                 char* ptr = mValue;
                 memcpy(ptr, mData, pos);
                 memcpy(ptr + pos, mData + pos + len, mSize - pos - len);
                 ptr[nlen] = '\0';
-                if (mMetric == 1) {
+                if (mMetric == 1)
+                {
                     StringPool::instance().put(mData);
-                } else if (mMetric == 2) {
+                }
+                else if (mMetric == 2)
+                {
                     delete[]mData;
                 }
                 mData = ptr;
                 mSize = nlen;
                 mCapacity = _STRING_LITTLE_LENGTH;
                 mMetric = metric;
-            } else if (metric == 1) {
+            }
+            else if (metric == 1)
+            {
                 char* ptr = StringPool::instance().get();
                 memcpy(ptr, mData, pos);
                 memcpy(ptr + pos, mData + pos + len, mSize - pos - len);
@@ -707,46 +844,54 @@ namespace eokas {
         return *this;
     }
     
-    size_t String::length() const {
+    size_t String::length() const
+    {
         return mSize;
     }
     
-    const char* String::cstr() const {
+    const char* String::cstr() const
+    {
         return mData;
     }
     
-    bool String::isEmpty() const {
+    bool String::isEmpty() const
+    {
         return mData[0] == '\0';
     }
     
-    char String::at(size_t index) const {
+    char String::at(size_t index) const
+    {
         if (index >= mSize)
             return '\0';
         return mData[index];
     }
     
-    size_t String::find(char chr, size_t pos) const {
+    size_t String::find(char chr, size_t pos) const
+    {
         const char* ptr = ::strchr(mData + pos, chr);
         if (ptr == nullptr)
             return npos;
         return ptr - mData;
     }
     
-    size_t String::find(const String& str, size_t pos) const {
+    size_t String::find(const String& str, size_t pos) const
+    {
         const char* ptr = ::strstr(mData + pos, str.mData);
         if (ptr == nullptr)
             return npos;
         return ptr - mData;
     }
     
-    size_t String::rfind(char chr) const {
+    size_t String::rfind(char chr) const
+    {
         const char* ptr = ::strrchr(mData, chr);
         if (ptr == nullptr)
             return npos;
         return ptr - mData;
     }
     
-    size_t String::rfind(const String& str) const {
+    size_t String::rfind(const String& str) const
+    {
         const String& rs = this->reverse();
         const String& rf = str.reverse();
         
@@ -757,14 +902,17 @@ namespace eokas {
         return this->length() - rp;
     }
     
-    bool String::contains(const String& str) const {
+    bool String::contains(const String& str) const
+    {
         char* ptr = ::strstr(mData, str.mData);
         return ptr != nullptr;
     }
     
-    bool String::containsOne(const StringVector& strs) const {
+    bool String::containsOne(const StringVector& strs) const
+    {
         auto iter = strs.begin();
-        while (iter != strs.end()) {
+        while (iter != strs.end())
+        {
             if (this->contains(*iter))
                 return true;
             ++iter;
@@ -772,9 +920,11 @@ namespace eokas {
         return false;
     }
     
-    bool String::containsAll(const StringVector& strs) const {
+    bool String::containsAll(const StringVector& strs) const
+    {
         auto iter = strs.begin();
-        while (iter != strs.end()) {
+        while (iter != strs.end())
+        {
             if (this->contains(*iter))
                 return false;
             ++iter;
@@ -782,7 +932,8 @@ namespace eokas {
         return true;
     }
     
-    bool String::startsWith(const String& str) const {
+    bool String::startsWith(const String& str) const
+    {
         size_t len1 = this->length();
         size_t len2 = str.length();
         if (len1 < len2 || len2 == 0)
@@ -790,9 +941,11 @@ namespace eokas {
         return memcmp(mData, str.mData, len2) == 0;
     }
     
-    bool String::startsWith(const StringVector& strs) const {
+    bool String::startsWith(const StringVector& strs) const
+    {
         auto iter = strs.begin();
-        while (iter != strs.end()) {
+        while (iter != strs.end())
+        {
             if (this->startsWith(*iter))
                 return true;
             ++iter;
@@ -800,7 +953,8 @@ namespace eokas {
         return false;
     }
     
-    bool String::endsWith(const String& str) const {
+    bool String::endsWith(const String& str) const
+    {
         size_t len1 = this->length();
         size_t len2 = str.length();
         if (len1 < len2 || len2 == 0)
@@ -808,9 +962,11 @@ namespace eokas {
         return memcmp(mData + len1 - len2, str.mData, len2) == 0;
     }
     
-    bool String::endsWith(const StringVector& strs) const {
+    bool String::endsWith(const StringVector& strs) const
+    {
         auto iter = strs.begin();
-        while (iter != strs.end()) {
+        while (iter != strs.end())
+        {
             if (this->endsWith(*iter))
                 return true;
             ++iter;
@@ -818,100 +974,120 @@ namespace eokas {
         return false;
     }
     
-    String String::toUpper() const {
+    String String::toUpper() const
+    {
         String result(*this);
         char* ptr = result.mData;
-        while (*ptr != '\0') {
+        while (*ptr != '\0')
+        {
             *ptr = (char) toupper(*ptr);
             ptr++;
         }
         return result;
     }
     
-    String String::toLower() const {
+    String String::toLower() const
+    {
         String result(*this);
         char* ptr = result.mData;
-        while (*ptr != '\0') {
+        while (*ptr != '\0')
+        {
             *ptr = (char) tolower(*ptr);
             ptr++;
         }
         return result;
     }
     
-    String String::reverse() const {
+    String String::reverse() const
+    {
         if (this->isEmpty())
             return "";
         String result(*this);
         char* src = this->mData;
         char* dst = result.mData + result.length() - 1;
-        while (*src != '\0') {
+        while (*src != '\0')
+        {
             *dst-- = *src++;
         }
         return result;
     }
     
-    String String::substr(size_t pos, size_t len) const {
+    String String::substr(size_t pos, size_t len) const
+    {
         return String(mData + pos, len);
     }
     
-    String String::left(size_t len) const {
+    String String::left(size_t len) const
+    {
         return this->substr(0, len);
     }
     
-    String String::right(size_t len) const {
+    String String::right(size_t len) const
+    {
         size_t slen = this->length();
         if (slen < len)
             return mData;
         return this->substr(slen - len, len);
     }
     
-    String String::replace(const String& str1, const String& str2) const {
+    String String::replace(const String& str1, const String& str2) const
+    {
         String result(*this);
         size_t index = result.find(str1);
-        while (index != npos) {
+        while (index != npos)
+        {
             result = result.remove(index, str1.length()).insert(index, str2);
             index = result.find(str1, index + str2.length());
         }
         return result;
     }
     
-    String String::replace(const StringMap& nameValues) const {
+    String String::replace(const StringMap& nameValues) const
+    {
         String result(*this);
         auto iter = nameValues.begin();
-        while (iter != nameValues.end()) {
+        while (iter != nameValues.end())
+        {
             result = result.replace(iter->first, iter->second);
             ++iter;
         }
         return result;
     }
     
-    String String::trim(bool left, bool right) const {
+    String String::trim(bool left, bool right) const
+    {
         if (this->isEmpty())
             return "";
         
         const char* beg = mData;
         const char* end = mData + this->length();
-        if (left) {
+        if (left)
+        {
             while (isspace(*beg))beg++;
         }
-        if (right) {
-            while (isspace(*(end-1))) end--;
+        if (right)
+        {
+            while (isspace(*(end - 1))) end--;
         }
         return this->substr(beg - mData, end - beg);
     }
     
-    StringVector String::split(const String& delim) const {
+    StringVector String::split(const String& delim) const
+    {
         StringVector result;
         size_t len = this->length();
         size_t beg = 0;
-        while (beg < len) {
+        while (beg < len)
+        {
             size_t end = this->find(delim, beg);
-            if (end == -1) {
+            if (end == -1)
+            {
                 result.push_back(this->substr(beg));
                 break;
             }
             
-            if (end > beg) {
+            if (end > beg)
+            {
                 result.push_back(this->substr(beg, end - beg));
             }
             beg = end + delim.length();
@@ -931,192 +1107,236 @@ namespace eokas {
     const StringValue StringValue::falseValue("false");
     
     StringValue::StringValue(const StringValue& var)
-        : mValue(var.mValue) {
+        : mValue(var.mValue)
+    {
     }
     
     StringValue::StringValue(const String& value)
-        : mValue(value) {
+        : mValue(value)
+    {
     }
     
     StringValue::StringValue(const char* value)
-        : mValue(value) {
+        : mValue(value)
+    {
     }
     
     StringValue::StringValue(i8_t value)
-        : mValue(value) {
+        : mValue(value)
+    {
     }
     
     StringValue::StringValue(u8_t value)
-        : mValue(value) {
+        : mValue(value)
+    {
     }
     
     StringValue::StringValue(i16_t value)
-        : mValue(String::valueToString(value)) {
+        : mValue(String::valueToString(value))
+    {
     }
     
     StringValue::StringValue(u16_t value)
-        : mValue(String::valueToString(value)) {
+        : mValue(String::valueToString(value))
+    {
     }
     
     StringValue::StringValue(i32_t value)
-        : mValue(String::valueToString(value)) {
+        : mValue(String::valueToString(value))
+    {
     }
     
     StringValue::StringValue(u32_t value)
-        : mValue(String::valueToString(value)) {
+        : mValue(String::valueToString(value))
+    {
     }
     
     StringValue::StringValue(i64_t value)
-        : mValue(String::valueToString(value)) {
+        : mValue(String::valueToString(value))
+    {
     }
     
     StringValue::StringValue(u64_t value)
-        : mValue(String::valueToString(value)) {
+        : mValue(String::valueToString(value))
+    {
     }
     
     StringValue::StringValue(f32_t value)
-        : mValue(String::valueToString(value)) {
+        : mValue(String::valueToString(value))
+    {
     }
     
     StringValue::StringValue(f64_t value)
-        : mValue(String::valueToString(value)) {
+        : mValue(String::valueToString(value))
+    {
     }
     
     StringValue::StringValue(bool value)
-        : mValue(String::valueToString(value)) {
+        : mValue(String::valueToString(value))
+    {
     }
     
-    StringValue& StringValue::operator=(const StringValue& var) {
+    StringValue& StringValue::operator=(const StringValue& var)
+    {
         mValue = var.mValue;
         return *this;
     }
     
-    StringValue& StringValue::operator=(const String& value) {
+    StringValue& StringValue::operator=(const String& value)
+    {
         mValue = value;
         return *this;
     }
     
-    StringValue& StringValue::operator=(const char* value) {
+    StringValue& StringValue::operator=(const char* value)
+    {
         mValue = value;
         return *this;
     }
     
-    StringValue& StringValue::operator=(i8_t value) {
+    StringValue& StringValue::operator=(i8_t value)
+    {
         mValue = String::valueToString(value);
         return *this;
     }
     
-    StringValue& StringValue::operator=(u8_t value) {
+    StringValue& StringValue::operator=(u8_t value)
+    {
         mValue = String::valueToString(value);
         return *this;
     }
     
-    StringValue& StringValue::operator=(i16_t value) {
+    StringValue& StringValue::operator=(i16_t value)
+    {
         mValue = String::valueToString(value);
         return *this;
     }
     
-    StringValue& StringValue::operator=(u16_t value) {
+    StringValue& StringValue::operator=(u16_t value)
+    {
         mValue = String::valueToString(value);
         return *this;
     }
     
-    StringValue& StringValue::operator=(i32_t value) {
+    StringValue& StringValue::operator=(i32_t value)
+    {
         mValue = String::valueToString(value);
         return *this;
     }
     
-    StringValue& StringValue::operator=(u32_t value) {
+    StringValue& StringValue::operator=(u32_t value)
+    {
         mValue = String::valueToString(value);
         return *this;
     }
     
-    StringValue& StringValue::operator=(i64_t value) {
+    StringValue& StringValue::operator=(i64_t value)
+    {
         mValue = String::valueToString(value);
         return *this;
     }
     
-    StringValue& StringValue::operator=(u64_t value) {
+    StringValue& StringValue::operator=(u64_t value)
+    {
         mValue = String::valueToString(value);
         return *this;
     }
     
-    StringValue& StringValue::operator=(f32_t value) {
+    StringValue& StringValue::operator=(f32_t value)
+    {
         mValue = String::valueToString(value);
         return *this;
     }
     
-    StringValue& StringValue::operator=(f64_t value) {
+    StringValue& StringValue::operator=(f64_t value)
+    {
         mValue = String::valueToString(value);
         return *this;
     }
     
-    StringValue& StringValue::operator=(bool value) {
+    StringValue& StringValue::operator=(bool value)
+    {
         mValue = String::valueToString(value);
         return *this;
     }
     
-    StringValue::operator const String&() const {
+    StringValue::operator const String&() const
+    {
         return mValue;
     }
     
-    StringValue::operator i8_t() const {
+    StringValue::operator i8_t() const
+    {
         return String::stringToValue<i8_t>(mValue);
     }
     
-    StringValue::operator u8_t() const {
+    StringValue::operator u8_t() const
+    {
         return String::stringToValue<i8_t>(mValue);
     }
     
-    StringValue::operator i16_t() const {
+    StringValue::operator i16_t() const
+    {
         return String::stringToValue<i16_t>(mValue);
     }
     
-    StringValue::operator u16_t() const {
+    StringValue::operator u16_t() const
+    {
         return String::stringToValue<u16_t>(mValue);
     }
     
-    StringValue::operator i32_t() const {
+    StringValue::operator i32_t() const
+    {
         return String::stringToValue<i32_t>(mValue);
     }
     
-    StringValue::operator u32_t() const {
+    StringValue::operator u32_t() const
+    {
         return String::stringToValue<u32_t>(mValue);
     }
     
-    StringValue::operator i64_t() const {
+    StringValue::operator i64_t() const
+    {
         return String::stringToValue<i64_t>(mValue);
     }
     
-    StringValue::operator u64_t() const {
+    StringValue::operator u64_t() const
+    {
         return String::stringToValue<u64_t>(mValue);
     }
     
-    StringValue::operator f32_t() const {
+    StringValue::operator f32_t() const
+    {
         return String::stringToValue<f32_t>(mValue);
     }
     
-    StringValue::operator f64_t() const {
+    StringValue::operator f64_t() const
+    {
         return String::stringToValue<f64_t>(mValue);
     }
     
-    StringValue::operator bool() const {
+    StringValue::operator bool() const
+    {
         return String::stringToValue<bool>(mValue);
     }
     
-    bool StringValue::operator==(const StringValue& rhs) const {
+    bool StringValue::operator==(const StringValue& rhs) const
+    {
         return mValue == rhs.mValue;
     }
     
-    bool StringValue::operator!=(const StringValue& rhs) const {
+    bool StringValue::operator!=(const StringValue& rhs) const
+    {
         return mValue != rhs.mValue;
     }
     
-    bool StringValue::operator==(const String& rhs) const {
+    bool StringValue::operator==(const String& rhs) const
+    {
         return mValue == rhs;
     }
     
-    bool StringValue::operator!=(const String& rhs) const {
+    bool StringValue::operator!=(const String& rhs) const
+    {
         return mValue != rhs;
     }
     

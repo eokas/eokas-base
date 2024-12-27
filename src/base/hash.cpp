@@ -377,18 +377,23 @@ namespace eokas {
     {
         u32_t w[64];
         u32_t wv[8];
-        for (int i = 0; i < (int) block_nb; i++) {
+        for (int i = 0; i < (int) block_nb; i++)
+        {
             const u8_t* sub_block = message + (i << 6);
-            for (int j = 0; j < 16; j++) {
+            for (int j = 0; j < 16; j++)
+            {
                 SHA2_PACK32(&sub_block[j << 2], &w[j]);
             }
-            for (int j = 16; j < 64; j++) {
-                w[j] =  SHA256_F4(w[j -  2]) + w[j -  7] + SHA256_F3(w[j - 15]) + w[j - 16];
+            for (int j = 16; j < 64; j++)
+            {
+                w[j] = SHA256_F4(w[j - 2]) + w[j - 7] + SHA256_F3(w[j - 15]) + w[j - 16];
             }
-            for (int j = 0; j < 8; j++) {
+            for (int j = 0; j < 8; j++)
+            {
                 wv[j] = m_h[j];
             }
-            for (int j = 0; j < 64; j++) {
+            for (int j = 0; j < 64; j++)
+            {
                 u32_t t1 = wv[7] + SHA256_F2(wv[4]) + SHA2_CH(wv[4], wv[5], wv[6]) + sha256_k[j] + w[j];
                 u32_t t2 = SHA256_F1(wv[0]) + SHA2_MAJ(wv[0], wv[1], wv[2]);
                 wv[7] = wv[6];
@@ -400,7 +405,8 @@ namespace eokas {
                 wv[1] = wv[0];
                 wv[0] = t1 + t2;
             }
-            for (int j = 0; j < 8; j++) {
+            for (int j = 0; j < 8; j++)
+            {
                 m_h[j] += wv[j];
             }
         }
@@ -411,7 +417,8 @@ namespace eokas {
         u32_t tmp_len = SHA224_256_BLOCK_SIZE - m_len;
         u32_t rem_len = len < tmp_len ? len : tmp_len;
         memcpy(&m_block[m_len], message, rem_len);
-        if (m_len + len < SHA224_256_BLOCK_SIZE) {
+        if (m_len + len < SHA224_256_BLOCK_SIZE)
+        {
             m_len += len;
             return;
         }
@@ -436,7 +443,8 @@ namespace eokas {
         m_block[m_len] = 0x80;
         SHA2_UNPACK32(len_b, m_block + pm_len - 4);
         transform(m_block, block_nb);
-        for (int i = 0 ; i < 8; i++) {
+        for (int i = 0 ; i < 8; i++)
+        {
             SHA2_UNPACK32(m_h[i], &digest[i << 2]);
         }
     }

@@ -7,32 +7,45 @@
 #include "./signal.h"
 #include <fstream>
 
-namespace eokas {
+namespace eokas
+{
     
-    enum class LogLevel {
+    enum class LogLevel
+    {
         Verbose, Notice, Warning, Error
     };
     
-    class Logger {
+    class Logger
+    {
     public:
         static void push(const String& name);
+        
         static void pop();
+        
         static Logger* log();
+        
         static Logger* log(const String& name);
     
     public:
         Logger();
+        
         ~Logger();
         
         bool open(const String& name);
+        
         void close();
+        
         void info(const char* fmt, ...);
+        
         void warning(const char* fmt, ...);
+        
         void error(const char* fmt, ...);
+        
         void message(LogLevel level, const String& message);
     
     public:
-        struct LogSignalMessage {
+        struct LogSignalMessage
+        {
             LogLevel level;
             String message;
         };
