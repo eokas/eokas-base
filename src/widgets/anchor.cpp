@@ -1,7 +1,7 @@
 #include "./anchor.h"
 
 namespace eokas {
-    Anchor::Anchor(Anchor* parent)
+    UIAnchor::UIAnchor(UIAnchor* parent)
         : mParent(parent)
         , mPivot()
         , mOffset()
@@ -9,79 +9,87 @@ namespace eokas {
         
     }
     
-    Anchor::~Anchor() { }
+    UIAnchor::~UIAnchor() { }
     
-    const Vector2& Anchor::offset() const {
+    const Vector2& UIAnchor::offset() const {
         return mOffset;
     }
     
-    void Anchor::offset(const Vector2& val) {
+    void UIAnchor::offset(const Vector2& val) {
         mOffset = val;
     }
     
-    const Vector2& Anchor::pivot() const {
+    Vector2 UIAnchor::position() const {
+        return mParent != nullptr ? mParent->position() + mOffset : mOffset;
+    }
+    
+    void UIAnchor::position(const Vector2& val) {
+        mOffset = mParent != nullptr ? val - mParent->position() : val;
+    }
+    
+    const Vector2& UIAnchor::pivot() const {
         return mPivot;
     }
     
-    void Anchor::pivot(const Vector2& val) {
+    void UIAnchor::pivot(const Vector2& val) {
         mPivot = val;
     }
     
-    const Bounds2 Anchor::bounds() const {
+    const Bounds2& UIAnchor::bounds() const {
         return mBounds;
     }
     
-    void Anchor::bounds(const Bounds2& val) {
+    void UIAnchor::bounds(const Bounds2& val) {
         mBounds = val;
     }
     
-    Vector2 Anchor::size() const {
+    Vector2 UIAnchor::size() const {
         return mBounds.size();
     }
     
-    void Anchor::size(const Vector2& val) {
+    void UIAnchor::size(const Vector2& val) {
         mBounds.size(val);
     }
     
-    f32_t Anchor::left() const {
+    f32_t UIAnchor::left() const {
         f32_t base = mParent != nullptr ? mParent->mBounds.min.x : 0;
         return (mOffset.x + mBounds.min.x) - base;
     }
     
-    void Anchor::left(f32_t val) {
+    void UIAnchor::left(f32_t val) {
         f32_t current = this->left();
         f32_t delta = val - current;
         mBounds.min.x += delta;
     }
     
-    f32_t Anchor::right() const {
+    f32_t UIAnchor::right() const {
         f32_t base = mParent != nullptr ? mParent->mBounds.max.x : 0;
         return base - (mOffset.x + mBounds.max.x);
     }
     
-    void Anchor::right(f32_t val) {
+    void UIAnchor::right(f32_t val) {
         f32_t current = this->right();
         f32_t delta = val - current;
         mBounds.max.x += delta;
     }
     
-    f32_t Anchor::top() const {
+    f32_t UIAnchor::top() const {
         f32_t base = mParent != nullptr ? mParent->mBounds.min.y : 0;
         return (mOffset.y + mBounds.min.y) - base;
     }
     
-    void Anchor::top(f32_t val) {
+    void UIAnchor::top(f32_t val) {
         f32_t current = this->top();
         f32_t delta = val - current;
         mBounds.min.y += delta;
     }
     
-    f32_t Anchor::bottom() const {
+    f32_t UIAnchor::bottom() const {
         f32_t base = mParent != nullptr ? mParent->mBounds.max.y : 0;
         return base - (mOffset.y + mBounds.max.y);
     }
     
-    void Anchor::bottom(f32_t val) {
+    void UIAnchor::bottom(f32_t val) {
         f32_t current = this->bottom();
         f32_t delta = val - current;
         mBounds.max.y += delta;

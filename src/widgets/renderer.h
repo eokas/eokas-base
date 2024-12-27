@@ -4,27 +4,43 @@
 #include "./header.h"
 
 namespace eokas {
-    class UIVertex {
-        Vector3 position;
-        Vector4 color;
-        Vector2 uv;
+    struct UIGeometry {
+        std::vector<Vector3> positions;
+        std::vector<Vector4> colors;
+        std::vector<Vector2> uv;
+        std::vector<u32_t> indices;
+        u32_t material;
     };
     
-    class UIGeometry {
+    struct UIMaterial {
+        String path;
+    };
     
+    struct UIShape {
+        std::vector<UIGeometry> geometries;
+        std::vector<UIMaterial> materials;
+        
+        void clear() {
+            this->geometries.clear();
+            this->materials.clear();
+        }
+    };
+    
+    class UIPrimitive {
     };
     
     class UITexture {
-    
     };
     
     class UIRenderer {
     public:
-        virtual UIGeometry* createGeometry() = 0;
-        virtual UITexture* createTexture() = 0;
+        virtual UIPrimitive* createPrimitive(const UIGeometry& geom) = 0;
+        virtual UITexture* createTexture(const String& path) = 0;
         
-        virtual void setGeometry(UIGeometry* geometry) = 0;
-        virtual void setTe
+        virtual void setPrimitive(UIPrimitive* primitive) = 0;
+        virtual void setTexture(UITexture* texture) = 0;
+        
+        virtual void render() = 0;
     };
 }
 

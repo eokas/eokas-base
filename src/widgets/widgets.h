@@ -3,6 +3,7 @@
 
 #include "./header.h"
 #include "./anchor.h"
+#include "./renderer.h"
 
 namespace eokas {
     class UIWidget {
@@ -12,13 +13,21 @@ namespace eokas {
         
         const String& id() const { return mID; }
         const String& name() const { return mName; }
-        Anchor& anchor() { return mAnchor; }
         
+        const UIAnchor& anchor() const { return mAnchor; }
+        UIAnchor& anchor() { return mAnchor; }
+        
+        bool dirty() { return mDirty; }
+        void dirty(bool val) { mDirty = val; }
+        
+        virtual UIShape* render();
     
     protected:
         String mID;
         String mName;
-        Anchor mAnchor;
+        UIAnchor mAnchor;
+        bool mDirty;
+        UIShape mShape;
     };
     
     template<typename ChildBase>

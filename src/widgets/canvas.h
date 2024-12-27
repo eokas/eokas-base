@@ -3,15 +3,23 @@
 
 #include "./header.h"
 #include "./widgets.h"
+#include "./renderer.h"
 
 namespace eokas {
-    class UICamera {
+    class UICanvas {
     public:
+        UICanvas();
         
-        void add();
+        void resize(const Rect& rect);
+        
+        void add(UIWidget* widget);
+        
+        void render();
     
     private:
         Rect mRect;
+        std::vector<UIWidget*> mWidgets;
+        std::vector<UIShape*> mShapes;
     };
 }
 
