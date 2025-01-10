@@ -3,11 +3,8 @@
 #define _EOKAS_BASE_MAIN_H_
 
 #include "./header.h"
-#include "./math.h"
 #include "./ascil.h"
 #include "./access.h"
-#include "./color.h"
-#include "./random.h"
 #include "./time.h"
 #include "./signal.h"
 #include "./string.h"

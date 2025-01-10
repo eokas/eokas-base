@@ -62,6 +62,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ")
 
 include("eokas.cmake")
 include("eokas-base.cmake")
+include("eokas-math.cmake")
 include("eokas-native.cmake")
 include("eokas-gpu.cmake")
 include("eokas-datapot.cmake")

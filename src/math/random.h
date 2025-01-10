@@ -2,7 +2,7 @@
 #ifndef  _EOKAS_BASE_RANDOM_H_
 #define  _EOKAS_BASE_RANDOM_H_
 
-#include "./header.h"
+#include "base/header.h"
 
 namespace eokas {
     

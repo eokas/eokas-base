@@ -2,7 +2,8 @@
 #ifndef _EOKAS_BASE_SIMD_H_
 #define _EOKAS_BASE_SIMD_H_
 
-#include "./header.h"
+#include "base/header.h"
+#include "math.h"
 
 namespace eokas
 {
@@ -81,10 +82,10 @@ namespace eokas
         using Comp = f32_t;
         using Type = __m128;
         
-        static Type set(Comp x, Comp y, Comp z, Comp w) {
+        static Type op_set(Comp x, Comp y, Comp z, Comp w) {
             return _mm_set_ps(x, y, z, w);
         }
-        static void get(Type v, Comp& x, Comp& y, Comp& z, Comp& w) {
+        static void op_get(Type v, Comp& x, Comp& y, Comp& z, Comp& w) {
             alignas(16) f32_t data[4];
             _mm_store_ps(data, v);
             x = data[0];
@@ -92,31 +93,79 @@ namespace eokas
             z = data[2];
             w = data[3];
         }
-        static Type add(Type a, Type b) {
+        static Type op_add(Type a, Type b) {
             return _mm_add_ps(a, b);
         }
-        static Type sub(Type a, Type b) {
+        static Type op_sub(Type a, Type b) {
             return _mm_sub_ps(a, b);
         }
-        static Type mul(Type a, Type b) {
+        static Type op_mul(Type a, Type b) {
             return _mm_mul_ps(a, b);
         }
-        static Type div(Type a, Type b) {
+        static Type op_div(Type a, Type b) {
             return _mm_div_ps(a, b);
         }
-        static Type dot(Type a, Type b) {
+        static Type op_and(Type x, Type y)
+        {
+            return _mm_and_ps(x, y);
+        }
+        static Type op_or(Type x, Type y)
+        {
+            return _mm_or_ps(x, y);
+        }
+        static Type op_xor(Type x, Type y)
+        {
+            return _mm_xor_ps(x, y);
+        }
+        static Type op_eq(Type x, Type y)
+        {
+            return _mm_cmpeq_ps(x, y);
+        }
+        static Type op_ne(Type x, Type y)
+        {
+            return _mm_cmpneq_ps(x, y);
+        }
+        static Type op_gt(Type x, Type y)
+        {
+            return _mm_cmpgt_ps(x, y);
+        }
+        static Type op_ge(Type x, Type y)
+        {
+            return _mm_cmpge_ps(x, y);
+        }
+        static Type op_lt(Type x, Type y)
+        {
+            return _mm_cmplt_ps(x, y);
+        }
+        static Type op_le(Type x, Type y)
+        {
+            return _mm_cmple_ps(x, y);
+        }
+        static Type op_truncate(Type x)
+        {
+            return _mm_cvtepi32_ps(_mm_cvttps_epi32(x));
+        }
+        static Type op_dot(Type a, Type b) {
             return _mm_dp_ps(a, b, 0xFF);
         }
-        static Type length(Type a) {
+        static Type op_length(Type a) {
             Type temp = _mm_dp_ps(a, a, 0xFF);
             return _mm_sqrt_ps(temp);
         }
-        static Type normalize(Type a) {
+        static Type op_normalize(Type a)
+        {
             Type lengthSqr = _mm_dp_ps(a, a, 0xFF);
             Type length = _mm_sqrt_ps(lengthSqr);
             Type normal = _mm_div_ps(a, length);
             return normal;
         }
+        static Type op_select(Type mask, Type arg0, Type arg1)
+        {
+            Type u = op_xor(arg0, arg1);
+            Type v = op_and(mask, u);
+            return op_xor(arg1, v);
+        }
+        
     };
 
 #if _EOKAS_SIMD & _EOKAS_SIMD_AVX
