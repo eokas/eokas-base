@@ -12,7 +12,15 @@ namespace eokas {
         
         void resize(const Rect& rect);
         
-        void add(UIWidget* widget);
+        void drawLine(const Vector2& start, const Vector2& end, const Color& color);
+        void drawTriangle(const Vector2& v0, const Vector2& v1, const Vector2& v2, const Color& color);
+        void drawRect(const Vector2& origin, const Vector2& size, const Color& color);
+        void drawCircle(const Vector2& center, f32_t radius, const Color& color);
+
+        void fillLine(const Vector2& start, const Vector2& end, const Color& color);
+        void fillTriangle(const Vector2& v0, const Vector2& v1, const Vector2& v2, const Color& color);
+        void fillRect(const Vector2& origin, const Vector2& size, const Color& color);
+        void fillCircle(const Vector2& center, f32_t radius, const Color& color);
         
         void render();
     

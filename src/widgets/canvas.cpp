@@ -8,7 +8,7 @@ namespace eokas {
         
     }
     
-    void UICanvas::add(UIWidget* widget) {
+    void UICanvas::addWidget(UIWidget* widget) {
         mWidgets.push_back(widget);
     }
     
