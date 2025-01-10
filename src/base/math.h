@@ -4,136 +4,13 @@
 
 #include "./header.h"
 
-namespace eokas {
-
-#define _EOKAS_SIMD_NONE    0x0000
-#define _EOKAS_SIMD_SSE     0x0001
-#define _EOKAS_SIMD_SSE2    0x0002
-#define _EOKAS_SIMD_SSE3    0x0004
-#define _EOKAS_SIMD_SSE3_E  0x0008
-#define _EOKAS_SIMD_SSE4_1  0x0010
-#define _EOKAS_SIMD_SSE4_2  0x0020
-#define _EOKAS_SIMD_AVX     0x0040
-#define _EOKAS_SIMD_AVX2    0x0080
-#define _EOKAS_SIMD_NEON    0x0100
-
-#define _EOKAS_SIMD_ARCH_SSE (_EOKAS_SIMD_SSE)
-#define _EOKAS_SIMD_ARCH_SSE2 ((_EOKAS_SIMD_SSE2) | (_EOKAS_SIMD_ARCH_SSE))
-#define _EOKAS_SIMD_ARCH_SSE3 ((_EOKAS_SIMD_SSE3) | (_EOKAS_SIMD_ARCH_SSE2))
-#define _EOKAS_SIMD_ARCH_SSE3_E ((_EOKAS_SIMD_SSE3_E) | (_EOKAS_SIMD_ARCH_SSE3))
-#define _EOKAS_SIMD_ARCH_SSE4_1 ((_EOKAS_SIMD_SSE4_1) | (_EOKAS_SIMD_ARCH_SSE3_E))
-#define _EOKAS_SIMD_ARCH_SSE4_2 ((_EOKAS_SIMD_SSE4_2) | (_EOKAS_SIMD_ARCH_SSE4_1))
-#define _EOKAS_SIMD_ARCH_AVX ((_EOKAS_SIMD_AVX) | (_EOKAS_SIMD_ARCH_SSE4_2))
-#define _EOKAS_SIMD_ARCH_AVX2 ((_EOKAS_SIMD_AVX2) | (_EOKAS_SIMD_ARCH_AVX))
-#define _EOKAS_SIMD_ARCH_NEON (_EOKAS_SIMD_NEON)
-
-#if defined(__AVX2__)
-    #define _EOKAS_SIMD _EOKAS_SIMD_ARCH_AVX2
-#elif defined(__AVX__)
-    #define _EOKAS_SIMD _EOKAS_SIMD_ARCH_AVX
-#elif defined(__SSE4_2__)
-    #define _EOKAS_SIMD _EOKAS_SIMD_ARCH_SSE4_2
-#elif defined(__SSE4_1__)
-    #define _EOKAS_SIMD _EOKAS_SIMD_ARCH_SSE4_1
-#elif defined(__SSE4__)
-    #define _EOKAS_SIMD _EOKAS_SIMD_ARCH_SSE4_1
-#elif defined(__SSSE3__)
-    #define _EOKAS_SIMD _EOKAS_SIMD_ARCH_SSE3_E
-#elif defined(__SSE3__)
-    #define _EOKAS_SIMD _EOKAS_SIMD_ARCH_SSE3
-#elif defined(__SSE2__)
-    #define _EOKAS_SIMD _EOKAS_SIMD_ARCH_SSE2
-#elif defined(__SSE__)
-    #define _EOKAS_SIMD _EOKAS_SIMD_ARCH_SSE
-#elif defined(__NEON__)
-    #define _EOKAS_SIMD _EOKAS_SIMD_NEON
-#else
-    #define _EOKAS_SIMD _EOKAS_SIMD_NONE
-#endif
-
-#if _EOKAS_SIMD & _EOKAS_SIMD_AVX2
-#   include <immintrin.h>
-#elif _EOKAS_SIMD & _EOKAS_SIMD_AVX
-#   include <immintrin.h>
-#elif _EOKAS_SIMD & _EOKAS_SIMD_SSE4_2
-#	if GLM_COMPILER & GLM_COMPILER_CLANG
-#		include <popcntintrin.h>
-#	endif
-#	include <nmmintrin.h>
-#elif _EOKAS_SIMD & _EOKAS_SIMD_SSE4_1
-#	include <smmintrin.h>
-#elif _EOKAS_SIMD & _EOKAS_SIMD_SSE3_E
-#	include <tmmintrin.h>
-#elif _EOKAS_SIMD & _EOKAS_SIMD_SSE3
-#	include <pmmintrin.h>
-#elif _EOKAS_SIMD & _EOKAS_SIMD_SSE2
-#	include <emmintrin.h>
-#elif _EOKAS_SIMD & _EOKAS_SIMD_NEON
-#	include "neon.h"
-#endif
-
-
-#if _EOKAS_SIMD & _EOKAS_SIMD_SSE
-    using f128_t = __m128;
-    
-    struct SimdVec4 {
-        using Comp = f32_t;
-        using Type = __m128;
-        
-        static Type set(Comp x, Comp y, Comp z, Comp w) {
-            return _mm_set_ps(x, y, z, w);
-        }
-        static void get(Type v, Comp& x, Comp& y, Comp& z, Comp& w) {
-            alignas(16) f32_t data[4];
-            _mm_store_ps(data, v);
-            x = data[0];
-            y = data[1];
-            z = data[2];
-            w = data[3];
-        }
-        static Type add(Type a, Type b) {
-            return _mm_add_ps(a, b);
-        }
-        static Type sub(Type a, Type b) {
-            return _mm_sub_ps(a, b);
-        }
-        static Type mul(Type a, Type b) {
-            return _mm_mul_ps(a, b);
-        }
-        static Type div(Type a, Type b) {
-            return _mm_div_ps(a, b);
-        }
-        static Type dot(Type a, Type b) {
-            return _mm_dp_ps(a, b, 0xFF);
-        }
-        static Type length(Type a) {
-            Type temp = _mm_dp_ps(a, a, 0xFF);
-            return _mm_sqrt_ps(temp);
-        }
-        static Type normalize(Type a) {
-            Type lengthSqr = _mm_dp_ps(a, a, 0xFF);
-            Type length = _mm_sqrt_ps(lengthSqr);
-            Type normal = _mm_div_ps(a, length);
-            return normal;
-        }
-    };
-
-    #if _EOKAS_SIMD & _EOKAS_SIMD_AVX
-        using f256_t = __m256d;
-    #endif
-    #if _EOKAS_SIMD & _EOKAS_SIMD_AVX2
-        using i256_t = __m256i;
-        using u256_t = __m256i;
-    #endif
-    
-#elif _EOKAS_SIMD & _EOKAS_SIMD_NEON
-    using f128_t = float32x4_t;
-#endif
-    
+namespace eokas
+{
     /**
      * Vector2
     */
-    class Vector2 {
+    class Vector2
+    {
     public:
         static const Vector2 ZERO;
         static const Vector2 ONE;
@@ -145,35 +22,56 @@ namespace eokas {
         static Vector2 random(f32_t scale = 1);
         
         static f32_t dot(const Vector2& v1, const Vector2& v2);
-        static f32_t cosA(const Vector2& v1, const Vector2& v2);
-        static f32_t radians(const Vector2& v1, const Vector2& v2);
-        static f32_t angles(const Vector2& v1, const Vector2& v2);
         
+        static f32_t cosA(const Vector2& v1, const Vector2& v2);
+        
+        static f32_t radians(const Vector2& v1, const Vector2& v2);
+        
+        static f32_t angles(const Vector2& v1, const Vector2& v2);
+    
     public:
         Vector2();
+        
         Vector2(f32_t x, f32_t y);
+        
         Vector2(const f32_t (& v)[2]);
+        
         Vector2(const Vector2& v);
+        
         ~Vector2();
     
     public:
         Vector2& operator=(const Vector2& v);
+        
         Vector2 operator-() const;
+        
         Vector2 operator+(const Vector2& v) const;
+        
         Vector2 operator-(const Vector2& v) const;
+        
         Vector2 operator*(const Vector2& v) const;
+        
         Vector2 operator*(f32_t t) const;
+        
         Vector2& operator+=(const Vector2& v);
+        
         Vector2& operator-=(const Vector2& v);
+        
         Vector2& operator*=(const Vector2& v);
+        
         Vector2& operator*=(f32_t t);
+        
         bool operator==(const Vector2& v) const;
+        
         bool operator!=(const Vector2& v) const;
     
     public:
         f32_t sqrmagnitude() const;
+        
         f32_t magnitude() const;
+        
         Vector2 normalized() const;
+        
         Vector2& normalize();
     
     public:
@@ -184,7 +82,8 @@ namespace eokas {
     /**
      * Vector3
     */
-    class Vector3 {
+    class Vector3
+    {
     public:
         static const Vector3 ZERO;
         static const Vector3 ONE;
@@ -198,38 +97,60 @@ namespace eokas {
         static Vector3 random(f32_t scale = 1);
         
         static Vector3 cross(const Vector3& v1, const Vector3& v2);
+        
         static f32_t dot(const Vector3& v1, const Vector3& v2);
+        
         static f32_t cosA(const Vector3& v1, const Vector3& v2);
+        
         static f32_t radians(const Vector3& v1, const Vector3& v2);
+        
         static f32_t angles(const Vector3& v1, const Vector3& v2);
     
     public:
         Vector3();
         
         Vector3(f32_t x, f32_t y, f32_t z);
+        
         Vector3(const f32_t (& v)[3]);
+        
         Vector3(const Vector2& v);
+        
         Vector3(const Vector3& v);
+        
         ~Vector3();
     
     public:
         Vector3& operator=(const Vector3& v);
+        
         Vector3 operator-() const;
+        
         Vector3 operator+(const Vector3& v) const;
+        
         Vector3 operator-(const Vector3& v) const;
+        
         Vector3 operator*(const Vector3& v) const;
+        
         Vector3 operator*(f32_t t) const;
+        
         Vector3& operator+=(const Vector3& v);
+        
         Vector3& operator-=(const Vector3& v);
+        
         Vector3& operator*=(const Vector3& v);
+        
         Vector3& operator*=(f32_t t);
+        
         bool operator==(const Vector3& v) const;
+        
         bool operator!=(const Vector3& v) const;
     
     public:
         f32_t sqrmagnitude() const;
+        
         f32_t magnitude() const;
+        
         Vector3 normalized() const;
+        
         Vector3& normalize();
     
     public:
@@ -241,7 +162,8 @@ namespace eokas {
     /**
      * Vector4
     */
-    class Vector4 {
+    class Vector4
+    {
     public:
         static const Vector4 ZERO;
         static const Vector4 ONE;
@@ -252,29 +174,47 @@ namespace eokas {
         Vector4();
         
         Vector4(f32_t x, f32_t y, f32_t z, f32_t w = 1);
+        
         Vector4(const f32_t (& v)[4]);
+        
         Vector4(const Vector3& v);
+        
         Vector4(const Vector4& v);
+        
         ~Vector4();
     
     public:
         Vector4& operator=(const Vector4& v);
+        
         Vector4 operator-() const;
+        
         Vector4 operator+(const Vector4& v) const;
+        
         Vector4 operator-(const Vector4& v) const;
+        
         Vector4 operator*(const Vector4& v) const;
+        
         Vector4 operator*(f32_t t) const;
+        
         Vector4& operator+=(const Vector4& v);
+        
         Vector4& operator-=(const Vector4& v);
+        
         Vector4& operator*=(const Vector4& v);
+        
         Vector4& operator*=(f32_t t);
+        
         bool operator==(const Vector4& v) const;
+        
         bool operator!=(const Vector4& v) const;
     
     public:
         f32_t sqrmagnitude() const;
+        
         f32_t magnitude() const;
+        
         Vector4 normalized() const;
+        
         Vector4& normalize();
     
     public:
@@ -284,90 +224,135 @@ namespace eokas {
         f32_t w;
     };
     
-	/**
-	 * 2x2 Matrix
-	 * */
-	class Matrix2 {
-	public:
-		static const Matrix2 ZERO;
-		static const Matrix2 IDENTITY;
-		
-	public:
-		Matrix2();
-		Matrix2(f32_t _00, f32_t _01, f32_t _10, f32_t _11);
-		Matrix2(const f32_t (& m)[2][2]);
-		Matrix2(const Matrix2& m);
-		~Matrix2();
-	
-	public:
-		Matrix2& operator=(const Matrix2& m);
-		Matrix2 operator-() const;
-		Matrix2 operator+(const Matrix2& m) const;
-		Matrix2 operator-(const Matrix2& m) const;
-		Matrix2 operator*(const Matrix2& m) const;
-		Matrix2 operator*(f32_t x) const;
-		Matrix2& operator+=(const Matrix2& m);
-		Matrix2& operator-=(const Matrix2& m);
-		Matrix2& operator*=(const Matrix2& m);
-		Matrix2& operator*=(f32_t x);
-		bool operator==(const Matrix2& m) const;
-		bool operator!=(const Matrix2& m) const;
-	
-	public:
-		f32_t confactor(i32_t i, i32_t j) const;
-		f32_t determinant() const;
-		Matrix2 transposed() const;
-		Matrix2& transpose();
-		Matrix2 adjoint() const;
-		Matrix2 inverse() const;
-		
-	public:
-		f32_t value[2][2];
-	};
-	
+    /**
+     * 2x2 Matrix
+     * */
+    class Matrix2
+    {
+    public:
+        static const Matrix2 ZERO;
+        static const Matrix2 IDENTITY;
+    
+    public:
+        Matrix2();
+        
+        Matrix2(f32_t _00, f32_t _01, f32_t _10, f32_t _11);
+        
+        Matrix2(const f32_t (& m)[2][2]);
+        
+        Matrix2(const Matrix2& m);
+        
+        ~Matrix2();
+    
+    public:
+        Matrix2& operator=(const Matrix2& m);
+        
+        Matrix2 operator-() const;
+        
+        Matrix2 operator+(const Matrix2& m) const;
+        
+        Matrix2 operator-(const Matrix2& m) const;
+        
+        Matrix2 operator*(const Matrix2& m) const;
+        
+        Matrix2 operator*(f32_t x) const;
+        
+        Matrix2& operator+=(const Matrix2& m);
+        
+        Matrix2& operator-=(const Matrix2& m);
+        
+        Matrix2& operator*=(const Matrix2& m);
+        
+        Matrix2& operator*=(f32_t x);
+        
+        bool operator==(const Matrix2& m) const;
+        
+        bool operator!=(const Matrix2& m) const;
+    
+    public:
+        f32_t confactor(i32_t i, i32_t j) const;
+        
+        f32_t determinant() const;
+        
+        Matrix2 transposed() const;
+        
+        Matrix2& transpose();
+        
+        Matrix2 adjoint() const;
+        
+        Matrix2 inverse() const;
+    
+    public:
+        f32_t value[2][2];
+    };
+    
     /**
      * 3x3 Matrix
     */
-    class Matrix3 {
+    class Matrix3
+    {
     public:
-		static const Matrix3 ZERO;
+        static const Matrix3 ZERO;
         static const Matrix3 IDENTITY;
         
         static Matrix3 translation(const Vector2& dir);
+        
         static Matrix3 rotation(const Vector2& axis, f32_t angle);
+        
         static Matrix3 scaling(const Vector2& scale);
         
         static Vector3 transform(const Vector3& v, const Matrix3& t);
+        
         static Matrix3 transform(const Matrix3& m, const Matrix3& t);
     
     public:
         Matrix3();
+        
         Matrix3(f32_t _00, f32_t _01, f32_t _02, f32_t _10, f32_t _11, f32_t _12, f32_t _20, f32_t _21, f32_t _22);
+        
         Matrix3(const f32_t (& m)[3][3]);
+        
         Matrix3(const Matrix3& m);
+        
         ~Matrix3();
     
     public:
         Matrix3& operator=(const Matrix3& m);
+        
         Matrix3 operator-() const;
+        
         Matrix3 operator+(const Matrix3& m) const;
+        
         Matrix3 operator-(const Matrix3& m) const;
+        
         Matrix3 operator*(const Matrix3& m) const;
-		Matrix3 operator*(f32_t x) const;
+        
+        Matrix3 operator*(f32_t x) const;
+        
         Matrix3& operator+=(const Matrix3& m);
+        
         Matrix3& operator-=(const Matrix3& m);
+        
         Matrix3& operator*=(const Matrix3& m);
-		Matrix3& operator*=(f32_t x);
+        
+        Matrix3& operator*=(f32_t x);
+        
         bool operator==(const Matrix3& m) const;
+        
         bool operator!=(const Matrix3& m) const;
     
     public:
-		f32_t confactor(i32_t i, i32_t j) const;
+        f32_t confactor(i32_t i, i32_t j) const;
+        
         f32_t determinant() const;
-		Matrix3 transposed() const;
-		Matrix3& transpose();
-		Matrix3 adjoint() const;
-		Matrix3 inverse() const;
+        
+        Matrix3 transposed() const;
+        
+        Matrix3& transpose();
+        
+        Matrix3 adjoint() const;
+        
+        Matrix3 inverse() const;
     
     public:
         f32_t value[3][3];
@@ -376,101 +361,159 @@ namespace eokas {
     /**
      * 4x4 Matrix
     */
-    class Matrix4 {
+    class Matrix4
+    {
     public:
-		static const Matrix4 ZERO;
+        static const Matrix4 ZERO;
         static const Matrix4 IDENTITY;
         
         static Matrix4 translate(const Vector3& dir);
+        
         static Matrix4 rotate(const Vector3& axis, f32_t angle);
+        
         static Matrix4 scale(const Vector3& scale);
+        
         static Matrix4 lookToLH(const Vector3& pos, const Vector3& forward, const Vector3& up);
+        
         static Matrix4 lookAtLH(const Vector3& pos, const Vector3& focus, const Vector3& up);
+        
         static Matrix4 lookToRH(const Vector3& pos, const Vector3& forward, const Vector3& up);
+        
         static Matrix4 lookAtRH(const Vector3& pos, const Vector3& focus, const Vector3& up);
+        
         static Matrix4 orthographicLH(f32_t width, f32_t height, f32_t near, f32_t far);
+        
         static Matrix4 orthographicRH(f32_t width, f32_t height, f32_t near, f32_t far);
+        
         static Matrix4 orthographicOffCenterLH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far);
+        
         static Matrix4 orthographicOffCenterRH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far);
+        
         static Matrix4 perspectiveLH(f32_t width, f32_t height, f32_t near, f32_t far);
+        
         static Matrix4 perspectiveRH(f32_t width, f32_t height, f32_t near, f32_t far);
+        
         static Matrix4 perspectiveFovLH(f32_t fov, f32_t aspect, f32_t near, f32_t far);
+        
         static Matrix4 perspectiveFovRH(f32_t fov, f32_t aspect, f32_t near, f32_t far);
+        
         static Matrix4 perspectiveOffCenterLH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far);
+        
         static Matrix4 perspectiveOffCenterRH(f32_t left, f32_t right, f32_t top, f32_t bottom, f32_t near, f32_t far);
         
         static Vector4 transform(const Vector4& v, const Matrix4& t);
-        static Matrix4 transform(const Matrix4& m, const Matrix4& t);
         
+        static Matrix4 transform(const Matrix4& m, const Matrix4& t);
+    
     public:
         Matrix4();
+        
         Matrix4(f32_t _00, f32_t _01, f32_t _02, f32_t _03, f32_t _10, f32_t _11, f32_t _12, f32_t _13, f32_t _20, f32_t _21, f32_t _22, f32_t _23, f32_t _30, f32_t _31, f32_t _32, f32_t _33);
+        
         Matrix4(const f32_t (& m)[4][4]);
+        
         Matrix4(const Matrix4& m);
+        
         Matrix4(const Matrix3& m);
+        
         ~Matrix4();
     
     public:
         Matrix4& operator=(const Matrix4& m);
+        
         Matrix4 operator-() const;
+        
         Matrix4 operator+(const Matrix4& m) const;
+        
         Matrix4 operator-(const Matrix4& m) const;
+        
         Matrix4 operator*(const Matrix4& m) const;
-		Matrix4 operator*(f32_t x) const;
+        
+        Matrix4 operator*(f32_t x) const;
+        
         Matrix4& operator+=(const Matrix4& m);
+        
         Matrix4& operator-=(const Matrix4& m);
+        
         Matrix4& operator*=(const Matrix4& m);
-		Matrix4& operator*=(f32_t x);
+        
+        Matrix4& operator*=(f32_t x);
+        
         bool operator==(const Matrix4& m) const;
+        
         bool operator!=(const Matrix4& m) const;
     
     public:
-		f32_t confactor(i32_t i, i32_t j) const;
+        f32_t confactor(i32_t i, i32_t j) const;
+        
         f32_t determinant() const;
+        
         Matrix4 transposed() const;
+        
         Matrix4& transpose();
-		Matrix4 adjoint() const;
-		Matrix4 inverse() const;
+        
+        Matrix4 adjoint() const;
+        
+        Matrix4 inverse() const;
     
     public:
         f32_t value[4][4];
     };
     
-    
     /**
      * Quaternion
     */
-    class Quaternion {
+    class Quaternion
+    {
     public:
         static const Quaternion IDENTITY;
         
         static Quaternion rotateEulerAngles(f32_t x, f32_t y, f32_t z);
+        
         static Quaternion rotateAxisAngle(const Vector3& axis, f32_t angle);
+        
         static Quaternion rotateBetween(const Vector3& a, const Vector3& b);
+        
         static Quaternion rotateBetween(const Quaternion& a, const Quaternion& b);
     
     public:
         Quaternion();
+        
         Quaternion(f32_t x, f32_t y, f32_t z, f32_t w = 1);
+        
         Quaternion(const f32_t (& q)[4]);
+        
         Quaternion(const Quaternion& q);
+        
         ~Quaternion();
     
     public:
         Quaternion& operator=(const Quaternion& q);
+        
         Quaternion operator-() const;
+        
         Quaternion operator+(const Quaternion& q) const;
+        
         Quaternion operator-(const Quaternion& q) const;
+        
         Quaternion operator*(const Quaternion& q) const;
+        
         Quaternion& operator+=(const Quaternion& q);
+        
         Quaternion& operator-=(const Quaternion& q);
+        
         Quaternion& operator*=(const Quaternion& q);
+        
         bool operator==(const Quaternion& q) const;
+        
         bool operator!=(const Quaternion& q) const;
         
         f32_t sqrmagnitude() const;
+        
         f32_t magnitude() const;
+        
         Quaternion conjugate() const;
+        
         Quaternion inverse() const;
     
     public:
@@ -483,12 +526,17 @@ namespace eokas {
     /**
      * Spherical coords
     */
-    class Spherical {
+    class Spherical
+    {
     public:
         Spherical();
+        
         Spherical(f32_t radius, f32_t phi, f32_t theta);
+        
         Spherical(const Vector3& point);
+        
         Spherical(const Spherical& other);
+        
         ~Spherical();
     
     public:
@@ -503,11 +551,15 @@ namespace eokas {
     /**
      * Ray
     */
-    class Ray {
+    class Ray
+    {
     public:
         Ray();
+        
         Ray(const Vector3& origin, const Vector3& diBounds2ion);
+        
         Ray(const Ray& other);
+        
         ~Ray();
     
     public:
@@ -521,13 +573,19 @@ namespace eokas {
     /**
      * Plane
     */
-    class Plane {
+    class Plane
+    {
     public:
         Plane();
+        
         Plane(const Vector3& normal, f32_t distance);
+        
         Plane(const Vector3& normal, const Vector3& position);
+        
         Plane(const Vector3& p1, const Vector3& p2, const Vector3& p3);
+        
         Plane(const Plane& other);
+        
         ~Plane();
     
     public:
@@ -541,17 +599,24 @@ namespace eokas {
     /**
      * Sphere
     */
-    class Sphere {
+    class Sphere
+    {
     public:
         Sphere();
+        
         Sphere(f32_t x, f32_t y, f32_t z, f32_t r);
+        
         Sphere(const Vector3& o, f32_t r);
+        
         Sphere(const Sphere& other);
+        
         ~Sphere();
     
     public:
         f32_t side(const Vector3& p) const;
+        
         bool include(const Vector3& p) const;
+        
         Sphere& expand(const Vector3&);
     
     public:
@@ -562,11 +627,15 @@ namespace eokas {
     /*
      * Rect
      * */
-    class Rect {
+    class Rect
+    {
     public:
         Rect();
+        
         Rect(f32_t x, f32_t y, f32_t w, f32_t h);
+        
         Rect(const Vector2& pos, const Vector2& size);
+        
         bool contains(const Vector2& point);
     
     public:
@@ -579,78 +648,100 @@ namespace eokas {
     /**
      * Bounds2
     */
-    class Bounds2 {
+    class Bounds2
+    {
     public:
         Vector2 min;
         Vector2 max;
         
         Bounds2();
+        
         Bounds2(const Bounds2& other);
+        
         ~Bounds2();
         
         Bounds2& operator=(const Bounds2& other);
         
         f32_t width() const;
+        
         void width(f32_t val);
         
         f32_t height() const;
+        
         void height(f32_t val);
         
         Vector2 size() const;
+        
         void size(const Vector2& val);
         
         Vector2 center() const;
+        
         void center(const Vector2& val);
         
         Vector2 extent() const;
+        
         void extent(const Vector2& val);
         
         bool contains(const Vector2& p) const;
+        
         Bounds2& expand(const Vector2& p);
+        
         Bounds2& expand(const Bounds2& b);
     };
     
     /**
      * Bounds3
     */
-    class Bounds3 {
+    class Bounds3
+    {
     public:
         Vector3 min;
         Vector3 max;
         
         Bounds3();
+        
         Bounds3(const Bounds3& other);
+        
         ~Bounds3();
         
         Bounds3& operator=(const Bounds3& other);
         
         f32_t width() const;
+        
         void width(f32_t val);
         
         f32_t height() const;
+        
         void height(f32_t val);
         
         f32_t depth() const;
+        
         void depth(f32_t val);
         
         Vector3 size() const;
+        
         void size(const Vector3& val);
         
         Vector3 center() const;
+        
         void center(const Vector3& val);
         
         Vector3 extent() const;
+        
         void extent(const Vector3& val);
         
         bool contains(const Vector3& p) const;
+        
         Bounds3& expand(const Vector3& p);
+        
         Bounds3& expand(const Bounds3& b);
     };
     
     /**
      * Math
     */
-    struct Math {
+    struct Math
+    {
         static const f32_t EPSILON_4;
         static const f32_t EPSILON_5;
         static const f32_t EPSILON_6;
@@ -664,43 +755,65 @@ namespace eokas {
         static const f32_t RADIANS_PER_DEGREE;
         
         static void fill(f32_t (& target)[2], f32_t x, f32_t y);
+        
         static void fill(f32_t (& target)[3], f32_t x, f32_t y, f32_t z);
+        
         static void fill(f32_t (& target)[4], f32_t x, f32_t y, f32_t z, f32_t w);
         
         static f32_t radianToAngle(f32_t radian);
+        
         static f32_t angleToRadian(f32_t degree);
         
         static bool between(f32_t x, f32_t a, f32_t b);
+        
         static bool between(const Vector2& x, const Vector2& a, const Vector2& b);
+        
         static bool between(const Vector3& x, const Vector3& a, const Vector3& b);
         
         static f32_t clamp(f32_t x, f32_t a, f32_t b);
+        
         static Vector2 clamp(const Vector2& x, const Vector2& a, const Vector2& b);
+        
         static Vector3 clamp(const Vector3& x, const Vector3& a, const Vector3& b);
         
         static f32_t lerp(f32_t a, f32_t b, f32_t t);
+        
         static Vector2 lerp(const Vector2& a, const Vector2& b, f32_t t);
+        
         static Vector3 lerp(const Vector3& a, const Vector3& b, f32_t t);
+        
         static Vector2 lerp(const Vector2& a, const Vector2& b, const Vector2& t);
+        
         static Vector3 lerp(const Vector3& a, const Vector3& b, const Vector3& t);
+        
         static Quaternion lerp(const Quaternion& a, const Quaternion& b, f32_t t);
         
         static Vector3 slerp(const Vector3& a, const Vector3& b, f32_t t);
+        
         static Quaternion slerp(const Quaternion& a, const Quaternion& b, f32_t t);
         
         // a * sin(w * x + q) + k
         // a * cos(w * x + q) + k
         static f32_t sampleSinCurve(f32_t a, f32_t w, f32_t q, f32_t k, f32_t min, f32_t max, f32_t t);
+        
         static f32_t sampleCosCurve(f32_t a, f32_t w, f32_t q, f32_t k, f32_t min, f32_t max, f32_t t);
+        
         static Vector3 sampleBezierCurve(const Vector3 p0, const Vector3 p1, const Vector3& p2, f32_t t);
+        
         static Vector3 sampleBezierCurve(const Vector3 p0, const Vector3 p1, const Vector3& p2, const Vector3& p3, f32_t t);
         
         static bool intersects(const Ray& ray, const Plane& plane);
+        
         static bool intersects(const Ray& ray, const Sphere& sphere);
+        
         static bool intersects(const Ray& ray, const Bounds3& bounds);
+        
         static bool intersects(f32_t& t, const Ray& ray, const Plane& plane);
+        
         static bool intersects(f32_t& t, const Ray& ray, const Sphere& sphere);
+        
         static bool intersects(f32_t& t, const Ray& ray, const Bounds3& bounds);
+        
         static bool intersects(f32_t& t, const Ray& ray, const Vector3& v0, const Vector3& v1, const Vector3 v2);
         
     };
