@@ -19,6 +19,9 @@
     #include <net/if_types.h>
     #include <net/if_dl.h>
     #include <net/ethernet.h>
+    #if _EOKAS_OS == _EOKAS_OS_MACOS || _EOKAS_OS == _EOKAS_OS_IOS
+        #include <mach/mach.h>
+    #endif
 #endif
 
 namespace eokas {
@@ -149,7 +152,7 @@ else
         struct task_basic_info t_info;
         mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
         if (KERN_SUCCESS == task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&t_info, &t_info_count)) {
-            ms.process = taskInfo.resident_size;
+            ms.process = (u64_t)(t_info.resident_size);
             // ms.virtual = t_info.resident_size;
         }
 #endif
