@@ -113,6 +113,16 @@ namespace eokas
         virtual uint32_t getTextureCount() const = 0;
     };
     
+    enum class FillMode
+    {
+        Solid, Wireframe
+    };
+    
+    enum class CullMode
+    {
+        None, Front, Back
+    };
+    
     struct PipelineState
     {
         using Ref = std::shared_ptr<PipelineState>;
@@ -121,6 +131,8 @@ namespace eokas
         virtual void setVertexElements(std::vector<VertexElement>& vElements) = 0;
         virtual void setProgram(ProgramType type, Program::Ref program) = 0;
         virtual void setTexture(uint32_t index, Texture::Ref texture) = 0;
+        virtual void setFillMode(FillMode fillMode) = 0;
+        virtual void setCullMode(CullMode cullMode) = 0;
         virtual void end() = 0;
     };
     
@@ -168,8 +180,8 @@ namespace eokas
         virtual Texture::Ref createTexture(const TextureOptions& options) = 0;
         virtual Program::Ref createProgram(const ProgramOptions& options) = 0;
         virtual PipelineState::Ref createPipelineState() = 0;
-        virtual CommandBuffer::Ref createCommandBuffer(const PipelineState::Ref pso) = 0;
-        virtual void commitCommandBuffer(const CommandBuffer::Ref commandBuffer) = 0;
+        virtual CommandBuffer::Ref createCommandBuffer(PipelineState::Ref pso) = 0;
+        virtual void commitCommandBuffer(CommandBuffer::Ref commandBuffer) = 0;
         virtual void present() = 0;
         virtual void waitForGPU() = 0;
         virtual void waitForNextFrame() = 0;

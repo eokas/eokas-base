@@ -79,6 +79,9 @@ namespace eokas
         ComPtr <ID3D12DescriptorHeap> mSRVHeap;
         UINT mSRVHeapStride = 0;
         
+        D3D12_FILL_MODE mFillMode = D3D12_FILL_MODE_SOLID;
+        D3D12_CULL_MODE mCullMode = D3D12_CULL_MODE_BACK;
+        
         ComPtr <ID3D12PipelineState> mPipelineState;
         
         DX12PipelineState(const DX12Device& device);
@@ -87,6 +90,8 @@ namespace eokas
         virtual void setVertexElements(std::vector<VertexElement>& vElements) override;
         virtual void setProgram(ProgramType type, Program::Ref program) override;
         virtual void setTexture(uint32_t index, Texture::Ref texture) override;
+        virtual void setFillMode(FillMode fillMode) override;
+        virtual void setCullMode(CullMode cullMode) override;
         virtual void end() override;
     };
     
@@ -134,15 +139,15 @@ namespace eokas
         HANDLE mFenceEvent;
         
         DX12Device(void* windowHandle, uint32_t windowWidth, uint32_t windowHeight);
-        
         virtual ~DX12Device();
+        
         virtual RenderTarget::Ref getActiveRenderTarget() override;
         virtual DynamicBuffer::Ref createDynamicBuffer(uint32_t length, uint32_t usage) override;
         virtual Texture::Ref createTexture(const TextureOptions& options) override;
         virtual Program::Ref createProgram(const ProgramOptions& options) override;
         virtual PipelineState::Ref createPipelineState() override;
-        virtual CommandBuffer::Ref createCommandBuffer(const PipelineState::Ref pso) override;
-        virtual void commitCommandBuffer(const CommandBuffer::Ref commandBuffer) override;
+        virtual CommandBuffer::Ref createCommandBuffer(PipelineState::Ref pso) override;
+        virtual void commitCommandBuffer(CommandBuffer::Ref commandBuffer) override;
         virtual void present() override;
         virtual void waitForGPU() override;
         virtual void waitForNextFrame() override;
