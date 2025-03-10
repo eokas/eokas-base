@@ -13,7 +13,8 @@
 #include <map>
 #include <codecvt>
 
-namespace eokas::gpu {
+namespace eokas
+{
     class HRException : public std::exception
     {
     public:
@@ -27,7 +28,7 @@ namespace eokas::gpu {
 #else
             std::string mbs = m_error.ErrorMessage();
 #endif
-            char buffer[1024] = { 0 };
+            char buffer[1024] = {0};
             sprintf_s(buffer, "\n  at %s : %d", file, line);
             m_what = mbs + buffer;
         }
@@ -42,11 +43,14 @@ namespace eokas::gpu {
         std::string m_what;
     };
 
-
 #define _ThrowIfFailed(hr) { HRESULT ret = (hr); if(FAILED(ret)) throw HRException(ret, __FILE__, __LINE__); }
     
-    DXGI_FORMAT DX12Utils::transferFormat(Format format) {
-        switch (format) {
+    DXGI_FORMAT DX12Utils::transferFormat(Format format)
+    {
+        switch (format)
+        {
+            case Format::Unknown:
+                break;
             case Format::R32_UINT: return DXGI_FORMAT_R32_UINT;
             case Format::R32_FLOAT: return DXGI_FORMAT_R32_FLOAT;
             case Format::R8G8B8A8_UNORM: return DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -62,11 +66,33 @@ namespace eokas::gpu {
         return DXGI_FORMAT_UNKNOWN;
     }
     
-    void* DX12RenderTarget::getNativeResource() const {
+    D3D12_PRIMITIVE_TOPOLOGY DX12Utils::transferTopology(Topology topology)
+    {
+        switch(topology)
+        {
+            case Topology::Undefined: return D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
+            case Topology::PointList: return D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+            case Topology::LineList: return D3D_PRIMITIVE_TOPOLOGY_LINELIST;
+            case Topology::LineStrip: return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
+            case Topology::TriangleList: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+            case Topology::TriangleStrip: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+            case Topology::LineList_Adj: return D3D_PRIMITIVE_TOPOLOGY_LINELIST_ADJ;
+            case Topology::LineStrip_Adj: return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ;
+            case Topology::TriangleList_Adj: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
+            case Topology::TriangleStrip_Adj: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ;
+            default:
+                break;
+        }
+        return D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
+    }
+    
+    void* DX12RenderTarget::getNativeResource() const
+    {
         return mResource.Get();
     }
     
-    DX12DynamicBuffer::DX12DynamicBuffer(const DX12Device& device, uint32_t length, uint32_t usage) {
+    DX12DynamicBuffer::DX12DynamicBuffer(const DX12Device& device, uint32_t length, uint32_t usage)
+    {
         auto& mDevice = device.mDevice;
         
         D3D12_RESOURCE_DESC bufferDesc = {};
@@ -84,6 +110,7 @@ namespace eokas::gpu {
         
         D3D12_HEAP_PROPERTIES bufferHeapProps = {};
         bufferHeapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
+        
         _ThrowIfFailed(mDevice->CreateCommittedResource(
             &bufferHeapProps,
             D3D12_HEAP_FLAG_NONE,
@@ -93,22 +120,26 @@ namespace eokas::gpu {
             IID_PPV_ARGS(&mResource)));
     }
     
-    void* DX12DynamicBuffer::getNativeResource() const {
+    void* DX12DynamicBuffer::getNativeResource() const
+    {
         return mResource.Get();
     }
     
-    void* DX12DynamicBuffer::map() {
+    void* DX12DynamicBuffer::map()
+    {
         UINT8* ptr = nullptr;
-        _ThrowIfFailed(mResource->Map(0, nullptr, (void**)&ptr));
+        _ThrowIfFailed(mResource->Map(0, nullptr, (void**) &ptr));
         return ptr;
     }
     
-    void DX12DynamicBuffer::unmap() {
+    void DX12DynamicBuffer::unmap()
+    {
         mResource->Unmap(0, nullptr);
     }
     
     DX12Texture::DX12Texture(const DX12Device& device, const TextureOptions& options)
-        : mOptions(options) {
+        : mOptions(options)
+    {
         
         auto& mDevice = device.mDevice;
         
@@ -129,25 +160,22 @@ namespace eokas::gpu {
         // 2. 创建纹理资源
         D3D12_HEAP_PROPERTIES textureHeapProps = {};
         textureHeapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
-        _ThrowIfFailed(mDevice->CreateCommittedResource(
-            &textureHeapProps,
-            D3D12_HEAP_FLAG_NONE,
-            &textureDesc,
-            D3D12_RESOURCE_STATE_COPY_DEST,
-            nullptr,
-            IID_PPV_ARGS(&mResource)));
+        _ThrowIfFailed(mDevice->CreateCommittedResource(&textureHeapProps, D3D12_HEAP_FLAG_NONE, &textureDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&mResource)));
     }
     
-    void* DX12Texture::getNativeResource() const {
+    void* DX12Texture::getNativeResource() const
+    {
         return mResource.Get();
     }
     
-    const TextureOptions& DX12Texture::getOptions() const {
+    const TextureOptions& DX12Texture::getOptions() const
+    {
         return this->mOptions;
     }
     
     DX12Program::DX12Program(const DX12Device& device, const ProgramOptions& options)
-        : mOptions(options) {
+        : mOptions(options)
+    {
         
         UINT compileFlags = 0;
 #if defined(_DEBUG)
@@ -169,71 +197,63 @@ namespace eokas::gpu {
             else if (options.target == ProgramTarget::SM_6_8) target += "_6_8";
         }
         
-        _ThrowIfFailed(D3DCompile(
-            options.source.c_str(),
-            options.source.size(),
-            options.name.c_str(),
-            nullptr,
-            nullptr,
-            options.entry.c_str(),
-            target.c_str(),
-            compileFlags,
-            0,
-            &mCode, &mError));
+        _ThrowIfFailed(D3DCompile(options.source.c_str(), options.source.size(), options.name.c_str(), nullptr, nullptr, options.entry.c_str(), target.c_str(), compileFlags, 0, &mCode, &mError));
         
-        if (mError != nullptr) {
-            std::string str((const char*)mError->GetBufferPointer(), mError->GetBufferSize());
+        if (mError != nullptr)
+        {
+            std::string str((const char*) mError->GetBufferPointer(), mError->GetBufferSize());
             throw std::runtime_error(str.c_str());
         }
     }
     
-    const ProgramOptions& DX12Program::getOptions() const {
+    const ProgramOptions& DX12Program::getOptions() const
+    {
         return mOptions;
     }
     
-    uint32_t DX12Program::getTextureCount() const {
+    uint32_t DX12Program::getTextureCount() const
+    {
         return 0;
     }
     
     DX12PipelineState::DX12PipelineState(const DX12Device& device)
-        : mDevice(device) {
+        : mDevice(device)
+    {
     }
     
-    void DX12PipelineState::begin() {
+    void DX12PipelineState::begin()
+    {
     
     }
     
-    void DX12PipelineState::setVertexElements(std::vector<VertexElement>& vElements) {
+    void DX12PipelineState::setVertexElements(std::vector<VertexElement>& vElements)
+    {
         mVertexElements.clear();
-        for (size_t index = 0; index < vElements.size(); index++) {
+        for (size_t index = 0; index < vElements.size(); index++)
+        {
             const VertexElement& ve = vElements.at(index);
             
-            mVertexElements.push_back({
-                ve.semanticName.c_str(),
-                ve.semanticIndex,
-                DX12Utils::transferFormat(ve.format),
-                0,
-                ve.offset,
-                D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
-                0
-            });
+            mVertexElements.push_back({ve.semanticName.c_str(), ve.semanticIndex, DX12Utils::transferFormat(ve.format), 0, ve.offset, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0});
         }
     }
     
-    void DX12PipelineState::setProgram(ProgramType type, Program::Ref program) {
+    void DX12PipelineState::setProgram(ProgramType type, Program::Ref program)
+    {
         mPrograms[type] = program;
     }
     
-    void DX12PipelineState::setTexture(uint32_t index, Texture::Ref texture) {
+    void DX12PipelineState::setTexture(uint32_t index, Texture::Ref texture)
+    {
         mTextures[index] = texture;
     }
     
-    void DX12PipelineState::end() {
+    void DX12PipelineState::end()
+    {
         auto& dxDevice = mDevice.mDevice;
         
         // Create Root Signature
         {
-            D3D12_STATIC_SAMPLER_DESC samplers[1] = { {} };
+            D3D12_STATIC_SAMPLER_DESC samplers[1] = {{}};
             samplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
             samplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
             samplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
@@ -269,7 +289,7 @@ namespace eokas::gpu {
                 D3D12_ROOT_PARAMETER1 parameters[1] = {};
                 parameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
                 parameters[0].DescriptorTable.NumDescriptorRanges = 1;
-                parameters[0].DescriptorTable.pDescriptorRanges = (const D3D12_DESCRIPTOR_RANGE1*)descriptorRanges;
+                parameters[0].DescriptorTable.pDescriptorRanges = (const D3D12_DESCRIPTOR_RANGE1*) descriptorRanges;
                 
                 rootSignatureDesc.Desc_1_1.NumParameters = 1;
                 rootSignatureDesc.Desc_1_1.pParameters = parameters;
@@ -288,7 +308,7 @@ namespace eokas::gpu {
                 D3D12_ROOT_PARAMETER parameters[1] = {};
                 parameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
                 parameters[0].DescriptorTable.NumDescriptorRanges = 1;
-                parameters[0].DescriptorTable.pDescriptorRanges = (const D3D12_DESCRIPTOR_RANGE*)descriptorRanges;
+                parameters[0].DescriptorTable.pDescriptorRanges = (const D3D12_DESCRIPTOR_RANGE*) descriptorRanges;
                 
                 rootSignatureDesc.Desc_1_0.NumParameters = 1;
                 rootSignatureDesc.Desc_1_0.pParameters = parameters;
@@ -308,16 +328,18 @@ namespace eokas::gpu {
             D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
             psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
             psoDesc.InputLayout.pInputElementDescs = mVertexElements.data();
-            psoDesc.InputLayout.NumElements = (UINT)mVertexElements.size();
+            psoDesc.InputLayout.NumElements = (UINT) mVertexElements.size();
             
             psoDesc.pRootSignature = mRootSignature.Get();
-            if (mPrograms.find(ProgramType::Vertex) != mPrograms.end()) {
+            if (mPrograms.find(ProgramType::Vertex) != mPrograms.end())
+            {
                 ComPtr<ID3DBlob> code = dynamic_cast<DX12Program*>(mPrograms[ProgramType::Vertex].get())->mCode;
-                psoDesc.VS = { code->GetBufferPointer(), code->GetBufferSize() };
+                psoDesc.VS = {code->GetBufferPointer(), code->GetBufferSize()};
             }
-            if (mPrograms.find(ProgramType::Fragment) != mPrograms.end()) {
+            if (mPrograms.find(ProgramType::Fragment) != mPrograms.end())
+            {
                 ComPtr<ID3DBlob> code = dynamic_cast<DX12Program*>(mPrograms[ProgramType::Fragment].get())->mCode;
-                psoDesc.PS = { code->GetBufferPointer(), code->GetBufferSize() };
+                psoDesc.PS = {code->GetBufferPointer(), code->GetBufferSize()};
             }
             
             psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
@@ -340,7 +362,7 @@ namespace eokas::gpu {
         
         // Create SRV Heap
         {
-            uint32_t textureCount = (uint32_t)mTextures.size();
+            uint32_t textureCount = (uint32_t) mTextures.size();
             D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
             srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
             srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
@@ -348,7 +370,8 @@ namespace eokas::gpu {
             _ThrowIfFailed(dxDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&mSRVHeap)));
             mSRVHeapStride = dxDevice->GetDescriptorHandleIncrementSize(srvHeapDesc.Type);
             
-            for (auto& node : mTextures) {
+            for (auto& node: mTextures)
+            {
                 auto index = node.first;
                 auto texture = node.second;
                 auto dxResource = dynamic_cast<DX12Texture*>(texture.get())->mResource;
@@ -369,21 +392,20 @@ namespace eokas::gpu {
     }
     
     DX12CommandBuffer::DX12CommandBuffer(const DX12Device& device, const DX12PipelineState& pso)
-        : mDevice(device) {
+        : mDevice(device)
+    {
         
         auto& dxDevice = device.mDevice;
         auto& dxPSO = pso.mPipelineState;
         auto& dxCommandAllocator = device.mCommandAllocators[device.mFrameBufferIndex];
         
-        _ThrowIfFailed(dxDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
-            dxCommandAllocator.Get(),
-            dxPSO.Get(),
-            IID_PPV_ARGS(&mCommandList)));
+        _ThrowIfFailed(dxDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, dxCommandAllocator.Get(), dxPSO.Get(), IID_PPV_ARGS(&mCommandList)));
         
         //_ThrowIfFailed(mCommandList->Close());
     }
     
-    void DX12CommandBuffer::reset(PipelineState::Ref pso) {
+    void DX12CommandBuffer::reset(PipelineState::Ref pso)
+    {
         auto& dxCommandAllocator = mDevice.mCommandAllocators[mDevice.mFrameBufferIndex];
         DX12PipelineState* pipelineState = dynamic_cast<DX12PipelineState*>(pso.get());
         
@@ -395,26 +417,30 @@ namespace eokas::gpu {
         mCommandList->SetGraphicsRootSignature(dxRootSignature.Get());
         
         auto& dxSRVHeap = pipelineState->mSRVHeap;
-        ID3D12DescriptorHeap* srvHeapList[] = { dxSRVHeap.Get() };
+        ID3D12DescriptorHeap* srvHeapList[] = {dxSRVHeap.Get()};
         mCommandList->SetDescriptorHeaps(_countof(srvHeapList), srvHeapList);
         mCommandList->SetGraphicsRootDescriptorTable(0, dxSRVHeap->GetGPUDescriptorHandleForHeapStart());
     }
     
-    void DX12CommandBuffer::setRenderTargets(const std::vector<RenderTarget::Ref>& renderTargets) {
+    void DX12CommandBuffer::setRenderTargets(const std::vector<RenderTarget::Ref>& renderTargets)
+    {
         std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> rtv;
-        for (size_t i = 0; i < renderTargets.size(); i++) {
+        for (size_t i = 0; i < renderTargets.size(); i++)
+        {
             auto dxRT = dynamic_cast<DX12RenderTarget*>(renderTargets.at(i).get());
             rtv.push_back(dxRT->mView);
         }
-        mCommandList->OMSetRenderTargets((UINT)rtv.size(), rtv.data(), FALSE, nullptr);
+        mCommandList->OMSetRenderTargets((UINT) rtv.size(), rtv.data(), FALSE, nullptr);
     }
     
-    void DX12CommandBuffer::clearRenderTarget(RenderTarget::Ref renderTarget, float(&color)[4]) {
+    void DX12CommandBuffer::clearRenderTarget(RenderTarget::Ref renderTarget, float(& color)[4])
+    {
         auto dxRT = dynamic_cast<DX12RenderTarget*>(renderTarget.get());
         mCommandList->ClearRenderTargetView(dxRT->mView, color, 0, nullptr);
     }
     
-    void DX12CommandBuffer::setViewport(const Viewport& viewport) {
+    void DX12CommandBuffer::setViewport(const Viewport& viewport)
+    {
         D3D12_VIEWPORT dxViewport;
         dxViewport.TopLeftX = viewport.left;
         dxViewport.TopLeftY = viewport.top;
@@ -424,20 +450,23 @@ namespace eokas::gpu {
         dxViewport.MaxDepth = viewport.back;
         
         D3D12_RECT dxScissorRect;
-        dxScissorRect.left = (LONG)viewport.left;
-        dxScissorRect.top = (LONG)viewport.top;
-        dxScissorRect.right = (LONG)viewport.right;
-        dxScissorRect.bottom = (LONG)viewport.bottom;
+        dxScissorRect.left = (LONG) viewport.left;
+        dxScissorRect.top = (LONG) viewport.top;
+        dxScissorRect.right = (LONG) viewport.right;
+        dxScissorRect.bottom = (LONG) viewport.bottom;
         
         mCommandList->RSSetViewports(1, &dxViewport);
         mCommandList->RSSetScissorRects(1, &dxScissorRect);
     }
     
-    void DX12CommandBuffer::setPrimitiveTopology(uint32_t topology) {
-        mCommandList->IASetPrimitiveTopology((D3D12_PRIMITIVE_TOPOLOGY)topology);
+    void DX12CommandBuffer::setTopology(Topology topology)
+    {
+        D3D_PRIMITIVE_TOPOLOGY dxTopology = DX12Utils::transferTopology(topology);
+        mCommandList->IASetPrimitiveTopology(dxTopology);
     }
     
-    void DX12CommandBuffer::setVertexBuffer(DynamicBuffer::Ref buffer, uint32_t length, uint32_t stride) {
+    void DX12CommandBuffer::setVertexBuffer(DynamicBuffer::Ref buffer, uint32_t length, uint32_t stride)
+    {
         DX12DynamicBuffer* dxVBO = dynamic_cast<DX12DynamicBuffer*>(buffer.get());
         const auto& dxVBR = dxVBO->mResource;
         
@@ -449,7 +478,8 @@ namespace eokas::gpu {
         mCommandList->IASetVertexBuffers(0, 1, &dxVBV);
     }
     
-    void DX12CommandBuffer::setIndexBuffer(DynamicBuffer::Ref buffer, uint32_t length, Format format) {
+    void DX12CommandBuffer::setIndexBuffer(DynamicBuffer::Ref buffer, uint32_t length, Format format)
+    {
         DX12DynamicBuffer* dxIBO = dynamic_cast<DX12DynamicBuffer*>(buffer.get());
         const auto& dxIBR = dxIBO->mResource;
         
@@ -461,42 +491,37 @@ namespace eokas::gpu {
         mCommandList->IASetIndexBuffer(&dxIBV);
     }
     
-    void DX12CommandBuffer::drawIndexedInstanced(
-        uint32_t indexCountPerInstance,
-        uint32_t instanceCount,
-        uint32_t startIndexLocation,
-        uint32_t baseVertexLocation,
-        uint32_t startInstanceLocation) {
+    void DX12CommandBuffer::drawIndexedInstanced(uint32_t indexCountPerInstance, uint32_t instanceCount, uint32_t startIndexLocation, uint32_t baseVertexLocation, uint32_t startInstanceLocation)
+    {
         
-        mCommandList->DrawIndexedInstanced(
-            indexCountPerInstance,
-            instanceCount,
-            startIndexLocation,
-            baseVertexLocation,
-            startInstanceLocation);
+        mCommandList->DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
     }
     
-    void DX12CommandBuffer::barrier(const std::vector<Barrier>& barriers) {
+    void DX12CommandBuffer::barrier(const std::vector<Barrier>& barriers)
+    {
         std::vector<D3D12_RESOURCE_BARRIER> dxBarriers;
         dxBarriers.resize(barriers.size());
-        for (size_t index = 0; index < barriers.size(); index++) {
+        for (size_t index = 0; index < barriers.size(); index++)
+        {
             const Barrier& barrier = barriers.at(index);
             
             D3D12_RESOURCE_BARRIER& dxBarrier = dxBarriers.at(index);
             dxBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-            dxBarrier.Transition.pResource = (ID3D12Resource*)barrier.resource->getNativeResource();
+            dxBarrier.Transition.pResource = (ID3D12Resource*) barrier.resource->getNativeResource();
             dxBarrier.Transition.Subresource = 0;
-            dxBarrier.Transition.StateBefore = (D3D12_RESOURCE_STATES)barrier.before;
-            dxBarrier.Transition.StateAfter = (D3D12_RESOURCE_STATES)barrier.after;
+            dxBarrier.Transition.StateBefore = (D3D12_RESOURCE_STATES) barrier.before;
+            dxBarrier.Transition.StateAfter = (D3D12_RESOURCE_STATES) barrier.after;
         }
-        mCommandList->ResourceBarrier((UINT)dxBarriers.size(), dxBarriers.data());
+        mCommandList->ResourceBarrier((UINT) dxBarriers.size(), dxBarriers.data());
     }
     
-    void DX12CommandBuffer::finish() {
+    void DX12CommandBuffer::finish()
+    {
         _ThrowIfFailed(mCommandList->Close());
     }
     
-    void DX12CommandBuffer::fillTexture(Texture::Ref target, const std::vector<uint8_t>& source) {
+    void DX12CommandBuffer::fillTexture(Texture::Ref target, const std::vector<uint8_t>& source)
+    {
         auto& dxDevice = mDevice.mDevice;
         
         DX12Texture* dxTarget = dynamic_cast<DX12Texture*>(target.get());
@@ -510,9 +535,7 @@ namespace eokas::gpu {
         UINT64 uploadBufferSize;
         UINT numRows;
         UINT64 rowSizeInBytes;
-        dxDevice->GetCopyableFootprints(
-            &dxTargetDesc, subresourceIndex, subresourceCount, 0,
-            &uploadFootprint, &numRows, &rowSizeInBytes, &uploadBufferSize);
+        dxDevice->GetCopyableFootprints(&dxTargetDesc, subresourceIndex, subresourceCount, 0, &uploadFootprint, &numRows, &rowSizeInBytes, &uploadBufferSize);
         
         // 2. 创建上传堆
         
@@ -532,19 +555,13 @@ namespace eokas::gpu {
             
             D3D12_HEAP_PROPERTIES bufferHeapProps = {};
             bufferHeapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
-            _ThrowIfFailed(dxDevice->CreateCommittedResource(
-                &bufferHeapProps,
-                D3D12_HEAP_FLAG_NONE,
-                &bufferDesc,
-                D3D12_RESOURCE_STATE_GENERIC_READ,
-                nullptr,
-                IID_PPV_ARGS(&uploadBuffer)));
+            _ThrowIfFailed(dxDevice->CreateCommittedResource(&bufferHeapProps, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&uploadBuffer)));
         }
         
         // 3. 将数据从 std::vector<UINT8> 复制到上传堆中
         const UINT8* srcPtr = source.data();
         UINT8* dstPtr;
-        _ThrowIfFailed(uploadBuffer->Map(0, nullptr, (void**)&dstPtr));
+        _ThrowIfFailed(uploadBuffer->Map(0, nullptr, (void**) &dstPtr));
         for (UINT row = 0; row < numRows; ++row)
         {
             memcpy(dstPtr, srcPtr, rowSizeInBytes);
@@ -577,7 +594,8 @@ namespace eokas::gpu {
         }
     }
     
-    DX12Device::DX12Device(void* windowHandle, uint32_t windowWidth, uint32_t windowHeight) {
+    DX12Device::DX12Device(void* windowHandle, uint32_t windowWidth, uint32_t windowHeight)
+    {
         UINT dxgiFactoryFlags = 0U;
 
 #if defined(_DEBUG)
@@ -585,8 +603,10 @@ namespace eokas::gpu {
         // NOTE: Enabling the debug layer after device creation will invalidate the active device.
         {
             ComPtr<ID3D12Debug> dc;
-            if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&dc)))) {
-                if (SUCCEEDED(dc->QueryInterface(IID_PPV_ARGS(&mDebugController)))) {
+            if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&dc))))
+            {
+                if (SUCCEEDED(dc->QueryInterface(IID_PPV_ARGS(&mDebugController))))
+                {
                     mDebugController->EnableDebugLayer();
                     mDebugController->SetEnableGPUBasedValidation(true);
                 }
@@ -599,13 +619,15 @@ namespace eokas::gpu {
         
         // Create DXGI Factory
         _ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&mDXGIFactory)));
-        _ThrowIfFailed(mDXGIFactory->MakeWindowAssociation((HWND)windowHandle, DXGI_MWA_NO_ALT_ENTER));
+        _ThrowIfFailed(mDXGIFactory->MakeWindowAssociation((HWND) windowHandle, DXGI_MWA_NO_ALT_ENTER));
         
         // Enum Adapter and Create Device
-        for (UINT adapterIndex = 0; DXGI_ERROR_NOT_FOUND != mDXGIFactory->EnumAdapters1(adapterIndex, &mDXGIAdapter); adapterIndex++) {
+        for (UINT adapterIndex = 0; DXGI_ERROR_NOT_FOUND != mDXGIFactory->EnumAdapters1(adapterIndex, &mDXGIAdapter); adapterIndex++)
+        {
             DXGI_ADAPTER_DESC1 desc = {};
             mDXGIAdapter->GetDesc1(&desc);
-            if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) {
+            if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
+            {
                 continue;
             }
             
@@ -615,7 +637,8 @@ namespace eokas::gpu {
 #endif
             break;
         }
-        if (mDevice == nullptr) {
+        if (mDevice == nullptr)
+        {
             throw std::runtime_error("Create Device Failed.");
         }
         
@@ -635,7 +658,7 @@ namespace eokas::gpu {
         swapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
         swapchainDesc.SampleDesc.Count = 1;
-        swapchainDesc.OutputWindow = (HWND)windowHandle;
+        swapchainDesc.OutputWindow = (HWND) windowHandle;
         swapchainDesc.Windowed = TRUE;
         _ThrowIfFailed(mDXGIFactory->CreateSwapChain(mCommandQueue.Get(), &swapchainDesc, &swapchain));
         _ThrowIfFailed(swapchain.As(&mSwapChain));
@@ -651,7 +674,8 @@ namespace eokas::gpu {
         
         // Get RenderTarget and Create RTV
         D3D12_CPU_DESCRIPTOR_HANDLE rtvHandleStart = mRTVHeap->GetCPUDescriptorHandleForHeapStart();
-        for (UINT i = 0; i < kFrameBufferCount; i++) {
+        for (UINT i = 0; i < kFrameBufferCount; i++)
+        {
             mRenderTargets[i] = std::make_shared<DX12RenderTarget>();
             DX12RenderTarget* dxRT = dynamic_cast<DX12RenderTarget*>(mRenderTargets[i].get());
             _ThrowIfFailed(mSwapChain->GetBuffer(i, IID_PPV_ARGS(&dxRT->mResource)));
@@ -661,10 +685,9 @@ namespace eokas::gpu {
         }
         
         // Create CommandAllocators
-        for (UINT i = 0; i < kFrameBufferCount; i++) {
-            _ThrowIfFailed(mDevice->CreateCommandAllocator(
-                D3D12_COMMAND_LIST_TYPE_DIRECT,
-                IID_PPV_ARGS(&mCommandAllocators[i])));
+        for (UINT i = 0; i < kFrameBufferCount; i++)
+        {
+            _ThrowIfFailed(mDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&mCommandAllocators[i])));
         }
         
         // Create Fence
@@ -672,56 +695,68 @@ namespace eokas::gpu {
         _ThrowIfFailed(mDevice->CreateFence(mFenceValues[mFrameBufferIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence)));
         mFenceValues[mFrameBufferIndex]++;
         mFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-        if (mFenceEvent == nullptr) {
+        if (mFenceEvent == nullptr)
+        {
             _ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
         }
     }
     
-    DX12Device::~DX12Device() {
+    DX12Device::~DX12Device()
+    {
         this->waitForGPU();
         CloseHandle(mFenceEvent);
         mFenceEvent = nullptr;
     }
     
-    RenderTarget::Ref DX12Device::getActiveRenderTarget() {
+    RenderTarget::Ref DX12Device::getActiveRenderTarget()
+    {
         return mRenderTargets[mFrameBufferIndex];
     }
     
-    DynamicBuffer::Ref DX12Device::createDynamicBuffer(uint32_t length, uint32_t usage) {
+    DynamicBuffer::Ref DX12Device::createDynamicBuffer(uint32_t length, uint32_t usage)
+    {
         return std::make_shared<DX12DynamicBuffer>(*this, length, usage);
     }
     
-    Texture::Ref DX12Device::createTexture(const TextureOptions& options) {
+    Texture::Ref DX12Device::createTexture(const TextureOptions& options)
+    {
         return std::make_shared<DX12Texture>(*this, options);
     }
     
-    Program::Ref DX12Device::createProgram(const ProgramOptions& options) {
+    Program::Ref DX12Device::createProgram(const ProgramOptions& options)
+    {
         return std::make_shared<DX12Program>(*this, options);
     }
     
-    PipelineState::Ref DX12Device::createPipelineState() {
+    PipelineState::Ref DX12Device::createPipelineState()
+    {
         return std::make_shared<DX12PipelineState>(*this);
     }
     
-    CommandBuffer::Ref DX12Device::createCommandBuffer(const PipelineState::Ref pso) {
+    CommandBuffer::Ref DX12Device::createCommandBuffer(const PipelineState::Ref pso)
+    {
         const DX12PipelineState& mPSO = dynamic_cast<const DX12PipelineState&>(*pso.get());
         return std::make_shared<DX12CommandBuffer>(*this, mPSO);
     }
     
-    void DX12Device::commitCommandBuffer(const CommandBuffer::Ref commandBuffer) {
+    void DX12Device::commitCommandBuffer(const CommandBuffer::Ref commandBuffer)
+    {
         const DX12CommandBuffer* dxCommandBuffer = dynamic_cast<const DX12CommandBuffer*>(commandBuffer.get());
-        ID3D12CommandList* commandLists[] = { dxCommandBuffer->mCommandList.Get() };
+        ID3D12CommandList* commandLists[] = {dxCommandBuffer->mCommandList.Get()};
         mCommandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
     }
     
-    void DX12Device::present() {
+    void DX12Device::present()
+    {
         HRESULT hr = mSwapChain->Present(1, 0);
-        if (FAILED(hr)) {
+        if (FAILED(hr))
+        {
             _ThrowIfFailed(mDevice->GetDeviceRemovedReason());
         }
     }
     
-    void DX12Device::waitForGPU() {
+    void DX12Device::waitForGPU()
+    {
         const UINT64 currentFenceValue = mFenceValues[mFrameBufferIndex];
         
         _ThrowIfFailed(mCommandQueue->Signal(mFence.Get(), currentFenceValue));
@@ -732,7 +767,8 @@ namespace eokas::gpu {
         mFenceValues[mFrameBufferIndex] = currentFenceValue + 1;
     }
     
-    void DX12Device::waitForNextFrame() {
+    void DX12Device::waitForNextFrame()
+    {
         const UINT64 currentFenceValue = mFenceValues[mFrameBufferIndex];
         
         _ThrowIfFailed(mCommandQueue->Signal(mFence.Get(), currentFenceValue));
@@ -749,7 +785,8 @@ namespace eokas::gpu {
         mFenceValues[mFrameBufferIndex] = currentFenceValue + 1;
     }
     
-    Device::Ref GPUFactory::createDevice(void* windowHandle, uint32_t windowWidth, uint32_t windowHeight) {
+    Device::Ref GPUFactory::createDevice(void* windowHandle, uint32_t windowWidth, uint32_t windowHeight)
+    {
         return std::make_shared<DX12Device>(windowHandle, windowWidth, windowHeight);
     }
 }
