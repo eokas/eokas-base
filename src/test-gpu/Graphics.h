@@ -139,7 +139,7 @@ namespace eokas::gpu {
                 mCommandBuffer->setRenderTargets({renderTarget});
                 float clearColor[4] = {0.0f, 0.2f, 0.4f, 1.0f};
                 mCommandBuffer->clearRenderTarget(renderTarget, clearColor);
-                mCommandBuffer->setPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+                mCommandBuffer->setTopology(Topology::TriangleList);
                 mCommandBuffer->setVertexBuffer(mVertexBuffer, vDataLength, vDataStride);
                 mCommandBuffer->setIndexBuffer(mIndexBuffer, iDataLength, iDataFormat);
                 mCommandBuffer->drawIndexedInstanced(6, 1, 0, 0, 0);
