@@ -13,7 +13,7 @@ using namespace Microsoft::WRL;
 #include <d3d12shader.h>
 #include <d3dcompiler.h>
 
-namespace eokas::gpu
+namespace eokas
 {
     struct DX12Device;
     
@@ -22,6 +22,7 @@ namespace eokas::gpu
     struct DX12Utils
     {
         static DXGI_FORMAT transferFormat(Format format);
+        static D3D12_PRIMITIVE_TOPOLOGY transferTopology(Topology topology);
     };
     
     struct DX12RenderTarget : public RenderTarget
@@ -35,13 +36,11 @@ namespace eokas::gpu
     struct DX12DynamicBuffer : public DynamicBuffer
     {
         ComPtr <ID3D12Resource> mResource;
-        
+
         DX12DynamicBuffer(const DX12Device& device, uint32_t length, uint32_t usage);
         
         virtual void* getNativeResource() const override;
-        
         virtual void* map() override;
-        
         virtual void unmap() override;
     };
     
@@ -53,7 +52,6 @@ namespace eokas::gpu
         DX12Texture(const DX12Device& device, const TextureOptions& options);
         
         virtual void* getNativeResource() const override;
-        
         virtual const TextureOptions& getOptions() const override;
     };
     
@@ -66,7 +64,6 @@ namespace eokas::gpu
         DX12Program(const DX12Device& device, const ProgramOptions& options);
         
         virtual const ProgramOptions& getOptions() const override;
-        
         virtual uint32_t getTextureCount() const override;
     };
     
@@ -87,13 +84,9 @@ namespace eokas::gpu
         DX12PipelineState(const DX12Device& device);
         
         virtual void begin() override;
-        
         virtual void setVertexElements(std::vector<VertexElement>& vElements) override;
-        
         virtual void setProgram(ProgramType type, Program::Ref program) override;
-        
         virtual void setTexture(uint32_t index, Texture::Ref texture) override;
-        
         virtual void end() override;
     };
     
@@ -107,25 +100,15 @@ namespace eokas::gpu
         DX12CommandBuffer(const DX12Device& device, const DX12PipelineState& pso);
         
         virtual void reset(PipelineState::Ref pso) override;
-        
         virtual void setRenderTargets(const std::vector<RenderTarget::Ref>& renderTargets) override;
-        
         virtual void clearRenderTarget(RenderTarget::Ref renderTarget, float(& color)[4]) override;
-        
         virtual void setViewport(const Viewport& viewport) override;
-        
-        virtual void setPrimitiveTopology(uint32_t topology) override;
-        
+        virtual void setTopology(Topology topology) override;
         virtual void setVertexBuffer(DynamicBuffer::Ref buffer, uint32_t length, uint32_t stride) override;
-        
         virtual void setIndexBuffer(DynamicBuffer::Ref buffer, uint32_t length, Format format) override;
-        
         virtual void drawIndexedInstanced(uint32_t indexCountPerInstance, uint32_t instanceCount, uint32_t startIndexLocation, uint32_t baseVertexLocation, uint32_t startInstanceLocation) override;
-        
         virtual void fillTexture(Texture::Ref target, const std::vector<uint8_t>& source) override;
-        
         virtual void barrier(const std::vector<Barrier>& barriers) override;
-        
         virtual void finish() override;
     };
     
@@ -153,25 +136,15 @@ namespace eokas::gpu
         DX12Device(void* windowHandle, uint32_t windowWidth, uint32_t windowHeight);
         
         virtual ~DX12Device();
-        
         virtual RenderTarget::Ref getActiveRenderTarget() override;
-        
         virtual DynamicBuffer::Ref createDynamicBuffer(uint32_t length, uint32_t usage) override;
-        
         virtual Texture::Ref createTexture(const TextureOptions& options) override;
-        
         virtual Program::Ref createProgram(const ProgramOptions& options) override;
-        
         virtual PipelineState::Ref createPipelineState() override;
-        
         virtual CommandBuffer::Ref createCommandBuffer(const PipelineState::Ref pso) override;
-        
         virtual void commitCommandBuffer(const CommandBuffer::Ref commandBuffer) override;
-        
         virtual void present() override;
-        
         virtual void waitForGPU() override;
-        
         virtual void waitForNextFrame() override;
     };
 }

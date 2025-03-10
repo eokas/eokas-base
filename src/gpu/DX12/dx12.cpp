@@ -13,7 +13,7 @@
 #include <map>
 #include <codecvt>
 
-namespace eokas::gpu
+namespace eokas
 {
     class HRException : public std::exception
     {
@@ -49,30 +49,41 @@ namespace eokas::gpu
     {
         switch (format)
         {
-            case Format::R32_UINT:
-                return DXGI_FORMAT_R32_UINT;
-            case Format::R32_FLOAT:
-                return DXGI_FORMAT_R32_FLOAT;
-            case Format::R8G8B8A8_UNORM:
-                return DXGI_FORMAT_R8G8B8A8_UNORM;
-            case Format::B8G8R8A8_UNORM:
-                return DXGI_FORMAT_B8G8R8A8_UNORM;
-            case Format::R16G16B16A16_FLOAT:
-                return DXGI_FORMAT_R16G16B16A16_FLOAT;
-            case Format::R32G32_FLOAT:
-                return DXGI_FORMAT_R32G32_FLOAT;
-            case Format::R32G32B32_FLOAT:
-                return DXGI_FORMAT_R32G32B32_FLOAT;
-            case Format::R32G32B32A32_FLOAT:
-                return DXGI_FORMAT_R32G32B32A32_FLOAT;
-            case Format::D32_FLOAT:
-                return DXGI_FORMAT_D32_FLOAT;
-            case Format::D24_UNORM_S8_UINT:
-                return DXGI_FORMAT_D24_UNORM_S8_UINT;
-            case Format::D16_UNORM:
-                return DXGI_FORMAT_D16_UNORM;
+            case Format::Unknown:
+                break;
+            case Format::R32_UINT: return DXGI_FORMAT_R32_UINT;
+            case Format::R32_FLOAT: return DXGI_FORMAT_R32_FLOAT;
+            case Format::R8G8B8A8_UNORM: return DXGI_FORMAT_R8G8B8A8_UNORM;
+            case Format::B8G8R8A8_UNORM: return DXGI_FORMAT_B8G8R8A8_UNORM;
+            case Format::R16G16B16A16_FLOAT: return DXGI_FORMAT_R16G16B16A16_FLOAT;
+            case Format::R32G32_FLOAT: return DXGI_FORMAT_R32G32_FLOAT;
+            case Format::R32G32B32_FLOAT: return DXGI_FORMAT_R32G32B32_FLOAT;
+            case Format::R32G32B32A32_FLOAT: return DXGI_FORMAT_R32G32B32A32_FLOAT;
+            case Format::D32_FLOAT: return DXGI_FORMAT_D32_FLOAT;
+            case Format::D24_UNORM_S8_UINT: return DXGI_FORMAT_D24_UNORM_S8_UINT;
+            case Format::D16_UNORM: return DXGI_FORMAT_D16_UNORM;
         }
         return DXGI_FORMAT_UNKNOWN;
+    }
+    
+    D3D12_PRIMITIVE_TOPOLOGY DX12Utils::transferTopology(Topology topology)
+    {
+        switch(topology)
+        {
+            case Topology::Undefined: return D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
+            case Topology::PointList: return D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+            case Topology::LineList: return D3D_PRIMITIVE_TOPOLOGY_LINELIST;
+            case Topology::LineStrip: return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
+            case Topology::TriangleList: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+            case Topology::TriangleStrip: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+            case Topology::LineList_Adj: return D3D_PRIMITIVE_TOPOLOGY_LINELIST_ADJ;
+            case Topology::LineStrip_Adj: return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ;
+            case Topology::TriangleList_Adj: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
+            case Topology::TriangleStrip_Adj: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ;
+            default:
+                break;
+        }
+        return D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
     }
     
     void* DX12RenderTarget::getNativeResource() const
@@ -99,7 +110,14 @@ namespace eokas::gpu
         
         D3D12_HEAP_PROPERTIES bufferHeapProps = {};
         bufferHeapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
-        _ThrowIfFailed(mDevice->CreateCommittedResource(&bufferHeapProps, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mResource)));
+        
+        _ThrowIfFailed(mDevice->CreateCommittedResource(
+            &bufferHeapProps,
+            D3D12_HEAP_FLAG_NONE,
+            &bufferDesc,
+            D3D12_RESOURCE_STATE_GENERIC_READ,
+            nullptr,
+            IID_PPV_ARGS(&mResource)));
     }
     
     void* DX12DynamicBuffer::getNativeResource() const
@@ -441,9 +459,10 @@ namespace eokas::gpu
         mCommandList->RSSetScissorRects(1, &dxScissorRect);
     }
     
-    void DX12CommandBuffer::setPrimitiveTopology(uint32_t topology)
+    void DX12CommandBuffer::setTopology(Topology topology)
     {
-        mCommandList->IASetPrimitiveTopology((D3D12_PRIMITIVE_TOPOLOGY) topology);
+        D3D_PRIMITIVE_TOPOLOGY dxTopology = DX12Utils::transferTopology(topology);
+        mCommandList->IASetPrimitiveTopology(dxTopology);
     }
     
     void DX12CommandBuffer::setVertexBuffer(DynamicBuffer::Ref buffer, uint32_t length, uint32_t stride)

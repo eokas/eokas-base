@@ -3,7 +3,7 @@
 
 #include "base/main.h"
 
-namespace eokas::gpu
+namespace eokas
 {
     enum class Format
     {
@@ -29,6 +29,20 @@ namespace eokas::gpu
         ASTC_12x12_HDR
     };
     
+    enum class Topology
+    {
+        Undefined = 0,
+        PointList = 1,
+        LineList = 2,
+        LineStrip = 3,
+        TriangleList = 4,
+        TriangleStrip = 5,
+        LineList_Adj = 10,
+        LineStrip_Adj = 11,
+        TriangleList_Adj = 12,
+        TriangleStrip_Adj = 13,
+    };
+    
     struct Resource
     {
         using Ref = std::shared_ptr<Resource>;
@@ -44,9 +58,7 @@ namespace eokas::gpu
     struct DynamicBuffer : public Resource
     {
         using Ref = std::shared_ptr<DynamicBuffer>;
-        
         virtual void* map() = 0;
-        
         virtual void unmap() = 0;
     };
     
@@ -68,7 +80,7 @@ namespace eokas::gpu
     
     struct VertexElement
     {
-        std::string semanticName = "";
+        std::string semanticName = {};
         uint32_t semanticIndex = 0;
         uint32_t offset = 0;
         Format format = Format::Unknown;
@@ -98,7 +110,6 @@ namespace eokas::gpu
         using Ref = std::shared_ptr<Program>;
         
         virtual const ProgramOptions& getOptions() const = 0;
-        
         virtual uint32_t getTextureCount() const = 0;
     };
     
@@ -107,13 +118,9 @@ namespace eokas::gpu
         using Ref = std::shared_ptr<PipelineState>;
         
         virtual void begin() = 0;
-        
         virtual void setVertexElements(std::vector<VertexElement>& vElements) = 0;
-        
         virtual void setProgram(ProgramType type, Program::Ref program) = 0;
-        
         virtual void setTexture(uint32_t index, Texture::Ref texture) = 0;
-        
         virtual void end() = 0;
     };
     
@@ -140,25 +147,15 @@ namespace eokas::gpu
         using Ref = std::shared_ptr<CommandBuffer>;
         
         virtual void reset(PipelineState::Ref pso) = 0;
-        
         virtual void setRenderTargets(const std::vector<RenderTarget::Ref>& renderTargets) = 0;
-        
         virtual void clearRenderTarget(RenderTarget::Ref renderTarget, float(& color)[4]) = 0;
-        
         virtual void setViewport(const Viewport& viewport) = 0;
-        
-        virtual void setPrimitiveTopology(uint32_t topology) = 0;
-        
+        virtual void setTopology(Topology topology) = 0;
         virtual void setVertexBuffer(DynamicBuffer::Ref buffer, uint32_t length, uint32_t stride) = 0;
-        
         virtual void setIndexBuffer(DynamicBuffer::Ref buffer, uint32_t length, Format format) = 0;
-        
         virtual void drawIndexedInstanced(uint32_t indexCountPerInstance, uint32_t instanceCount, uint32_t startIndexLocation, uint32_t baseVertexLocation, uint32_t startInstanceLocation) = 0;
-        
         virtual void fillTexture(Texture::Ref target, const std::vector<uint8_t>& source) = 0;
-        
         virtual void barrier(const std::vector<Barrier>& barriers) = 0;
-        
         virtual void finish() = 0;
     };
     
@@ -167,23 +164,14 @@ namespace eokas::gpu
         using Ref = std::shared_ptr<Device>;
         
         virtual RenderTarget::Ref getActiveRenderTarget() = 0;
-        
         virtual DynamicBuffer::Ref createDynamicBuffer(uint32_t length, uint32_t usage) = 0;
-        
         virtual Texture::Ref createTexture(const TextureOptions& options) = 0;
-        
         virtual Program::Ref createProgram(const ProgramOptions& options) = 0;
-        
         virtual PipelineState::Ref createPipelineState() = 0;
-        
         virtual CommandBuffer::Ref createCommandBuffer(const PipelineState::Ref pso) = 0;
-        
         virtual void commitCommandBuffer(const CommandBuffer::Ref commandBuffer) = 0;
-        
         virtual void present() = 0;
-        
         virtual void waitForGPU() = 0;
-        
         virtual void waitForNextFrame() = 0;
     };
     
