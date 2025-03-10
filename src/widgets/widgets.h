@@ -5,20 +5,44 @@
 #include "./anchor.h"
 #include "./renderer.h"
 
-namespace eokas {
-    class UIWidget {
+namespace eokas
+{
+    class UIWidget
+    {
     public:
         UIWidget(const String& name);
+        
         virtual ~UIWidget();
         
-        const String& id() const { return mID; }
-        const String& name() const { return mName; }
+        const String& id() const
+        {
+            return mID;
+        }
         
-        const UIAnchor& anchor() const { return mAnchor; }
-        UIAnchor& anchor() { return mAnchor; }
+        const String& name() const
+        {
+            return mName;
+        }
         
-        bool dirty() { return mDirty; }
-        void dirty(bool val) { mDirty = val; }
+        const UIAnchor& anchor() const
+        {
+            return mAnchor;
+        }
+        
+        UIAnchor& anchor()
+        {
+            return mAnchor;
+        }
+        
+        bool dirty()
+        {
+            return mDirty;
+        }
+        
+        void dirty(bool val)
+        {
+            mDirty = val;
+        }
         
         virtual UIShape* render();
     
@@ -31,25 +55,32 @@ namespace eokas {
     };
     
     template<typename ChildBase>
-    class UIContainer : public UIWidget {
+    class UIContainer : public UIWidget
+    {
     public:
         UIContainer() = default;
         
-        virtual ~UIContainer() override {
+        virtual ~UIContainer() override
+        {
             this->clear();
         }
         
         template<typename Child, typename... Args>
-        Child* add(Args&&... args) {
+        Child* add(Args&& ... args)
+        {
             ChildBase*& child = this->mChildren.emplace_back();
             child = new Child(std::forward<Args>(args)...);
             child->mParent = &this->mAnchor;
-            return (Child*)child;
+            return (Child*) child;
         }
         
-        const std::vector<ChildBase*>& children() const { return mChildren; }
+        const std::vector<ChildBase*>& children() const
+        {
+            return mChildren;
+        }
         
-        void clear() {
+        void clear()
+        {
             _DeleteList(mChildren);
         }
     
@@ -57,27 +88,38 @@ namespace eokas {
         std::vector<ChildBase*> mChildren = {};
     };
     
-    class UIViewport : public UIWidget { };
+    class UIViewport : public UIWidget
+    { };
     
-    class UIImage : public UIWidget { };
+    class UIImage : public UIWidget
+    { };
     
-    class UIText : public UIWidget { };
+    class UIText : public UIWidget
+    { };
     
-    class UIButton : public UIWidget { };
+    class UIButton : public UIWidget
+    { };
     
-    class UIToggle : public UIWidget { };
+    class UIToggle : public UIWidget
+    { };
     
-    class UISelector : public UIWidget { };
+    class UISelector : public UIWidget
+    { };
     
-    class UIVerticalListView : public UIContainer<UIWidget> { };
+    class UIVerticalListView : public UIContainer<UIWidget>
+    { };
     
-    class UIHorizontalListView : public UIContainer<UIWidget> { };
+    class UIHorizontalListView : public UIContainer<UIWidget>
+    { };
     
-    class UIGridView : public UIContainer<UIWidget> { };
+    class UIGridView : public UIContainer<UIWidget>
+    { };
     
-    class UITableView : public UIContainer<UIWidget> { };
+    class UITableView : public UIContainer<UIWidget>
+    { };
     
-    class UITreeView : public UIContainer<UIWidget> { };
+    class UITreeView : public UIContainer<UIWidget>
+    { };
 }
 
 #endif//_EOKAS_WIDGETS_WIDGETS_H_

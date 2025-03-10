@@ -26,9 +26,8 @@ using namespace Microsoft::WRL;
 #include "gpu/main.h"
 #include "./Utilities.h"
 
-namespace eokas::gpu
+namespace eokas
 {
-    
     class Graphics
     {
         Device::Ref mDevice;
@@ -90,7 +89,7 @@ namespace eokas::gpu
                 vDataLength = sizeof(vData);
                 vDataStride = sizeof(Vertex);
                 
-                mVertexBuffer = mDevice->createDynamicBuffer(vDataLength, 0);
+                mVertexBuffer = mDevice->createDynamicBuffer(vDataLength, vDataStride, 0);
                 void* ptr = mVertexBuffer->map();
                 memcpy(ptr, vData, vDataLength);
                 mVertexBuffer->unmap();
@@ -144,7 +143,7 @@ namespace eokas::gpu
                 mCommandBuffer->setRenderTargets({renderTarget});
                 float clearColor[4] = {0.0f, 0.2f, 0.4f, 1.0f};
                 mCommandBuffer->clearRenderTarget(renderTarget, clearColor);
-                mCommandBuffer->setPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+                mCommandBuffer->setTopology(Topology::TriangleList);
                 mCommandBuffer->setVertexBuffer(mVertexBuffer, vDataLength, vDataStride);
                 mCommandBuffer->setIndexBuffer(mIndexBuffer, iDataLength, iDataFormat);
                 mCommandBuffer->drawIndexedInstanced(6, 1, 0, 0, 0);
@@ -165,7 +164,6 @@ namespace eokas::gpu
         
         Program::Ref compileShader(const std::string& file, ProgramType type, ProgramTarget target, const char* entry)
         {
-            
             ProgramOptions options;
             options.name = file;
             options.source = Utilities::readTextFile(file);

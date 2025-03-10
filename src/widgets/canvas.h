@@ -8,7 +8,7 @@
 namespace eokas {
     class UICanvas {
     public:
-        UICanvas();
+        UICanvas(const Rect& rect);
         
         void resize(const Rect& rect);
         

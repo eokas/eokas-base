@@ -2,6 +2,7 @@
 #define _EOKAS_WIDGETS_HEADER_H_
 
 #include "base/main.h"
+#include "gpu/header.h"
 
 namespace eokas {
 

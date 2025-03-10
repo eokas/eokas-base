@@ -3,8 +3,10 @@
 
 #include "./header.h"
 
-namespace eokas {
-    struct UIGeometry {
+namespace eokas
+{
+    struct UIGeometry
+    {
         std::vector<Vector3> positions;
         std::vector<Vector4> colors;
         std::vector<Vector2> uv;
@@ -12,35 +14,63 @@ namespace eokas {
         u32_t material;
     };
     
-    struct UIMaterial {
-        String path;
+    struct UIMaterial
+    {
+        Color color;
+        String texture;
+        String vertexShader;
+        String pixelShader;
     };
     
-    struct UIShape {
+    struct UIShape
+    {
         std::vector<UIGeometry> geometries;
         std::vector<UIMaterial> materials;
         
-        void clear() {
+        void clear()
+        {
             this->geometries.clear();
             this->materials.clear();
         }
     };
     
-    class UIPrimitive {
+    struct UIRenderPrimitive
+    {
+        DynamicBuffer::Ref vertexBuffer;
+        uint32_t vertexLength;
+        uint32_t vertexStride;
+        
+        DynamicBuffer::Ref indexBuffer;
+        uint32_t indexLength;
+        Format indexFormat;
     };
     
-    class UITexture {
+    class UIRenderMaterial
+    {
+        Color color;
+        Texture::Ref texture;
+        PipelineState::Ref PSO;
     };
     
-    class UIRenderer {
+    class UIRenderer
+    {
     public:
-        virtual UIPrimitive* createPrimitive(const UIGeometry& geom) = 0;
-        virtual UITexture* createTexture(const String& path) = 0;
+        explicit UIRenderer(Device::Ref device);
+        virtual ~UIRenderer();
         
-        virtual void setPrimitive(UIPrimitive* primitive) = 0;
-        virtual void setTexture(UITexture* texture) = 0;
+        UIRenderPrimitive* createPrimitive(const UIGeometry& geom);
+        UIRenderMaterial* createMaterial(const UIMaterial& mat);
         
-        virtual void render() = 0;
+        void setPrimitive(UIRenderPrimitive* primitive);
+        void setMaterial(UIRenderMaterial* material);
+        
+        void render();
+
+    private:
+        Device::Ref mDevice;
+        CommandBuffer::Ref mCommandBuffer;
+        UIRenderPrimitive* mPrimitive;
+        UIRenderMaterial* mMaterial;
     };
 }
 

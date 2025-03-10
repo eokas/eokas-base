@@ -1,15 +1,11 @@
 #include "./canvas.h"
 
 namespace eokas {
-    UICanvas::UICanvas()
-        : mRect()
+    UICanvas::UICanvas(const Rect& rect)
+        : mRect(rect)
         , mWidgets()
         , mShapes() {
         
-    }
-    
-    void UICanvas::addWidget(UIWidget* widget) {
-        mWidgets.push_back(widget);
     }
     
     void UICanvas::resize(const Rect& rect) {
