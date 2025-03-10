@@ -4,7 +4,7 @@
 #include "./header.h"
 
 namespace eokas {
-    class
+    
 }
 
 #endif//_EOKAS_APP_CONFIG_H_

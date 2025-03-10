@@ -4,12 +4,12 @@ using namespace eokas;
 
 _eokas_test_case(hom)
 {
-    HomObject* obj = new HomObject();
-    obj->set("name", "eokas-hom");
-    obj->set("version", "1.0.0");
+    HomNode node(HomType::Object);
+    node.set("name", "eokas-hom");
+    node.set("version", "1.0.0");
 
-    printf("obj.name: %s\n", obj->getString("name").cstr());
-    printf("obj.version: %s\n", obj->getString("version").cstr());
+    printf("obj.name: %s\n", node.get("name").asString().cstr());
+    printf("obj.version: %s\n", node.get("version").asString().cstr());
 
     return 0;
 }

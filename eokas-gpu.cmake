@@ -29,7 +29,7 @@ set(EOKAS_LIBRARY_FILES
 
 if(APPLE)
     list(APPEND EOKAS_SOURCE_FILES
-            "${EOKAS_TARGET_DIR}/Metal/*.cpp"
+            "${EOKAS_TARGET_DIR}/Metal/metal.cpp"
     )
     list(APPEND EOKAS_LIBRARY_FILES
             "-framework Metal"
@@ -49,7 +49,7 @@ elseif (WIN32)
     add_definitions(-D_MBCS)
 else()
     list(APPEND EOKAS_SOURCE_FILES
-            "${EOKAS_TARGET_DIR}/Vulkan/*.cpp"
+            "${EOKAS_TARGET_DIR}/Vulkan/vulka.cpp"
     )
     list(APPEND EOKAS_LIBRARY_FILES
             "vulkan-1"
