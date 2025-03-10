@@ -8,7 +8,7 @@ namespace eokas
         String configJson;
         if (!File::readText("../config/config.json", configJson))
             return false;
-        std::shared_ptr<HomValue> json = JSON::parse(configJson);
+        HomNode json = JSON::parse(configJson);
         
         mModules.init();
         return true;
