@@ -1,6 +1,6 @@
 
-set(EOKAS_TARGET_NAME "datapot")
-set(EOKAS_TARGET_DIR "${EOKAS_SOURCE_DIR}/datapot")
+set(EOKAS_TARGET_NAME "rose")
+set(EOKAS_TARGET_DIR "${EOKAS_SOURCE_DIR}/rose")
 
 message("============================================================================")
 message("EOKAS_TARGET_NAME = ${EOKAS_TARGET_NAME}")

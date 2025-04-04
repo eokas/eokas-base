@@ -247,6 +247,25 @@ namespace eokas
         mTextures[index] = texture;
     }
     
+    void DX12PipelineState::setFillMode(FillMode fillMode)
+    {
+        switch(fillMode)
+        {
+            case FillMode::Solid: mFillMode = D3D12_FILL_MODE_SOLID; break;
+            case FillMode::Wireframe: mFillMode = D3D12_FILL_MODE_WIREFRAME; break;
+        }
+    }
+    
+    void DX12PipelineState::setCullMode(CullMode cullMode)
+    {
+        switch(cullMode)
+        {
+            case CullMode::None: mCullMode = D3D12_CULL_MODE_NONE; break;
+            case CullMode::Front: mCullMode = D3D12_CULL_MODE_FRONT; break;
+            case CullMode::Back: mCullMode = D3D12_CULL_MODE_BACK; break;
+        }
+    }
+    
     void DX12PipelineState::end()
     {
         auto& dxDevice = mDevice.mDevice;
@@ -342,8 +361,8 @@ namespace eokas
                 psoDesc.PS = {code->GetBufferPointer(), code->GetBufferSize()};
             }
             
-            psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
-            psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
+            psoDesc.RasterizerState.FillMode = mFillMode;
+            psoDesc.RasterizerState.CullMode = mCullMode;
             
             psoDesc.BlendState.AlphaToCoverageEnable = FALSE;
             psoDesc.BlendState.IndependentBlendEnable = FALSE;

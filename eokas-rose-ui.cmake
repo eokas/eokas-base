@@ -1,6 +1,6 @@
 
-set(EOKAS_TARGET_NAME "datapot-ui")
-set(EOKAS_TARGET_DIR "${EOKAS_SOURCE_DIR}/datapot-ui")
+set(EOKAS_TARGET_NAME "rose-ui")
+set(EOKAS_TARGET_DIR "${EOKAS_SOURCE_DIR}/rose-ui")
 
 message("============================================================================")
 message("EOKAS_TARGET_NAME = ${EOKAS_TARGET_NAME}")
@@ -45,7 +45,7 @@ file(GLOB EOKAS_SOURCE_FILES
 )
 
 set(EOKAS_LIBRARY_FILES
-    "base" "native" "datapot" "glfw3" "freetype"
+    "base" "native" "rose" "glfw3" "freetype"
 )
 
 if(APPLE)
